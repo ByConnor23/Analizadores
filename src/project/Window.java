@@ -24,7 +24,7 @@ public class Window extends JFrame {
         //Creación del panel
         panel = new JPanel();//Creando un panel
         panel.setLayout(null);
-        panel.setBackground(Color.GRAY);//Agregando color de fondo
+        panel.setBackground(new Color(230,236,241));//Agregando color de fondo
 
         this.getContentPane().add(panel);//Añadiendo el papel a la ventana
 
@@ -40,7 +40,7 @@ public class Window extends JFrame {
         //Etiquetas de texto
         JLabel titleLabel = new JLabel();
         titleLabel.setText("VisualFire");
-        titleLabel.setBounds(250, 60, 200, 40);
+        titleLabel.setBounds(350, 60, 200, 40);
         titleLabel.setHorizontalAlignment(JLabel.CENTER);
         titleLabel.setFont(mono);
         panel.add(titleLabel);
@@ -48,7 +48,7 @@ public class Window extends JFrame {
         //Imagen tipo logo
         ImageIcon logo = new ImageIcon("fuego_v2.png");
         JLabel iconLabel = new JLabel();
-        iconLabel.setBounds(425, 55, 50, 50);
+        iconLabel.setBounds(530, 55, 50, 50);
         iconLabel.setIcon(new ImageIcon(logo.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
         panel.add(iconLabel);
 
@@ -75,7 +75,7 @@ public class Window extends JFrame {
         JButton load = new JButton();
         load.setText("Cargar Archivo");
         load.setBackground(new Color(210, 19, 18));
-        load.setBounds(250, 120, 140, 30);
+        load.setBounds(360, 120, 140, 30);
         load.setHorizontalAlignment(JButton.CENTER);
         load.setFont(mono);
         load.setForeground(Color.WHITE);
@@ -84,7 +84,7 @@ public class Window extends JFrame {
         JButton scan = new JButton();
         scan.setText("Analizar");
         scan.setBackground(new Color(210, 19, 18));
-        scan.setBounds(390, 120, 100, 30);
+        scan.setBounds(490, 120, 100, 30);
         scan.setHorizontalAlignment(JButton.CENTER);
         scan.setFont(mono);
         scan.setForeground(Color.WHITE);
