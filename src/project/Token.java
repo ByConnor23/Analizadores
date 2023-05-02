@@ -1,5 +1,10 @@
 package project;
 
 public enum Token {
-    IDENTIFICADOR
+    IDENTIFICADOR,
+    VARIABLE,
+    PALABRA_CLAVE,
+    SIMBOLO,
+    LITERAL,
+    NUMEROS
 }
