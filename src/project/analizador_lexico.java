@@ -1,145 +1,89 @@
 package project;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import project.Token.Tipos;
+import java.io.*;
+import java.util.*;
 
 public class analizador_lexico {
-    public analizador_lexico(String codigo) {
-        start(codigo);
+
+    public static void main(String[] args) {
+        String sourceCodeFile = "fuente.txt"; // Ruta del archivo fuente
+        String symbolTableFile = "tabla_simbolos.txt"; // Ruta del archivo de la tabla de símbolos
+        
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(sourceCodeFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(symbolTableFile));
+
+            String line;
+            int lineNumber = 1;
+            while ((line = reader.readLine()) != null) {
+                line = removeComments(line);
+                analyzeLine(line, writer, lineNumber);
+                lineNumber++;
+            }
+
+            reader.close();
+            writer.close();
+
+            System.out.println("Análisis léxico completado. Se ha generado el archivo de la tabla de símbolos.");
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo fuente: " + e.getMessage());
+        }
     }
 
-    public static ArrayList<Token> lex(String input) {
-        final ArrayList<Token> tokens = new ArrayList<Token>();
-        final StringTokenizer st = new StringTokenizer(input);
-        juntador(st);
-        while (st.hasMoreTokens()) {
-            String palabra = st.nextToken();
-            boolean matched = false;
-            System.out.println(palabra);
-            for (Tipos tokenTipo : Tipos.values()) {
-                Pattern patron = Pattern.compile(tokenTipo.patron);
-                Matcher matcher = patron.matcher(palabra);
-                if (matcher.find()) {
-                    Token tk = new Token();
-                    tk.setTipo(tokenTipo.toString());
-                    tk.setValor(palabra);
-                    tokens.add(tk);
-                    matched = true;
+    private static void analyzeLine(String line, BufferedWriter writer, int lineNumber) throws IOException {
+        // Expresiones regulares para identificar los diferentes tipos de tokens
+        String keywordRegex = "\\b(int|double|string|bool|false|true|loopFor|If|else|key|case|breaker|start|add|minus|multi|div|new|back|list|Screen|menu|go|define|color|Image|Sound|setBackground|playSound|stopSound|chBox|Character)\\b";
+        String identifierRegex = "[a-zA-Z][a-zA-Z0-9_]*";
+        String stringRegex = "\"[^\"]*\"";
+        String numberRegex = "\\d+(\\.\\d+)?";
+        String punctuationRegex = "[.,;(){}\\[\\]]";
 
+        // Dividir la línea en tokens
+        String[] tokens = line.split("\\s+");
+
+        int i = 0;
+        while (i < tokens.length) {
+            String token = tokens[i];
+
+            if (token.matches(keywordRegex)) {
+                writer.write(token + "\t\t\tKeyword\n");
+            } else if (token.matches(identifierRegex)) {
+                writer.write(token + "\t\t\tIdentifier\n");
+            } else if (token.matches(stringRegex)) {
+                writer.write(token + "\t\t\tString\n");
+            } else if (token.matches(numberRegex)) {
+                writer.write(token + "\t\t\tNumber\n");
+            } else if (token.matches(punctuationRegex)) {
+                writer.write(token + "\t\t\tPunctuation\n");
+            } else {
+                // Combinar tokens hasta encontrar el cierre de comillas
+                if (token.startsWith("\"") && !token.endsWith("\"")) {
+                    StringBuilder combinedToken = new StringBuilder(token);
+                    i++;
+                    while (i < tokens.length && !tokens[i].endsWith("\"")) {
+                        combinedToken.append(" ").append(tokens[i]);
+                        i++;
+                    }
+                    if (i < tokens.length) {
+                        combinedToken.append(" ").append(tokens[i]);
+                        writer.write(combinedToken.toString() + "\t\t\tString\n");
+                    } else {
+                        writer.write(combinedToken.toString() + "\t\t\tOther\n");
+                    }
+                } else {
+                    writer.write(token + "\t\t\tOther\n");
                 }
             }
 
-            if (!matched) {
-                throw new RuntimeException("Se encontró un token invalido.");
-            }
-        }
-        return tokens;
-    }
-
-    // metodo para crear el archivo
-    public static void crea(ArrayList lex, ArrayList tipo) {
-        try {
-            FileWriter writer = new FileWriter("tabla_simbolos.txt", true);
-            writer.write("---------------------------------------------\n");
-            writer.write("|---------lexema-------|--------Tipo--------|\n");
-            for (int i = 0; i < lex.size(); i++) {
-
-                writer.write("| " + lex.get(i) + " | " + tipo.get(i) + " | \n");
-            }
-            writer.write("---------------------------------------------");
-            writer.close();
-            System.out.println("Archivo creado y contenido añadido correctamente.");
-        } catch (IOException e) {
-            System.out.println("Error al crear el archivo: " + e.getMessage());
+            i++;
         }
     }
 
-    // metodo para eliminar comentarios
-    public static String eliminarComentario(String input) {
-        // elimino comentarios
+    private static String removeComments(String input){
+        //Eliminar comentarios de varias lineas
         input = input.replaceAll("##.*?##", "");
+        //Eliminar comentarios de una linea
         input = input.replaceAll("/#.*(?<!\\n)", "");
         return input;
     }
-
-    public static void start(String codifoFuente) {
-        // elimino comentarios
-        codifoFuente = eliminarComentario(codifoFuente);
-
-        // separo por lineas y por ;
-        String[] newCadena = codifoFuente.split("[\n;]");
-        ArrayList<Token> tokens = new ArrayList<Token>();
-
-        // aquellos elementos que tiene espacios
-        String[] lexemas = Arrays.stream(newCadena).filter(s -> s.trim().length() > 0).toArray(String[]::new);
-        // ciclo para validar y añadir
-        for (int i = 0; i < lexemas.length; i++) {
-            lexemas[i] = lexemas[i].trim();
-            tokens.addAll(lex(lexemas[i]));////////////////////no esta guardando los tokens//////////////////////////////////////
-        }
-        int fila = tokens.size();
-        String[][] tabla = new String[fila][2];
-        fila = 0;
-        // System.out.println("---------------------------------------------");
-        // System.out.println("|---------lexema-------|--------Tipo--------|");
-        for (Token token : tokens) {
-            tabla[fila][0] = token.getTipo();
-            tabla[fila][1] = token.getValor();
-            // System.out.println("|" + tabla[fila][1] + " | " + tabla[fila][0] + "|");
-            fila++;
-        }
-        ArrayList<String> lex = new ArrayList<>();
-        ArrayList<String> tipo = new ArrayList<>();
-        int i = 0;
-        while (i < tabla.length) {
-            String str = tabla[i][1];
-            if (str.startsWith("\"")) {
-                while (!str.endsWith("\"")) {
-                    i++;
-                    str += " " + tabla[i][1];
-                }
-            }
-            lex.add(str);
-            tipo.add(tabla[i][0]);
-            i++;
-        }
-        //creo mi archivo con la tabla de simbolos
-        //crea(lex, tipo);
-    }
-
-    public static void juntador(StringTokenizer listaTokens) {
-        ArrayList<String> tokensEntreComillas = new ArrayList<String>();
-        // for (StringTokenizer tokenizer : listaTokens) {
-        while (listaTokens.hasMoreTokens()) {
-            String token = listaTokens.nextToken();
-            if (token.startsWith("\"")) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(token);
-                while (listaTokens.hasMoreTokens()) {
-                    token = listaTokens.nextToken();
-                    sb.append(" ").append(token);
-                    if (token.endsWith("\"")) {
-                        break;
-                    }
-                }
-                tokensEntreComillas.add(sb.toString());
-            }else{
-                tokensEntreComillas.add(token);
-            }
-        }
-        // }
-        //System.out.println("texto procesado comillas");
-        //for(int i = 0; i < tokensEntreComillas.size(); i++){
-        //    System.out.println(tokensEntreComillas.get(i));
-        //}
-
-    }
-    
 }
