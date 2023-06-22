@@ -1,0 +1,12 @@
+define p1 = Character ( 'Marta' , color = "#92nd9s" ) ;
+define p2 = Character ( 'Yo' , color = "#c8c8ff" ) ;
+Screen start ( ) { /# inicio del metodo principal
+	( "Se lo eguntaré..." ) ;
+	p1 ( "Um... te gustaría..." ) ;
+	p1 ( "¿Te gustaría ir al cine después de la escuela?" ) ;
+	( "Silencio." ) ;
+	( "El se sorprendió por tan repentina pregunta, y entonces..." ) ;
+	p2 ( "Claro, me encantaría ir contigo" ) ;
+	( "El no sabía que esa noche su vida cambiaria para siempre" ) ;
+end ;
+}
