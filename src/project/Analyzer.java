@@ -7,12 +7,18 @@ import java.util.regex.Pattern;
 
 public class analizador_lexico {
 
-    //Constructor este al ser llamado toma como parametro una cadena que debera provenir de la ventana 
+    //Constructor este al ser llamado toma como parametro una cadena que debera provenir de la ventana
     public analizador_lexico(String sourceCode) {
+        // Remuevo los comentarios
+        String removeComm = removeComments(sourceCode);
         //Genero los tokens y clasifico
-        List<String> tokens = tokenize(sourceCode);
+        tokens = tokenize(removeComm);
         //Genero el archivo tabla de simbolos y escribo los tokens que anteriormente analice
         generateTable(tokens);
+    }
+
+    public List<String> getTokens() {
+        return tokens;
     }
 
     private static void generateTable(List<String> tokens) {
@@ -27,6 +33,14 @@ public class analizador_lexico {
         }
     }
 
+    private static String removeComments(String input){
+        //Eliminar comentarios de varias lineas
+        input = input.replaceAll("##.*?##", "");
+        //Eliminar comentarios de una linea
+        input = input.replaceAll("/#.*(?<!\\n)", "");
+        return input;
+    }
+
     private static List<String> tokenize(String sourceCode) {
         List<String> tokens = new ArrayList<>();
 
@@ -34,7 +48,7 @@ public class analizador_lexico {
         Pattern identifierPattern = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");// busca palabras
         Pattern numberPattern = Pattern.compile("\\d+");// busca numeros
         Pattern punctuationPattern = Pattern.compile("[(){};,\\.=]");// busca signos de puntuacion
-        Pattern separadoPattern = Pattern.compile("[\n  ]");// busca separadores
+        Pattern separadoPattern = Pattern.compile("[\n\\s]");// busca separadores
 
         Matcher matcher;
 
@@ -103,26 +117,6 @@ public class analizador_lexico {
         return Arrays.asList(keywords).contains(token);
     }
 
-    // Prueba de uso
-    public static void main(String[] args) {
-        String sourceCode = "define p1 = Character (\'Marta\' , color = \"#92nd9s\");\n" +
-                "define p2 = Character ( \'Yo\' , color = \"#c8c8ff\" );\n" +
-                "Screen start ( ) {\n" +
-                "        ( \"Se lo eguntaré...\" );\n" +
-                "        p1 ( \"Um... te gustaría...\" );\n" +
-                "        p1 ( \"¿Te gustaría ir al cine después de la escuela?\" );\n" +
-                "       ( \"Silencio.\" );\n" +
-                "       ( \"El se sorprendió por tan repentina pregunta, y entonces...\" );" +
-                "       p2 ( \"Claro, me encantaría ir contigo\" );" +
-                "        ( \"El no sabía que esa noche su vida cambiaria para siempre\" );" +
-                "   end;\n" +
-                "}";
+    private List<String> tokens;
 
-        analizador_lexico lex = new analizador_lexico(sourceCode);
-        /*
-         * for (String token : tokens) {
-         * System.out.println(token);
-         * }
-         */
-    }
 }
