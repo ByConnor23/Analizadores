@@ -1,63 +1,69 @@
-Keyword: define
-Identifier: p1
-Punctuation: =
-Keyword: Character
-Punctuation: (
-String: 'Marta'
-Punctuation: ,
-Keyword: color
-Punctuation: =
-String: "#92nd9s"
-Punctuation: )
-Punctuation: ;
-Keyword: define
-Identifier: p2
-Punctuation: =
-Keyword: Character
-Punctuation: (
-String: 'Yo'
-Punctuation: ,
-Keyword: color
-Punctuation: =
-String: "#c8c8ff"
-Punctuation: )
-Punctuation: ;
-Keyword: Screen
-Keyword: start
-Punctuation: (
-Punctuation: )
-Punctuation: {
-Punctuation: (
-String: "Se lo eguntaré..."
-Punctuation: )
-Punctuation: ;
-Identifier: p1
-Punctuation: (
-String: "Um... te gustaría..."
-Punctuation: )
-Punctuation: ;
-Identifier: p1
-Punctuation: (
-String: "¿Te gustaría ir al cine después de la escuela?"
-Punctuation: )
-Punctuation: ;
-Punctuation: (
-String: "Silencio."
-Punctuation: )
-Punctuation: ;
-Punctuation: (
-String: "El se sorprendió por tan repentina pregunta, y entonces..."
-Punctuation: )
-Punctuation: ;
-Identifier: p2
-Punctuation: (
-String: "Claro, me encantaría ir contigo"
-Punctuation: )
-Punctuation: ;
-Punctuation: (
-String: "El no sabía que esa noche su vida cambiaria para siempre"
-Punctuation: )
-Punctuation: ;
-Identifier: end
-Punctuation: ;
-Punctuation: }
+public
+static
+void
+main
+(
+)
+{
+define
+p1
+=
+Character
+(
+"Marta"
+,
+Color
+=
+"92nd9s"
+)
+;
+define
+p2
+=
+Character
+(
+"Yo"
+,
+Color
+=
+"c8c8ff"
+)
+;
+Screen
+start
+(
+)
+{
+(
+"Se lo eguntarÃ©..."
+)
+;
+p1
+(
+"Um... te gustarÃ­a..."
+)
+;
+p1
+(
+"Â¿Te gustarÃ­a ir al cine despuÃ©s de la escuela?"
+)
+;
+(
+"Silencio."
+)
+;
+(
+"El se sorprendiÃ³ por tan repentina pregunta, y entonces..."
+)
+;
+p2
+(
+"Claro, me encantarÃ­a ir contigo"
+)
+;
+(
+"El no sabÃ­a que esa noche su vida cambiaria para siempre"
+)
+;
+}
+}
