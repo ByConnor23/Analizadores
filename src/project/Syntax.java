@@ -72,11 +72,11 @@ public class Syntax {
         //Si despues del define recibo un tipo de dato hago esto
         if(match("int") || match("double") || match("string") || match("bool")){
             OPE(); // Para el tipo de dato
-            Q();
+            Q(); // Para el resto
             // Si recibo un tipo de dato booleano hago esto
         }else if(match("Character")){
             CHA(); //Verifico que llegue la palabra reservada
-            O();
+            O();// Para el resto
 
             // Para imagenes y/o sonidos
         }else if(match("Image") || match("Sound")){
@@ -128,8 +128,8 @@ public class Syntax {
             CAD(); // validar si es una cadena
             PYC(); // Para el ;
         }else if(match("True") || match("False")){
-            TF();
-            PYC();
+            TF(); // Para falso y verdadero
+            PYC(); // Para el ;
         }else{
             T(); // Para validar que es un identificador
             PYC(); // Para el ;
@@ -227,7 +227,7 @@ public class Syntax {
         PA(); // Para el parentesis de apertura
         T(); // Para el identificador
         PC(); // Para el parentesis de cerradura
-        PYC(); // PAra el punto y coma
+        PYC(); // Para el punto y coma
     }
 
     private void DF() throws Exception{
@@ -242,17 +242,17 @@ public class Syntax {
 
     private void L()throws Exception{
         if(match("\\(")){
-            PA();
+            PA(); // Parentesis de apertura
             if(match("(['\"])(.*?)\\1")){
-                DF();
+                DF(); // Para la cadena
             }else if(match("\\(") || match("\\d+") || match("[a-zA-Z_][a-zA-Z0-9_]*")){
-                K();
-                PC();
+                K(); // para llamar a la funcion de K
+                PC(); // Para el )
             }
         } else if (match("[a-zA-Z_][a-zA-Z0-9_]*")) {
-            T();
+            T(); // Para el identificador
         } else if (match("\\d+")) {
-            NUM();
+            NUM(); // Para el numero
         }else {
             throw new Exception("Se esperaba '(', identificador o numero");
         }
@@ -262,7 +262,7 @@ public class Syntax {
         if(match("[+*-/]")){
             consume();
             if(match("=")){
-                Z();
+                Z(); // en caso de que tenga una operacion iterativa
             }else{
                 L();
                 KP();
@@ -303,10 +303,10 @@ public class Syntax {
             BRE(); // Para determinar que me llegue un breaker
             AO(); // Para llamar de manera recursiva a las opciones del menu
         }else if(match("go")){ // Para marcar el final de una opción
-            GO();
-            AO();
+            GO(); // Para el Go
+            AO(); // Para la recursividad
         }else if(match("for")){
-            FOR();
+            FOR(); // Para el for
             AT(); // Para llamar de manera recursiva al metodo
         }else if(match("if")){
             IF();
@@ -392,9 +392,12 @@ public class Syntax {
     }
 
     private void BO() throws Exception{
-        if(match("if")){
+        if(match("for")){
+            FOR(); // Para el for
+            BO(); // Para la recursividad
+        }else if(match("if")){
             IF(); // Para verificar que es un if
-            BO(); // Para verificar que es un if
+            BO(); // Para la recursividad
         }else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
             T(); // Si llega un identificador
             
@@ -484,12 +487,6 @@ public class Syntax {
             KP(); // Para verificar que lo siguiente del número sea un operador
             PYC(); // Para el " ; "
             BG(); // Para la recursividad
-        }
-    }
-
-    private void BI() throws Exception{
-        if(match("else")){
-            ELS(); // Para el else o else if
         }
     }
 
@@ -692,7 +689,7 @@ public class Syntax {
         BM(); // Para el condicional
         PC(); // Para el parentesis de cerradura
         BF(); // Para lo que va dentro del if
-        BI(); // Para poner o no, un else if o else
+        ELS(); // Para poner o no, un else if o else
     }
 
     private void ELS() throws Exception{
