@@ -40,9 +40,20 @@ public class Compiler extends JFrame {
 		menu = new JMenuBar();
 		fileMenu = new JMenu();
 		newMenuItem = new JMenuItem();
+		openMenuItem = new JMenuItem();
+		saveMenuItem = new JMenuItem();
+		saveAsMenuItem = new JMenuItem();
+		exitMenuItem = new JMenuItem();
 
 		editMenu = new JMenu();
 		undoMenuItem = new JMenuItem();
+		redoMenuItem = new JMenuItem();
+		cutMenuItem = new JMenuItem();
+		copyMenuItem = new JMenuItem();
+		pasteMenuItem = new JMenuItem();
+
+		helpMenu = new JMenu();
+		aboutMenuItem = new JMenuItem();
 
 		// ==================== Content Panel ====================
 		codeEditor = new JTextPane();
@@ -59,25 +70,59 @@ public class Compiler extends JFrame {
 		contentPane.setLayout(new BorderLayout());
 
 		// ==================== Menu Bar ====================
-		{// ==================== File Menu ====================
+		{
 			fileMenu.setText("File");
 			fileMenu.setMnemonic('F');
 
-			{// ==================== New Menu Item ====================
+			{// ==================== File Menu ====================
+				// ==================== New Menu Item ====================
 				newMenuItem = new JMenuItem("New");
 				newMenuItem.setAccelerator(
 						KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 				newMenuItem.setMnemonic('N');
 				newMenuItem.addActionListener(e -> newActionPerformed());
 				fileMenu.add(newMenuItem);
+
+				// ==================== Open Menu Item ====================
+				openMenuItem = new JMenuItem("Open");
+				openMenuItem.setAccelerator(
+						KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+				openMenuItem.setMnemonic('O');
+				openMenuItem.addActionListener(e -> newActionPerformed());
+				fileMenu.add(openMenuItem);
+
+				// ==================== Save Menu Item ====================
+				saveMenuItem = new JMenuItem("Save");
+				saveMenuItem.setAccelerator(
+						KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+				saveMenuItem.setMnemonic('S');
+				saveMenuItem.addActionListener(e -> newActionPerformed());
+				fileMenu.add(saveMenuItem);
+
+				// ==================== Save As Menu Item ====================
+				saveAsMenuItem = new JMenuItem("Save As");
+				saveAsMenuItem.setAccelerator(
+						KeyStroke.getKeyStroke(KeyEvent.VK_S,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | KeyEvent.SHIFT_DOWN_MASK));
+				saveAsMenuItem.setMnemonic('A');
+				saveAsMenuItem.addActionListener(e -> newActionPerformed());
+				fileMenu.add(saveAsMenuItem);
+
+				// ==================== Exit Menu Item ====================
+				exitMenuItem = new JMenuItem("Exit");
+				exitMenuItem.setAccelerator(
+						KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+				exitMenuItem.setMnemonic('x');
+				exitMenuItem.addActionListener(e -> System.exit(0));
+				fileMenu.add(exitMenuItem);
 			}
 			menu.add(fileMenu);
 			{ // ==================== Edit Menu ====================
 				editMenu = new JMenu("Edit");
 				editMenu.setMnemonic('E');
 
-				{ // ==================== Undo Menu Item ====================
-
+				{
+					// ==================== Undo Menu Item ====================
 					undoMenuItem = new JMenuItem("Undo");
 					undoMenuItem.setAccelerator(
 							KeyStroke.getKeyStroke(KeyEvent.VK_Z,
@@ -86,9 +131,65 @@ public class Compiler extends JFrame {
 					undoMenuItem.setIcon(new FlatSVGIcon("resources/icons/undo.svg"));
 					undoMenuItem.addActionListener(e -> newActionPerformed());
 					editMenu.add(undoMenuItem);
+
+					// ==================== Redo Menu Item ====================
+					redoMenuItem = new JMenuItem("Redo");
+					redoMenuItem.setAccelerator(
+							KeyStroke.getKeyStroke(KeyEvent.VK_Y,
+									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+					redoMenuItem.setMnemonic('R');
+					redoMenuItem.setIcon(new FlatSVGIcon("resources/icons/redo.svg"));
+					redoMenuItem.addActionListener(e -> newActionPerformed());
+					editMenu.add(redoMenuItem);
+
+					// ==================== Cut Menu Item ====================
+					cutMenuItem = new JMenuItem("Cut");
+					cutMenuItem.setAccelerator(
+							KeyStroke.getKeyStroke(KeyEvent.VK_X,
+									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+					cutMenuItem.setMnemonic('t');
+					cutMenuItem.setIcon(new FlatSVGIcon("resources/icons/cut.svg"));
+					cutMenuItem.addActionListener(e -> newActionPerformed());
+					editMenu.add(cutMenuItem);
+
+					// ==================== Copy Menu Item ====================
+					copyMenuItem = new JMenuItem("Copy");
+					copyMenuItem.setAccelerator(
+							KeyStroke.getKeyStroke(KeyEvent.VK_C,
+									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+					copyMenuItem.setMnemonic('C');
+					copyMenuItem.setIcon(new FlatSVGIcon("resources/icons/copy.svg"));
+					copyMenuItem.addActionListener(e -> newActionPerformed());
+					editMenu.add(copyMenuItem);
+
+					// ==================== Paste Menu Item ====================
+					pasteMenuItem = new JMenuItem("Paste");
+					pasteMenuItem.setAccelerator(
+							KeyStroke.getKeyStroke(KeyEvent.VK_V,
+									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+					pasteMenuItem.setMnemonic('P');
+					pasteMenuItem.setIcon(new FlatSVGIcon("resources/icons/paste.svg"));
+					pasteMenuItem.addActionListener(e -> newActionPerformed());
+					editMenu.add(pasteMenuItem);
 				}
-				menu.add(editMenu);
 			}
+			menu.add(editMenu);
+			{// ==================== About Menu ====================
+				helpMenu = new JMenu("Help");
+				helpMenu.setMnemonic('H');
+
+				{
+					// ==================== About Menu Item ====================
+					aboutMenuItem = new JMenuItem("About");
+					aboutMenuItem.setAccelerator(
+							KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+					aboutMenuItem.setMnemonic('A');
+					aboutMenuItem.addActionListener(e -> newActionPerformed());
+					helpMenu.add(aboutMenuItem);
+				}
+			}
+			menu.add(helpMenu);
+
 		}
 		setJMenuBar(menu);
 
@@ -163,27 +264,16 @@ public class Compiler extends JFrame {
 		{// ==================== Symbol Table ====================
 			symbolTable.setModel(new DefaultTableModel(
 					new Object[][] {
-							{ "item 1", "item 1b", "January", "July", 123, null },
-							{ "item 2", "item 2b", "February", "August", 456, true },
-							{ "item 3", null, "March", null, null, null },
-							{ "item 4", null, "April", null, null, null },
-							{ "item 5", null, "May", null, null, null },
-							{ "item 6", null, "June", null, null, null },
-							{ "item 7", null, "July", null, null, null },
-							{ "item 8", null, "August", null, null, null },
-							{ "item 9", null, "September", null, null, null },
-							{ "item 10", null, "October", null, null, null },
-							{ "item 11", null, "November", null, null, null },
-							{ "item 12", null, "December", null, null, null },
+							{ "item 1", "item 2", "[item, item]", "item 4", "item 5", "item 6" },
 					},
 					new String[] {
-							"Not editable", "Text", "Combo", "Combo Editable", "Integer", "Boolean"
+							"Lexical Component", "Lexeme", "[Column, Row]", "Type", "Value", "Error"
 					}) {
 				Class<?>[] columnTypes = new Class<?>[] {
-						Object.class, Object.class, String.class, String.class, Integer.class, Boolean.class
+						String.class, String.class, String.class, String.class, String.class, String.class
 				};
 				boolean[] columnEditable = new boolean[] {
-						false, true, true, true, true, true
+						false, false, false, false, false, false
 				};
 
 				@Override
@@ -230,7 +320,6 @@ public class Compiler extends JFrame {
 	private JButton btnUndo;
 	private JButton btnRedo;
 	// Tests
-	private JMenu optionsMenu;
 	private JToolBar toolBar;
 	private JMenuBar menu;
 	// File Menu
@@ -247,7 +336,6 @@ public class Compiler extends JFrame {
 	private JMenuItem cutMenuItem;
 	private JMenuItem copyMenuItem;
 	private JMenuItem pasteMenuItem;
-	private JMenuItem deleteMenuItem;
 	// About Menu
 	private JMenu helpMenu;
 	private JMenuItem aboutMenuItem;
