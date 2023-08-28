@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.Buffer;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -35,26 +34,19 @@ public class FileDirectory {
     }
 
     private String getTextFile(File paramFile) {
-        String str = "";
-        try {
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(paramFile), "UTF8"));
-            while (true) {
-                int i = bufferedReader.read();
-                if (i != -1) {
-                    str = str + str;
-                    continue;
-                }
-                break;
+        StringBuilder stringBuilder = new StringBuilder();
+        try (BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(paramFile), "UTF8"))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line).append(System.lineSeparator());
             }
         } catch (FileNotFoundException fileNotFoundException) {
             System.err.println("El archivo no pudo ser encontrado... " + fileNotFoundException.getMessage());
-            return null;
         } catch (IOException ioException) {
             System.err.println("Error al leer el archivo... " + ioException.getMessage());
-            return null;
         }
-        return str;
+        return stringBuilder.toString();
     }
 
     private boolean saveFile(File paramFile, String paramString) {
@@ -77,38 +69,39 @@ public class FileDirectory {
         if (this.frame.getTitle().equals(this.title + "*")) {
             i = 0;
         } else {
-            i = JOptionPane.showOptionDialog(this.frame, "El archivo actual estsiendo editado, guardar los cambios?",
+            i = JOptionPane.showOptionDialog(this.frame, "El archivo actual está siendo editado, ¿guardar los cambios?",
                     "¿Descartar cambios?", -1, 3, null, (Object[]) this.options, this.options[0]);
         }
         if (i == 0) {
             if (paramJFileChooser.getSelectedFile() != null) {
                 boolean bool = saveFile(paramFile, this.textComponent.getText());
-                if (bool)
+                if (bool) {
                     this.frame.setTitle(paramFile.getName());
+                }
             } else if (this.frame.getTitle().equals(this.title + "*")) {
-                int j = JOptionPane.showOptionDialog(this.frame, "guardar el archivo actual?", "edicide archivo nuevo?",
+                int j = JOptionPane.showOptionDialog(this.frame, "Guardar el archivo actual?", "Editar archivo nuevo?",
                         -1, 3, null, (Object[]) this.options, this.options[0]);
                 if (j == 0) {
                     if (paramJFileChooser.showDialog(this.frame, "Guardar") == 0) {
                         paramFile = paramJFileChooser.getSelectedFile();
                         String str = paramFile.getName();
-                        if (!str.endsWith(this.extension))
-                            str = str + str;
+                        if (!str.endsWith(this.extension)) {
+                            str = str + this.extension; // Corrected extension appending
+                        }
                         if (fileNameValid(str)) {
-                            if (!paramFile.getName().endsWith(this.extension))
-                                paramFile = new File(paramFile.getAbsolutePath() + paramFile.getAbsolutePath());
                             if (!paramFile.exists()) {
                                 saveFile(paramFile);
                             } else {
                                 int k = JOptionPane.showConfirmDialog(this.frame,
-                                        "Ya hay un archivo con este nombre, sobreescribirlo?", "Sobreescribir archivo",
+                                        "Ya hay un archivo con este nombre, ¿sobrescribirlo?", "Sobreescribir archivo",
                                         2);
-                                if (k == 0)
+                                if (k == 0) {
                                     saveFile(paramFile);
+                                }
                             }
                         } else {
-                            JOptionPane.showMessageDialog(this.frame, "Escriba un nombre vpara el archivo",
-                                    "Nombre inv", 2);
+                            JOptionPane.showMessageDialog(this.frame, "Escriba un nombre válido para el archivo",
+                                    "Nombre inválido", 2);
                             return false;
                         }
                     }
@@ -120,6 +113,55 @@ public class FileDirectory {
         } else {
             this.textComponent.setText("");
             this.frame.setTitle(this.title);
+        }
+        return true;
+    }
+
+    private boolean saveEditNew(File paramFile, JFileChooser paramJFileChooser) {
+        int i;
+        if (this.frame.getTitle().equals(this.title + "*")) {
+            i = 0;
+        } else {
+            i = JOptionPane.showOptionDialog(this.frame, "El archivo actual está siendo editado, ¿guardar los cambios?",
+                    "¿Descartar edición?", -1, 3, null, (Object[]) this.options, this.options[0]);
+        }
+        if (i == 0) {
+            if (paramJFileChooser.getSelectedFile() != null) {
+                boolean bool = saveFile(paramFile, this.textComponent.getText());
+                if (bool) {
+                    this.frame.setTitle(paramFile.getName());
+                }
+            } else if (this.frame.getTitle().equals(this.title + "*")) {
+                int j = JOptionPane.showOptionDialog(this.frame, "Guardar el archivo actual?",
+                        "¿Descartar edición de archivo nuevo?", -1, 3, null, (Object[]) this.options, this.options[0]);
+                if (j == 0) {
+                    if (paramJFileChooser.showDialog(this.frame, "Guardar") == 0) {
+                        paramFile = paramJFileChooser.getSelectedFile();
+                        String str = paramFile.getName();
+                        if (!str.endsWith(this.extension)) {
+                            str = str + this.extension;
+                        }
+                        if (!paramFile.exists()) {
+                            saveFile(paramFile);
+                        } else {
+                            int k = JOptionPane.showConfirmDialog(this.frame,
+                                    "Ya hay un archivo con este nombre, ¿desea sobreescribirlo?",
+                                    "Sobreescribir archivo", 2);
+                            if (k == 0) {
+                                saveFile(paramFile);
+                            }
+                        }
+                    }
+                } else {
+                    return true;
+                }
+            } else {
+                int j = JOptionPane.showConfirmDialog(this.frame,
+                        "Ya hay un archivo con este nombre, ¿desea sobreescribirlo?", "Sobreescribir archivo", 2);
+                if (j == 0) {
+                    saveFile(paramFile);
+                }
+            }
         }
         return true;
     }
@@ -140,6 +182,23 @@ public class FileDirectory {
                 !paramString.contains(":") && !paramString.contains("*") && !paramString.contains("?")
                 && !paramString.contains("\"") &&
                 !paramString.contains("<") && !paramString.contains(">") && !paramString.contains("|"));
+    }
+
+    public void New() {
+        this.file = this.fileChooser.getSelectedFile();
+        if (this.frame.getTitle().contains("*")) {
+            if (saveEditNew(this.file, this.fileChooser)) {
+                this.frame.setTitle(this.title);
+                this.textComponent.setText("");
+                this.fileChooser = new JFileChooser();
+                this.file = null;
+            }
+        } else {
+            this.frame.setTitle(this.title);
+            this.textComponent.setText("");
+            this.fileChooser = new JFileChooser();
+            this.file = null;
+        }
     }
 
     public boolean Open() {

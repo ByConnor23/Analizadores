@@ -22,7 +22,17 @@ public class Compiler extends JFrame {
 	}
 
 	private void init() {
-		directory = new FileDirectory(this, codeEditor, "Code Compiler", ".txt");
+		// ==================== This ====================
+		// this.setTitle("Code Compiler");
+		title = "Code Compiler";
+		this.setTitle(title);
+		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.setSize(1660, 880);
+		this.setLocationRelativeTo(null);
+		directory = new FileDirectory(this, codeEditor, title, ".txt");
+		timerKeyRelease = new Timer((int) (1000 * 0.3), (ActionEvent e) -> {
+			timerKeyRelease.stop();
+		});
 	}
 
 	private void initComponents() {
@@ -63,12 +73,6 @@ public class Compiler extends JFrame {
 		codeEditor = new JTextPane();
 		symbolTable = new JTable();
 		outputConsole = new JPanel();
-
-		// ==================== This ====================
-		this.setTitle("Code Compiler");
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		this.setSize(1660, 880);
-		this.setLocationRelativeTo(null);
 
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
@@ -299,7 +303,7 @@ public class Compiler extends JFrame {
 	}
 
 	private void newActionPerformed() {
-		System.out.println("New");
+		directory.New();
 	}
 
 	private void openActionPerformed(ActionEvent event) {
@@ -320,6 +324,12 @@ public class Compiler extends JFrame {
 	}
 
 	// ==================== Variables ====================
+
+	private String title;
+	private FileDirectory directory;
+	private Timer timerKeyRelease;
+	private boolean codeHasBeenCopiled = false;
+
 	private JButton btnNewFile;
 	private JButton btnSave;
 	private JButton btnSaveAs;
@@ -332,7 +342,6 @@ public class Compiler extends JFrame {
 	// Tests
 	private JToolBar toolBar;
 	private JMenuBar menu;
-	private FileDirectory directory;
 	// File Menu
 	private JMenu fileMenu;
 	private JMenuItem newMenuItem;
