@@ -52,10 +52,24 @@ package project;
     comma = ","
 
     /* comparison operators */
-    comparisonOperator = "<=" | ">=" | "==" | "<" | ">"
+    lessThan = "<"
+
+    moreThan = ">"
+
+    ltoet = "<="
+
+    gtoet = ">="
+
+    awa = "=="
 
     /* arithmetic operators */
-    arithmeticOperator = "+" | "-" | "*" | "/"
+    more = "+"
+
+    menus = "-"
+
+    by = "*"
+
+    on = "/"
 
     /* asignment operators */
     plus = "++"
@@ -157,13 +171,28 @@ package project;
 
     /* operators */
 
-    {comparisonOperator} {return token(yytext(), "OPERADOR DE COMPARACIÓN");}
+    
+    {lessThan} {return token(yytext(),"MENOR QUE");}
 
-    {arithmeticOperator} {return token(yytext(), "OPERADOR ARITMETICO");}
+    {moreThan} {return token(yytext(),"MAYOR QUE");}
+
+    {ltoet} {return token(yytext(),"MENOR O IGUAL QUE");}
+
+    {gtoet} {return token(yytext(),"MAYOR O IGUAL QUE");}
+
+    {awa} {return token(yytext(),"IGUALACIÓN");}
+
+    {more} {return token(yytext(),"MAS");}
+
+    {menus} {return token(yytext(),"MENOS");}
+
+    {by} {return token(yytext(),"POR");}
+
+    {on} {return token(yytext(),"SOBRE");}
 
     {plus} {return token(yytext(), "OPERADOR DE AUMENTO");}
 
-    {equalSignal} {return token(yytext(), "IGUAL");}
+    {equalSignal} {return token(yytext(), "ASIGNACIÓN");}
 
     /* color */
 

@@ -62,10 +62,26 @@ import java_cup.runtime.Symbol;
     comma = ","
 
     /* comparison operators */
-    comparisonOperator = "<=" | ">=" | "==" | "<" | ">"
+
+    lessThan = "<"
+
+    moreThan = ">"
+
+    ltoet = "<="
+
+    gtoet = ">="
+
+    awa = "=="
 
     /* arithmetic operators */
-    arithmeticOperator = "+" | "-" | "*" | "/"
+
+    more = "+"
+
+    menus = "-"
+
+    by = "*"
+
+    on = "/"
 
     /* asignment operators */
     plus = "++"
@@ -165,9 +181,23 @@ import java_cup.runtime.Symbol;
 
     /* operators */
 
-    {comparisonOperator} {return new Symbol(sym.comparisonOperator, yychar, yyline, yytext());}
+    {lessThan} {return new Symbol(sym.lessThan, yychar, yyline, yytext());}
 
-    {arithmeticOperator} {return new Symbol(sym.arithmeticOperator, yychar, yyline, yytext());}
+    {moreThan} {return new Symbol(sym.moreThan, yychar, yyline, yytext());}
+
+    {ltoet} {return new Symbol(sym.ltoet, yychar, yyline, yytext());}
+
+    {gtoet} {return new Symbol(sym.gtoet, yychar, yyline, yytext());}
+
+    {awa} {return new Symbol(sym.awa, yychar, yyline, yytext());}
+
+    {more} {return new Symbol(sym.more, yychar, yyline, yytext());}
+
+    {menus} {return new Symbol(sym.menus, yychar, yyline, yytext());}
+
+    {by} {return new Symbol(sym.by, yychar, yyline, yytext());}
+
+    {on} {return new Symbol(sym.on, yychar, yyline, yytext());}
 
     {plus} {return new Symbol(sym.plus, yychar, yyline, yytext());}
 
