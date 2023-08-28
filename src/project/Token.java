@@ -11,6 +11,9 @@ public class Token {
     public Token() {
     }
 
+    public Token(String type, String text) {
+    }
+
     public static List<String> tokenize(String sourceCode) {
         List<String> tokens = new ArrayList<>();
 
