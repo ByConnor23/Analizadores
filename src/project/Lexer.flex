@@ -99,6 +99,8 @@ package project;
 
     breaker = "breaker"
 
+    color = "Color"
+
     //Atmosphere
     image = "Image"
 
@@ -199,23 +201,25 @@ package project;
 
     {breaker} {return token(yytext(),"BREAKER");}
 
+    {color} {return token(yytext(),"COLOR");}
+
     {image} {return token(yytext(),"IMAGE");}
 
     {sound} {return token(yytext(),"SOUND");}
 
     /* dataTypes */
 
-    {intK} {return new Symbol(sym.intK, yychar, yyline, yytext());}
+    {intK} {return token(yytext(), "INT");}
 
-    {doubleK} {return new Symbol(sym.doubleK, yychar, yyline, yytext());}
+    {doubleK} {return token(yytext(), "DOUBLE");}
 
-    {stringK} {return new Symbol(sym.stringK, yychar, yyline, yytext());}
+    {stringK} {return token(yytext(), "STRING");}
 
-    {boolK} {return new Symbol(sym.boolK, yychar, yyline, yytext());}
+    {boolK} {return token(yytext(), "BOOLEANO");}
 
-    {trueK} {return new Symbol(sym.trueK, yychar, yyline, yytext());}
+    {trueK} {return token(yytext(),"TRUE");}
 
-    {falseK} {return new Symbol(sym.falseK, yychar, yyline, yytext());}
+    {falseK} {return token(yytext(), "FALSE");}
 
     /* assignamentTypes */
 

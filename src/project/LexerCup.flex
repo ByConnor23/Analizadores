@@ -107,6 +107,8 @@ import java_cup.runtime.Symbol;
 
     breaker = "breaker"
 
+    color = "Color"
+
     //Atmosphere
     image = "Image"
 
@@ -206,6 +208,8 @@ import java_cup.runtime.Symbol;
     {go} {return new Symbol(sym.go, yychar, yyline, yytext());}
 
     {breaker} {return new Symbol(sym.breaker, yychar, yyline, yytext());}
+
+    {color} {return new Symbol(sym.color, yychar, yyline, yytext());}
 
     {image} {return new Symbol(sym.image, yychar, yyline, yytext());}
 
