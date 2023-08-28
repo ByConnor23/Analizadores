@@ -27,13 +27,14 @@ package project;
 
     leter = [a-zA-Z_]+
     digit = [0-9]+
+    identifer = {leter}({leter}|{digit})*
     
 
     /* numbers + && - */
     number = -?[0-9]+(\.[0-9]+)?
 
     /* string */
-    string = "\"" ([^\n\r\"] | "\\" .)* "\""
+    chaising = "\"" ([^\n\r\"] | "\\" .)* "\""
 
     /* delimiters */
     leftBrace = \{
@@ -94,7 +95,7 @@ package project;
     
     /* Identifer */
 
-    {leter}({leter}|{digit})* {return token(yytext(), "IDENTIFICADOR");}
+    {identifer} {return token(yytext(), "IDENTIFICADOR");}
 
     /* delimiters */
 
@@ -114,7 +115,7 @@ package project;
 
     {number} {return token(yytext(), "NÚMERO");}
 
-    {string} {return token(yytext(), "CADENA");}
+    {chaising} {return token(yytext(), "CADENA");}
 
     /* operators */
 
