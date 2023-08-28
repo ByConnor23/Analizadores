@@ -38,7 +38,7 @@ import java_cup.runtime.Symbol;
 
     leter = [a-zA-Z_]+
     digit = [0-9]+
-    
+    identifer = {leter}({leter}|{digit})*
 
     /* numbers + && - */
     number = -?[0-9]+(\.[0-9]+)?
@@ -58,6 +58,8 @@ import java_cup.runtime.Symbol;
     colon = :
 
     semiColon = ";"
+    
+    comma = ","
 
     /* comparison operators */
     comparisonOperator = "<=" | ">=" | "==" | "<" | ">"
@@ -66,46 +68,68 @@ import java_cup.runtime.Symbol;
     arithmeticOperator = "+" | "-" | "*" | "/"
 
     /* asignment operators */
-    assignmentOperator = "++" | "+=" | "-=" | "*=" | "/="
+    plus = "++"
 
     /* color */
     colorSymbol = "#"
 
     /* keywords */
-    keywords = "public" |
-            "static" |
-            "void" |
-            "main" |
-            "define" |
-            "int" |
-            "double" |
-            "string" |
-            "bool" |
-            "true" |
-            "false" |
-            "Character" |
-            "Color" |
-            "Image" |
-            "Sound" |
-            "Screen" |
-            "setBackground" |
-            "show" |
-            "hide" |
-            "playSound" |
-            "stopSound" |
-            "Menu" |
-            "breaker" |
-            "go" |
-            "for" |
-            "if" |
-            "else"
+    
+    //Main method
+    public = "public"
+
+    static = "static"
+
+    void = "void"
+
+    main = "main"
+
+    //Keywords new
+    define = "define"
+
+    character = "Character"
+    
+    screen = "Screen"
+
+    background = "setBackground"
+
+    sSound = "stopSound"
+
+    pSound = "playSound"
+
+    hide = "hide"
+    
+    show = "show"
+
+    menu = "Menu"
+
+    go = "go"
+
+    breaker = "breaker"
+
+    //Atmosphere
+    image = "Image"
+
+    sound = "Sound"
+
+    //Data type
+    dataType = "int" | "double" | "string" | "bool"
+
+    booleanType = "true" |  "false"
+
+    //control structures
+    for = "for"
+
+    if = "if"
+
+    else = "else"
 
 %%
     {comment} | {whiteSpace} 
     
     /* Identifer */
 
-    {leter}({leter}|{digit})* {return new Symbol(sym.Identifer, yychar, yyline, yytext());}
+    {identifer} {return new Symbol(sym.Identifer, yychar, yyline, yytext());}
 
     /* delimiters */
 
@@ -121,6 +145,8 @@ import java_cup.runtime.Symbol;
 
     {semiColon} {return new Symbol(sym.semiColon, yychar, yyline, yytext());}
 
+    {comma} {return new Symbol(sym.comma, yychar, yyline, yytext());}
+
     /* dataType */
 
     {number} {return new Symbol(sym.number, yychar, yyline, yytext());}
@@ -133,7 +159,9 @@ import java_cup.runtime.Symbol;
 
     {arithmeticOperator} {return new Symbol(sym.arithmeticOperator, yychar, yyline, yytext());}
 
-    {assignmentOperator} {return new Symbol(sym.assignmentOperator, yychar, yyline, yytext());}
+    {plus} {return new Symbol(sym.plus, yychar, yyline, yytext());}
+
+    {equalSignal} {return new Symbol(sym.equalSignal, yychar, yyline, yytext());}
 
     /* color */
 
@@ -141,7 +169,49 @@ import java_cup.runtime.Symbol;
 
     /* keywords */
     
-    {keywords} {return new Symbol(sym.keywords, yychar, yyline, yytext());}
+    {public} {return new Symbol(sym.public, yychar, yyline, yytext());}
+
+    {static} {return new Symbol(sym.static, yychar, yyline, yytext());}
+
+    {void} {return new Symbol(sym.void, yychar, yyline, yytext());}
+
+    {main} {return new Symbol(sym.main, yychar, yyline, yytext());}
+
+    {define} {return new Symbol(sym.define, yychar, yyline, yytext());}
+
+    {character} {return new Symbol(sym.character, yychar, yyline, yytext());}
+
+    {screen} {return new Symbol(sym.screen, yychar, yyline, yytext());}
+
+    {background} {return new Symbol(sym.background, yychar, yyline, yytext());}
+
+    {sSound} {return new Symbol(sym.sSound, yychar, yyline, yytext());}
+
+    {pSound} {return new Symbol(sym.pSound, yychar, yyline, yytext());}
+
+    {hide} {return new Symbol(sym.hide, yychar, yyline, yytext());}
+
+    {show} {return new Symbol(sym.show , yychar, yyline, yytext());}
+
+    {menu} {return new Symbol(sym.menu , yychar, yyline, yytext());}
+
+    {go} {return new Symbol(sym.go, yychar, yyline, yytext());}
+
+    {breaker} {return new Symbol(sym.breaker, yychar, yyline, yytext());}
+
+    {image} {return new Symbol(sym.image, yychar, yyline, yytext());}
+
+    {sound} {return new Symbol(sym.sound, yychar, yyline, yytext());}
+
+    {dataType} {return new Symbol(sym.dataType, yychar, yyline, yytext());}
+
+    {booleanType} {return new Symbol(sym.booleanType, yychar, yyline, yytext());}
+
+    {for} {return new Symbol(sym.for, yychar, yyline, yytext());}
+    
+    {if} {return new Symbol(sym.if, yychar, yyline, yytext());}
+
+    {else} {return new Symbol(sym.else, yychar, yyline, yytext());}
 
     /* errors */
     .    { return new Symbol(sym.error, yychar, yyline, yytext());}

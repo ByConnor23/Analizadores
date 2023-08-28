@@ -49,6 +49,8 @@ package project;
 
     semiColon = ";"
 
+    comma = ","
+
     /* comparison operators */
     comparisonOperator = "<=" | ">=" | "==" | "<" | ">"
 
@@ -56,39 +58,63 @@ package project;
     arithmeticOperator = "+" | "-" | "*" | "/"
 
     /* asignment operators */
-    assignmentOperator = "++" | "+=" | "-=" | "*=" | "/="
+    plus = "++"
+
+    equalSignal = "="
 
     /* color */
     colorSymbol = "#"
 
     /* keywords */
-    keywords = "public" |
-            "static" |
-            "void" |
-            "main" |
-            "define" |
-            "int" |
-            "double" |
-            "string" |
-            "bool" |
-            "true" |
-            "false" |
-            "Character" |
-            "Color" |
-            "Image" |
-            "Sound" |
-            "Screen" |
-            "setBackground" |
-            "show" |
-            "hide" |
-            "playSound" |
-            "stopSound" |
-            "Menu" |
-            "breaker" |
-            "go" |
-            "for" |
-            "if" |
-            "else"
+    
+    //Main method
+    public = "public"
+
+    static = "static"
+
+    void = "void"
+
+    main = "main"
+
+    //Keywords new
+    define = "define"
+
+    character = "Character"
+    
+    screen = "Screen"
+
+    background = "setBackground"
+
+    sSound = "stopSound"
+
+    pSound = "playSound"
+
+    hide = "hide"
+    
+    show = "show"
+
+    menu = "Menu"
+
+    go = "go"
+
+    breaker = "breaker"
+
+    //Atmosphere
+    image = "Image"
+
+    sound = "Sound"
+
+    //Data type
+    dataType = "int" | "double" | "string" | "bool"
+
+    booleanType = "true" |  "false"
+
+    //control structures
+    for = "for"
+
+    if = "if"
+
+    else = "else"
 
 %%
     {comment} | {whiteSpace} 
@@ -111,6 +137,8 @@ package project;
 
     {semiColon} {return token(yytext(), "PUNTO Y COMA");}
 
+    {comma} {return token(yytext(), "COMA");}
+
     /* dataType */
 
     {number} {return token(yytext(), "NÚMERO");}
@@ -123,7 +151,9 @@ package project;
 
     {arithmeticOperator} {return token(yytext(), "OPERADOR ARITMETICO");}
 
-    {assignmentOperator} {return token(yytext(), "OPERADOR DE ASIGNACIÓN");}
+    {plus} {return token(yytext(), "OPERADOR DE AUMENTO");}
+
+    {equalSignal} {return token(yytext(), "IGUAL");}
 
     /* color */
 
@@ -131,7 +161,49 @@ package project;
 
     /* keywords */
     
-    {keywords} {return token(yytext(),"PALABRA RESERVADA");}
+    {public} {return token(yytext(),"PUBLIC");}
+
+    {static} {return token(yytext(),"STATIC");}
+
+    {void} {return token(yytext(),"VOID");}
+
+    {main} {return token(yytext(),"MAIN");}
+
+    {define} {return token(yytext(),"DEFINE");}
+
+    {character} {return token(yytext(),"CHARACTER");}
+
+    {screen} {return token(yytext(),"SCREEN");}
+
+    {background} {return token(yytext(),"BACKGROUND");}
+
+    {sSound} {return token(yytext(),"STOP SOUND");}
+
+    {pSound} {return token(yytext(),"PLAY SOUND");}
+
+    {hide} {return token(yytext(),"HIDE");}
+    
+    {show} {return token(yytext(),"SHOW");}
+
+    {menu} {return token(yytext(),"MENU");}
+
+    {go} {return token(yytext(),"GO");}
+
+    {breaker} {return token(yytext(),"BREAKER");}
+
+    {image} {return token(yytext(),"IMAGE");}
+    
+    {sound} {return token(yytext(),"SOUND");}
+
+    {dataType} {return token(yytext(),"TIPO DE DATO");}
+
+    {booleanType} {return token(yytext(),"BOOL ASIGNACIÓN");}
+
+    {for} {return token(yytext(),"FOR");}
+
+    {if} {return token(yytext(),"IF");}
+
+    {else} {return token(yytext(),"ELSE");}
 
     /* errors */
     .    { return token(yytext(), "ERROR TOKEN DESCONOCIDO");}
