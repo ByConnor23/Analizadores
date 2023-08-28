@@ -113,9 +113,17 @@ import java_cup.runtime.Symbol;
     sound = "Sound"
 
     //Data type
-    dataType = "int" | "double" | "string" | "bool"
+    intK = "int"
 
-    booleanType = "true" |  "false"
+    doubleK = "double"
+
+    stringK = "string"
+
+    boolK = "bool"
+
+    trueK = "true"
+
+    falseK = "false"
 
     //control structures
     for = "for"
@@ -203,9 +211,21 @@ import java_cup.runtime.Symbol;
 
     {sound} {return new Symbol(sym.sound, yychar, yyline, yytext());}
 
-    {dataType} {return new Symbol(sym.dataType, yychar, yyline, yytext());}
+    /* dataTypes */
 
-    {booleanType} {return new Symbol(sym.booleanType, yychar, yyline, yytext());}
+    {intK} {return new Symbol(sym.intK, yychar, yyline, yytext());}
+
+    {doubleK} {return new Symbol(sym.doubleK, yychar, yyline, yytext());}
+
+    {stringK} {return new Symbol(sym.stringK, yychar, yyline, yytext());}
+
+    {boolK} {return new Symbol(sym.boolK, yychar, yyline, yytext());}
+
+    {trueK} {return new Symbol(sym.trueK, yychar, yyline, yytext());}
+
+    {falseK} {return new Symbol(sym.falseK, yychar, yyline, yytext());}
+
+    /* assignamentTypes */
 
     {for} {return new Symbol(sym.for, yychar, yyline, yytext());}
     

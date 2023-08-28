@@ -105,9 +105,17 @@ package project;
     sound = "Sound"
 
     //Data type
-    dataType = "int" | "double" | "string" | "bool"
+    intK = "int"
 
-    booleanType = "true" |  "false"
+    doubleK = "double"
+
+    stringK = "string"
+
+    boolK = "bool"
+
+    trueK = "true"
+
+    falseK = "false"
 
     //control structures
     for = "for"
@@ -192,12 +200,24 @@ package project;
     {breaker} {return token(yytext(),"BREAKER");}
 
     {image} {return token(yytext(),"IMAGE");}
-    
+
     {sound} {return token(yytext(),"SOUND");}
 
-    {dataType} {return token(yytext(),"TIPO DE DATO");}
+    /* dataTypes */
 
-    {booleanType} {return token(yytext(),"BOOL ASIGNACIÓN");}
+    {intK} {return new Symbol(sym.intK, yychar, yyline, yytext());}
+
+    {doubleK} {return new Symbol(sym.doubleK, yychar, yyline, yytext());}
+
+    {stringK} {return new Symbol(sym.stringK, yychar, yyline, yytext());}
+
+    {boolK} {return new Symbol(sym.boolK, yychar, yyline, yytext());}
+
+    {trueK} {return new Symbol(sym.trueK, yychar, yyline, yytext());}
+
+    {falseK} {return new Symbol(sym.falseK, yychar, yyline, yytext());}
+
+    /* assignamentTypes */
 
     {for} {return token(yytext(),"FOR");}
 
