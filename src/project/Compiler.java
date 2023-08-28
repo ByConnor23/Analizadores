@@ -1,6 +1,7 @@
 package project;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.*;
@@ -10,15 +11,18 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import net.miginfocom.swing.MigLayout;
+import project.util.FileDirectory;
+import project.util.LineNumber;
 
 public class Compiler extends JFrame {
 
 	public Compiler() {
 		initComponents();
+		init();
 	}
 
-	private void newActionPerformed() {
-		System.out.println("New");
+	private void init() {
+		directory = new FileDirectory(this, codeEditor, "Code Compiler", ".txt");
 	}
 
 	private void initComponents() {
@@ -88,7 +92,7 @@ public class Compiler extends JFrame {
 				openMenuItem.setAccelerator(
 						KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 				openMenuItem.setMnemonic('O');
-				openMenuItem.addActionListener(e -> newActionPerformed());
+				openMenuItem.addActionListener(e -> openActionPerformed(e));
 				fileMenu.add(openMenuItem);
 
 				// ==================== Save Menu Item ====================
@@ -251,15 +255,12 @@ public class Compiler extends JFrame {
 		contentPane.add(toolBar, BorderLayout.NORTH);
 		// ==================== Content Panel ====================
 		{// ==================== Code Editor ====================
-			// codeEditor.setBounds(10, 190, 480, 450);
 			codeEditor.setBackground(Color.WHITE);
 			codeEditor.setMargin(new Insets(10, 10, 10, 10));
-			// line = new Line(codeEditor);
-			contentPanel.add(new JScrollPane(codeEditor), "grow");
-			// jScrollPane1 = new JScrollPane(codeEditor);
-			// jScrollPane1.setBounds(10, 190, 480, 450);
-			// jScrollPane1.setRowHeaderView(line);
-			// contentPane.add(jScrollPane1);
+			LineNumber line = new LineNumber(codeEditor);
+			JScrollPane rootCode = new JScrollPane(codeEditor);
+			rootCode.setRowHeaderView(line);
+			contentPanel.add(rootCode, "grow");
 		}
 		{// ==================== Symbol Table ====================
 			symbolTable.setModel(new DefaultTableModel(
@@ -288,7 +289,6 @@ public class Compiler extends JFrame {
 			});
 			symbolTable.setAutoCreateRowSorter(true);
 			symbolTable.setComponentPopupMenu(null);
-			// jScrollPane2.setViewportView(symbolTable);
 			contentPanel.add(new JScrollPane(symbolTable), "w 2501p, grow, wrap");
 		}
 		{// ==================== Output Console ====================
@@ -296,6 +296,16 @@ public class Compiler extends JFrame {
 			contentPanel.add(new JScrollPane(outputConsole), "grow, span 2");
 		}
 		contentPane.add(contentPanel, BorderLayout.CENTER);
+	}
+
+	private void newActionPerformed() {
+		System.out.println("New");
+	}
+
+	private void openActionPerformed(ActionEvent event) {
+		if (directory.Open()) {
+
+		}
 	}
 
 	public static void main(String args[]) {
@@ -322,6 +332,7 @@ public class Compiler extends JFrame {
 	// Tests
 	private JToolBar toolBar;
 	private JMenuBar menu;
+	private FileDirectory directory;
 	// File Menu
 	private JMenu fileMenu;
 	private JMenuItem newMenuItem;
