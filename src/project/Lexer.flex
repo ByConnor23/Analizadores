@@ -1,11 +1,11 @@
 package project;
-import static project.Token.*;
+import static project.TokenType.*;
 %%
 %class Lexer
 %type Token
 %{
     public String lexeme;
-
+    private int lastBreak = 0;
 %}
     /* spaces */
     lineTerminator = \r|\n|\r\n
@@ -143,120 +143,272 @@ import static project.Token.*;
     
     /* Identifer */
 
-    {identifer} {lexeme=yytext(); return "IDENTIFICADOR";}
+    //{lexeme=yytext(); return "IDENTIFICADOR";}
+
+    {identifer} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.IDENTIFICADOR, lexeme=yytext(), yyline + 1, column);
+                }
 
     /* delimiters */
 
-    {leftBrace} {lexeme=yytext(); return "LLAVE_DE_APERTURA";}
+    {leftBrace} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.LLAVE_DE_APERTURA, lexeme=yytext(), yyline + 1, column);
+                }
 
-    {rightBrace} {lexeme=yytext(); return "LLAVE_DE_CERRADURA";}
+    {rightBrace} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.LLAVE_DE_CERRADURA, lexeme=yytext(), yyline + 1, column);
+                }
 
-    {leftParethesis} {lexeme=yytext(); return "PARENTESIS_DE_APERTURA";}
+    {leftParethesis} {
+                        int column = yychar - lastBreak + 1;
+                        return new Token(TokenType.PARENTESIS_DE_APERTURA, lexeme=yytext(), yyline + 1, column);
+                    }
 
-    {rightParethesis} {lexeme=yytext(); return "PARENTESIS_DE_CERRADURA";}
+    {rightParethesis} {
+                        int column = yychar - lastBreak + 1;
+                        return new Token(TokenType.LLAVE_DE_CERRADURA, lexeme=yytext(), yyline + 1, column);
+                    }
 
-    {colon} {lexeme=yytext(); return "DOS_PUNTOS";}
+    {colon} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.DOS_PUNTOS, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {semiColon} {lexeme=yytext(); return "PUNTO_Y_COMA";}
+    {semiColon} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.PUNTO_Y_COMA, lexeme=yytext(), yyline + 1, column);
+                }
 
-    {comma} {lexeme=yytext(); return "COMA";}
+    {comma} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.COMA, lexeme=yytext(), yyline + 1, column);
+            }
 
     /* dataType */
 
-    {number} {lexeme=yytext(); return "NUMERO";}
+    {number} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.NUMERO, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {chaising} {lexeme=yytext(); return "CADENA";}
+    {chaising} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.CADENA, lexeme=yytext(), yyline + 1, column);
+                }
 
     /* operators */
 
     
-    {lessThan} {lexeme=yytext();"return MENOR_QUE";}
+    {lessThan} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.MENOR_QUE, lexeme=yytext(), yyline + 1, column);
+                }
 
-    {moreThan} {lexeme=yytext();"return MAYOR_QUE";}
+    {moreThan} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.MAYOR_QUE, lexeme=yytext(), yyline + 1, column);
+                }
 
-    {ltoet} {lexeme=yytext();"return MENOR_O_IGUAL_QUE";}
+    {ltoet} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.MENOR_O_IGUAL_QUE, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {gtoet} {lexeme=yytext();"return MAYOR_O_IGUAL_QUE";}
+    {gtoet} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.MAYOR_O_IGUAL_QUE, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {awa} {lexeme=yytext();"return IGUALACION";}
+    {awa} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.IGUALACION, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {more} {lexeme=yytext();"return MAS";}
+    {more} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.SUMA, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {menus} {lexeme=yytext();"return MENOS";}
+    {menus} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.RESTA, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {by} {lexeme=yytext();"return POR";}
+    {by} {
+            int column = yychar - lastBreak + 1;
+            return new Token(TokenType.MULTIPLICACION, lexeme=yytext(), yyline + 1, column);
+        }
 
-    {on} {lexeme=yytext();"return SOBRE";}
+    {on} {
+            int column = yychar - lastBreak + 1;
+            return new Token(TokenType.DIVISION, lexeme=yytext(), yyline + 1, column);
+        }
 
-    {plus} {lexeme=yytext(); return "OPERADOR_DE_AUMENTO";}
+    {plus} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.OPERADOR_DE_AUMENTO, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {equalSignal} {lexeme=yytext(); return "ASIGNACION";}
+    {equalSignal} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.ASIGNACION, lexeme=yytext(), yyline + 1, column);
+                }
 
     /* color */
 
-    {colorSymbol} {lexeme=yytext();"return ASIGNACION_DE_COLOR";}
+    {colorSymbol} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.ASIGNACION_DE_COLOR, lexeme=yytext(), yyline + 1, column);
+                }
 
     /* keywords */
     
-    {public} {lexeme=yytext();"return PUBLIC";}
+    {public} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.PUBLIC, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {static} {lexeme=yytext();"return STATIC";}
+    {static} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.STATIC, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {void} {lexeme=yytext();"return VOID";}
+    {void} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.VOID, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {main} {lexeme=yytext();"return MAIN";}
+    {main} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.MAIN, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {define} {lexeme=yytext();"return DEFINE";}
+    {define} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.DEFINE, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {character} {lexeme=yytext();"return CHARACTER";}
+    {character} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.CHARACTER, lexeme=yytext(), yyline + 1, column);
+                }
 
-    {screen} {lexeme=yytext();"return SCREEN";}
+    {screen} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.SCREEN, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {background} {lexeme=yytext();"return BACKGROUND";}
+    {background} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.BACKGROUND, lexeme=yytext(), yyline + 1, column);
+                }
 
-    {sSound} {lexeme=yytext();"return STOP_SOUND";}
+    {sSound} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.STOP_SOUND, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {pSound} {lexeme=yytext();"return PLAY_SOUND";}
+    {pSound} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.PLAY_SOUND, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {hide} {lexeme=yytext();"return HIDE";}
+    {hide} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.HIDE, lexeme=yytext(), yyline + 1, column);
+            }
     
-    {show} {lexeme=yytext();"return SHOW";}
+    {show} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.SHOW, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {menu} {lexeme=yytext();"return MENU";}
+    {menu} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.MENU, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {go} {lexeme=yytext();"return GO";}
+    {go} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.GO, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {breaker} {lexeme=yytext();"return BREAKER";}
+    {breaker} {
+                    int column = yychar - lastBreak + 1;
+                    return new Token(TokenType.BREAKER, lexeme=yytext(), yyline + 1, column);
+                }
 
-    {color} {lexeme=yytext();"return COLOR";}
+    {color} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.COLOR, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {image} {lexeme=yytext();"return IMAGE";}
+    {image} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.IMAGE, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {sound} {lexeme=yytext();"return SOUND";}
+    {sound} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.SOUND, lexeme=yytext(), yyline + 1, column);
+            }
 
     /* dataTypes */
 
-    {intK} {lexeme=yytext(); return "INT";}
+    {intK} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.INT, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {doubleK} {lexeme=yytext(); return "DOUBLE";}
+    {doubleK} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.DOUBLE, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {stringK} {lexeme=yytext(); return "STRING";}
+    {stringK} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.STRING, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {boolK} {lexeme=yytext(); return "BOOLEANO";}
+    {boolK} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.BOOLEANO, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {trueK} {lexeme=yytext();"return TRUE";}
+    {trueK} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.TRUE, lexeme=yytext(), yyline + 1, column);
+            }
 
-    {falseK} {lexeme=yytext(); return "FALSE";}
+    {falseK} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.FALSE, lexeme=yytext(), yyline + 1, column);
+            }
 
     /* assignamentTypes */
 
-    {for} {lexeme=yytext();"return FOR";}
+    {for} {
+            int column = yychar - lastBreak + 1;
+            return new Token(TokenType.FOR, lexeme=yytext(), yyline + 1, column);
+        }
 
-    {if} {lexeme=yytext();"return IF";}
+    {if} {
+            int column = yychar - lastBreak + 1;
+            return new Token(TokenType.IF, lexeme=yytext(), yyline + 1, column);
+        }
 
-    {else} {lexeme=yytext();"return ELSE";}
+    {else} {
+                int column = yychar - lastBreak + 1;
+                return new Token(TokenType.ELSE, lexeme=yytext(), yyline + 1, column);
+            }
 
     /* errors */
-    .    { lexeme=yytext(); return "ERROR_TOKEN_DESCONOCIDO";}
+    .    {
+            int column = yychar - lastBreak + 1;
+            return new Token(TokenType.ERROR_TOKEN_DESCONOCIDO, lexeme=yytext(), yyline + 1, column);
+        }
 
 
