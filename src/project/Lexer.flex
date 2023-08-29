@@ -1,10 +1,10 @@
 package project;
-import static project.Token.*;
+import static project.TokenType.*;
 %%
 %class Lexer
 %type Token
 %{
-    public String lexeme;
+    public TokenType lexeme;
 
 %}
     /* spaces */
@@ -139,124 +139,124 @@ import static project.Token.*;
     else = "else"
 
 %%
-    {comment} | {whiteSpace} 
+    {comment} | {whiteSpace} {/* ignore */}
     
     /* Identifer */
 
-    {identifer} {lexeme=yytext(); return "IDENTIFICADOR";}
+    {identifer} {lexeme=yytext(); return IDENTIFICADOR;}
 
     /* delimiters */
 
-    {leftBrace} {lexeme=yytext(); return "LLAVE_DE_APERTURA";}
+    {leftBrace} {lexeme=yytext(); return LLAVE_DE_APERTURA;}
 
-    {rightBrace} {lexeme=yytext(); return "LLAVE_DE_CERRADURA";}
+    {rightBrace} {lexeme=yytext(); return LLAVE_DE_CERRADURA;}
 
-    {leftParethesis} {lexeme=yytext(); return "PARENTESIS_DE_APERTURA";}
+    {leftParethesis} {lexeme=yytext(); return PARENTESIS_DE_APERTURA;}
 
-    {rightParethesis} {lexeme=yytext(); return "PARENTESIS_DE_CERRADURA";}
+    {rightParethesis} {lexeme=yytext(); return PARENTESIS_DE_CERRADURA;}
 
-    {colon} {lexeme=yytext(); return "DOS_PUNTOS";}
+    {colon} {lexeme=yytext(); return DOS_PUNTOS;}
 
-    {semiColon} {lexeme=yytext(); return "PUNTO_Y_COMA";}
+    {semiColon} {lexeme=yytext(); return PUNTO_Y_COMA;}
 
-    {comma} {lexeme=yytext(); return "COMA";}
+    {comma} {lexeme=yytext(); return COMA;}
 
     /* dataType */
 
-    {number} {lexeme=yytext(); return "NUMERO";}
+    {number} {lexeme=yytext(); return NUMERO;}
 
-    {chaising} {lexeme=yytext(); return "CADENA";}
+    {chaising} {lexeme=yytext(); return CADENA;}
 
     /* operators */
 
     
-    {lessThan} {lexeme=yytext();"return MENOR_QUE";}
+    {lessThan} {lexeme=yytext();return MENOR_QUE;}
 
-    {moreThan} {lexeme=yytext();"return MAYOR_QUE";}
+    {moreThan} {lexeme=yytext();return MAYOR_QUE;}
 
-    {ltoet} {lexeme=yytext();"return MENOR_O_IGUAL_QUE";}
+    {ltoet} {lexeme=yytext();return MENOR_O_IGUAL_QUE;}
 
-    {gtoet} {lexeme=yytext();"return MAYOR_O_IGUAL_QUE";}
+    {gtoet} {lexeme=yytext();return MAYOR_O_IGUAL_QUE;}
 
-    {awa} {lexeme=yytext();"return IGUALACION";}
+    {awa} {lexeme=yytext();return IGUALACION;}
 
-    {more} {lexeme=yytext();"return MAS";}
+    {more} {lexeme=yytext();return MAS;}
 
-    {menus} {lexeme=yytext();"return MENOS";}
+    {menus} {lexeme=yytext();return MENOS;}
 
-    {by} {lexeme=yytext();"return POR";}
+    {by} {lexeme=yytext();return POR;}
 
-    {on} {lexeme=yytext();"return SOBRE";}
+    {on} {lexeme=yytext();return SOBRE;}
 
-    {plus} {lexeme=yytext(); return "OPERADOR_DE_AUMENTO";}
+    {plus} {lexeme=yytext(); return OPERADOR_DE_AUMENTO;}
 
-    {equalSignal} {lexeme=yytext(); return "ASIGNACION";}
+    {equalSignal} {lexeme=yytext(); return ASIGNACION;}
 
     /* color */
 
-    {colorSymbol} {lexeme=yytext();"return ASIGNACION_DE_COLOR";}
+    {colorSymbol} {lexeme=yytext();return ASIGNACION_DE_COLOR;}
 
     /* keywords */
     
-    {public} {lexeme=yytext();"return PUBLIC";}
+    {public} {lexeme=yytext();return PUBLIC;}
 
-    {static} {lexeme=yytext();"return STATIC";}
+    {static} {lexeme=yytext();return STATIC;}
 
-    {void} {lexeme=yytext();"return VOID";}
+    {void} {lexeme=yytext();return VOID;}
 
-    {main} {lexeme=yytext();"return MAIN";}
+    {main} {lexeme=yytext();return MAIN;}
 
-    {define} {lexeme=yytext();"return DEFINE";}
+    {define} {lexeme=yytext();return DEFINE;}
 
-    {character} {lexeme=yytext();"return CHARACTER";}
+    {character} {lexeme=yytext();return CHARACTER;}
 
-    {screen} {lexeme=yytext();"return SCREEN";}
+    {screen} {lexeme=yytext();return SCREEN;}
 
-    {background} {lexeme=yytext();"return BACKGROUND";}
+    {background} {lexeme=yytext();return BACKGROUND;}
 
-    {sSound} {lexeme=yytext();"return STOP_SOUND";}
+    {sSound} {lexeme=yytext();return STOP_SOUND;}
 
-    {pSound} {lexeme=yytext();"return PLAY_SOUND";}
+    {pSound} {lexeme=yytext();return PLAY_SOUND;}
 
-    {hide} {lexeme=yytext();"return HIDE";}
+    {hide} {lexeme=yytext();return HIDE;}
     
-    {show} {lexeme=yytext();"return SHOW";}
+    {show} {lexeme=yytext();return SHOW;}
 
-    {menu} {lexeme=yytext();"return MENU";}
+    {menu} {lexeme=yytext();return MENU;}
 
-    {go} {lexeme=yytext();"return GO";}
+    {go} {lexeme=yytext();return GO;}
 
-    {breaker} {lexeme=yytext();"return BREAKER";}
+    {breaker} {lexeme=yytext();return BREAKER;}
 
-    {color} {lexeme=yytext();"return COLOR";}
+    {color} {lexeme=yytext();return COLOR;}
 
-    {image} {lexeme=yytext();"return IMAGE";}
+    {image} {lexeme=yytext();return IMAGE;}
 
-    {sound} {lexeme=yytext();"return SOUND";}
+    {sound} {lexeme=yytext();return SOUND;}
 
     /* dataTypes */
 
-    {intK} {lexeme=yytext(); return "INT";}
+    {intK} {lexeme=yytext(); return INT;}
 
-    {doubleK} {lexeme=yytext(); return "DOUBLE";}
+    {doubleK} {lexeme=yytext(); return DOUBLE;}
 
-    {stringK} {lexeme=yytext(); return "STRING";}
+    {stringK} {lexeme=yytext(); return STRING;}
 
-    {boolK} {lexeme=yytext(); return "BOOLEANO";}
+    {boolK} {lexeme=yytext(); return BOOLEANO;}
 
-    {trueK} {lexeme=yytext();"return TRUE";}
+    {trueK} {lexeme=yytext();return TRUE;}
 
-    {falseK} {lexeme=yytext(); return "FALSE";}
+    {falseK} {lexeme=yytext(); return FALSE;}
 
     /* assignamentTypes */
 
-    {for} {lexeme=yytext();"return FOR";}
+    {for} {lexeme=yytext();return FOR;}
 
-    {if} {lexeme=yytext();"return IF";}
+    {if} {lexeme=yytext();return IF;}
 
-    {else} {lexeme=yytext();"return ELSE";}
+    {else} {lexeme=yytext();return ELSE;}
 
     /* errors */
-    .    { lexeme=yytext(); return "ERROR_TOKEN_DESCONOCIDO";}
+    .    { lexeme=yytext(); return ERROR_TOKEN_DESCONOCIDO;}
 
 
