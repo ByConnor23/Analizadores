@@ -149,38 +149,38 @@ package project;
 
     /* delimiters */
 
-    {leftBrace} {return token(yytext(), "LLAVE DE APERTURA");}
+    {leftBrace} {return token(yytext(), "LLAVE_DE_APERTURA");}
 
-    {rightBrace} {return token(yytext(), "LLAVE DE CERRADURA");}
+    {rightBrace} {return token(yytext(), "LLAVE_DE_CERRADURA");}
 
-    {leftParethesis} {return token(yytext(), "PARENTESIS DE APERTURA");}
+    {leftParethesis} {return token(yytext(), "PARENTESIS_DE_APERTURA");}
 
-    {rightParethesis} {return token(yytext(), "PARENTESIS DE CERRADURA");}
+    {rightParethesis} {return token(yytext(), "PARENTESIS_DE_CERRADURA");}
 
-    {colon} {return token(yytext(), "DOS PUNTOS");}
+    {colon} {return token(yytext(), "DOS_PUNTOS");}
 
-    {semiColon} {return token(yytext(), "PUNTO Y COMA");}
+    {semiColon} {return token(yytext(), "PUNTO_Y_COMA");}
 
     {comma} {return token(yytext(), "COMA");}
 
     /* dataType */
 
-    {number} {return token(yytext(), "NÚMERO");}
+    {number} {return token(yytext(), "NUMERO");}
 
     {chaising} {return token(yytext(), "CADENA");}
 
     /* operators */
 
     
-    {lessThan} {return token(yytext(),"MENOR QUE");}
+    {lessThan} {return token(yytext(),"MENOR_QUE");}
 
-    {moreThan} {return token(yytext(),"MAYOR QUE");}
+    {moreThan} {return token(yytext(),"MAYOR_QUE");}
 
-    {ltoet} {return token(yytext(),"MENOR O IGUAL QUE");}
+    {ltoet} {return token(yytext(),"MENOR_O_IGUAL_QUE");}
 
-    {gtoet} {return token(yytext(),"MAYOR O IGUAL QUE");}
+    {gtoet} {return token(yytext(),"MAYOR_O_IGUAL_QUE");}
 
-    {awa} {return token(yytext(),"IGUALACIÓN");}
+    {awa} {return token(yytext(),"IGUALACION");}
 
     {more} {return token(yytext(),"MAS");}
 
@@ -190,13 +190,13 @@ package project;
 
     {on} {return token(yytext(),"SOBRE");}
 
-    {plus} {return token(yytext(), "OPERADOR DE AUMENTO");}
+    {plus} {return token(yytext(), "OPERADOR_DE_AUMENTO");}
 
-    {equalSignal} {return token(yytext(), "ASIGNACIÓN");}
+    {equalSignal} {return token(yytext(), "ASIGNACION");}
 
     /* color */
 
-    {colorSymbol} {return token(yytext(),"ASIGNACIÓN DE COLOR");}
+    {colorSymbol} {return token(yytext(),"ASIGNACION_DE_COLOR");}
 
     /* keywords */
     
@@ -216,9 +216,9 @@ package project;
 
     {background} {return token(yytext(),"BACKGROUND");}
 
-    {sSound} {return token(yytext(),"STOP SOUND");}
+    {sSound} {return token(yytext(),"STOP_SOUND");}
 
-    {pSound} {return token(yytext(),"PLAY SOUND");}
+    {pSound} {return token(yytext(),"PLAY_SOUND");}
 
     {hide} {return token(yytext(),"HIDE");}
     
@@ -259,6 +259,6 @@ package project;
     {else} {return token(yytext(),"ELSE");}
 
     /* errors */
-    .    { return token(yytext(), "ERROR TOKEN DESCONOCIDO");}
+    .    { return token(yytext(), "ERROR_TOKEN_DESCONOCIDO");}
 
 
