@@ -6,17 +6,12 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
+import javax.swing.*;
+import javax.swing.border.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
@@ -28,13 +23,12 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.Utilities;
 
-public class LineNumber extends JPanel implements CaretListener, DocumentListener, PropertyChangeListener {
-
-    public final static float LEFT = 0.0f;
-    public final static float CENTER = 0.5f;
-    public final static float RIGHT = 1.0f;
-    private final static Border OUTER = new MatteBorder(0, 0, 0, 2, Color.GRAY);
-    private final static int HEIGHT = Integer.MAX_VALUE - 1000000;
+public final class LineNumber extends JPanel implements CaretListener, DocumentListener, PropertyChangeListener {
+    private static final Border OUTER = new MatteBorder(0, 0, 0, 2, Color.BLACK);
+    public static final float LEFT = 0.0F;
+    public static final float CENTER = 0.5F;
+    public static final float RIGHT = 1.0F;
+    private static final int HEIGHT = 2146483647;
     private JTextComponent component;
     private boolean updateFont;
     private int borderGap;
@@ -46,286 +40,234 @@ public class LineNumber extends JPanel implements CaretListener, DocumentListene
     private int lastLine;
     private HashMap<String, FontMetrics> fonts;
 
-    public LineNumber(JTextComponent component) {
-        this(component, 3);
+    public LineNumber(JTextComponent paramJTextComponent) {
+        this(paramJTextComponent, 2, Color.GRAY);
     }
 
-    public LineNumber(JTextComponent component, int minimumDisplayDigits) {
-        this.component = component;
+    public LineNumber(JTextComponent paramJTextComponent, int paramInt) {
+        this(paramJTextComponent, paramInt, Color.GRAY);
+    }
 
-        setFont(component.getFont());
+    public LineNumber(JTextComponent paramJTextComponent, int paramInt, Color paramColor) {
+        this.component = paramJTextComponent;
 
+        setFont(paramJTextComponent.getFont());
         setBorderGap(5);
-        setCurrentLineForeground(Color.RED);
-        setDigitAlignment(RIGHT);
-        setMinimumDisplayDigits(minimumDisplayDigits);
+        setCurrentLineForeground(paramColor);
+        setDigitAlignment(1.0F);
+        setMinimumDisplayDigits(paramInt);
 
-        component.getDocument().addDocumentListener(this);
-        component.addCaretListener(this);
-        component.addPropertyChangeListener("font", this);
+        paramJTextComponent.getDocument().addDocumentListener(this);
+        paramJTextComponent.addCaretListener(this);
+        paramJTextComponent.addPropertyChangeListener("font", this);
+        // System.out.println(Functions.ANSI_BLUE_BLACK + "LineNumber v2.47 (By Yisus
+        // Efebei and M45t3r L3g10n)");
     }
 
     public boolean getUpdateFont() {
-        return updateFont;
+        return this.updateFont;
     }
 
-    public void setUpdateFont(boolean updateFont) {
-        this.updateFont = updateFont;
+    public void setUpdateFont(boolean paramBoolean) {
+        this.updateFont = paramBoolean;
     }
 
     public int getBorderGap() {
-        return borderGap;
+        return this.borderGap;
     }
 
-    public void setBorderGap(int borderGap) {
-        this.borderGap = borderGap;
-        Border inner = new EmptyBorder(0, borderGap, 0, borderGap);
-        setBorder(new CompoundBorder(OUTER, inner));
-        lastDigits = 0;
+    public void setBorderGap(int paramInt) {
+        this.borderGap = paramInt;
+        EmptyBorder emptyBorder = new EmptyBorder(0, paramInt, 0, paramInt);
+        setBorder(new CompoundBorder(OUTER, emptyBorder));
+        this.lastDigits = 0;
         setPreferredWidth();
     }
 
     public Color getCurrentLineForeground() {
-        return currentLineForeground == null ? getForeground() : currentLineForeground;
+        return (this.currentLineForeground == null) ? getForeground() : this.currentLineForeground;
     }
 
-    public void setCurrentLineForeground(Color currentLineForeground) {
-        this.currentLineForeground = currentLineForeground;
+    public void setCurrentLineForeground(Color paramColor) {
+        this.currentLineForeground = paramColor;
     }
 
     public float getDigitAlignment() {
-        return digitAlignment;
+        return this.digitAlignment;
     }
 
-    public void setDigitAlignment(float digitAlignment) {
-        this.digitAlignment = digitAlignment > 1.0f ? 1.0f : digitAlignment < 0.0f ? -1.0f : digitAlignment;
+    public void setDigitAlignment(float paramFloat) {
+        this.digitAlignment = (paramFloat > 1.0F) ? 1.0F : ((paramFloat < 0.0F) ? -1.0F : paramFloat);
     }
 
     public int getMinimumDisplayDigits() {
-        return minimumDisplayDigits;
+        return this.minimumDisplayDigits;
     }
 
-    public void setMinimumDisplayDigits(int minimumDisplayDigits) {
-        this.minimumDisplayDigits = minimumDisplayDigits;
+    public void setMinimumDisplayDigits(int paramInt) {
+        this.minimumDisplayDigits = paramInt;
         setPreferredWidth();
     }
 
     private void setPreferredWidth() {
-        Element root = component.getDocument().getDefaultRootElement();
-        int lines = root.getElementCount();
-        int digits = Math.max(String.valueOf(lines).length(), minimumDisplayDigits);
+        Element element = this.component.getDocument().getDefaultRootElement();
+        int i = element.getElementCount();
+        int j = Math.max(String.valueOf(i).length(), this.minimumDisplayDigits);
 
-        // Update sizes when number of digits in the line number changes
-
-        if (lastDigits != digits) {
-            lastDigits = digits;
+        if (this.lastDigits != j) {
+            this.lastDigits = j;
             FontMetrics fontMetrics = getFontMetrics(getFont());
-            int width = fontMetrics.charWidth('0') * digits;
+            int k = fontMetrics.charWidth('0') * j;
             Insets insets = getInsets();
-            int preferredWidth = insets.left + insets.right + width;
+            int m = insets.left + insets.right + k;
 
-            Dimension d = getPreferredSize();
-            d.setSize(preferredWidth, HEIGHT);
-            setPreferredSize(d);
-            setSize(d);
+            Dimension dimension = getPreferredSize();
+            dimension.setSize(m, 2146483647);
+            setPreferredSize(dimension);
+            setSize(dimension);
         }
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    public void paintComponent(Graphics paramGraphics) {
+        super.paintComponent(paramGraphics);
 
-        // Determine the width of the space available to draw the line number
-
-        FontMetrics fontMetrics = component.getFontMetrics(component.getFont());
+        FontMetrics fontMetrics = this.component.getFontMetrics(this.component.getFont());
         Insets insets = getInsets();
-        int availableWidth = getSize().width - insets.left - insets.right;
+        int i = (getSize()).width - insets.left - insets.right;
 
-        // Determine the rows to draw within the clipped bounds.
+        Rectangle rectangle = paramGraphics.getClipBounds();
+        int j = this.component.viewToModel(new java.awt.Point(0, rectangle.y));
+        int k = this.component.viewToModel(new java.awt.Point(0, rectangle.y + rectangle.height));
 
-        Rectangle clip = g.getClipBounds();
-        int rowStartOffset = component.viewToModel(new Point(0, clip.y));
-        int endOffset = component.viewToModel(new Point(0, clip.y + clip.height));
-
-        while (rowStartOffset <= endOffset) {
+        while (j <= k) {
             try {
-                if (isCurrentLine(rowStartOffset))
-                    g.setColor(getCurrentLineForeground());
-                else
-                    g.setColor(getForeground());
+                if (isCurrentLine(j)) {
+                    paramGraphics.setColor(getCurrentLineForeground());
+                } else {
+                    paramGraphics.setColor(getForeground());
+                }
 
-                // Get the line number as a string and then determine the
-                // "X" and "Y" offsets for drawing the string.
-
-                String lineNumber = getTextLineNumber(rowStartOffset);
-                int stringWidth = fontMetrics.stringWidth(lineNumber);
-                int x = getOffsetX(availableWidth, stringWidth) + insets.left;
-                int y = getOffsetY(rowStartOffset, fontMetrics);
-                g.drawString(lineNumber, x, y);
-
-                // Move to the next row
-
-                rowStartOffset = Utilities.getRowEnd(component, rowStartOffset) + 1;
-            } catch (Exception e) {
+                String str = getTextLineNumber(j);
+                int m = fontMetrics.stringWidth(str);
+                int n = getOffsetX(i, m) + insets.left;
+                int i1 = getOffsetY(j, fontMetrics);
+                paramGraphics.drawString(str, n, i1);
+                j = Utilities.getRowEnd(this.component, j) + 1;
+            } catch (Exception exception) {
                 break;
             }
         }
     }
 
-    private boolean isCurrentLine(int rowStartOffset) {
-        int caretPosition = component.getCaretPosition();
-        Element root = component.getDocument().getDefaultRootElement();
+    private boolean isCurrentLine(int paramInt) {
+        int i = this.component.getCaretPosition();
+        Element element = this.component.getDocument().getDefaultRootElement();
 
-        if (root.getElementIndex(rowStartOffset) == root.getElementIndex(caretPosition))
-            return true;
-        else
-            return false;
+        return (element.getElementIndex(paramInt) == element.getElementIndex(i));
     }
 
-    protected String getTextLineNumber(int rowStartOffset) {
-        Element root = component.getDocument().getDefaultRootElement();
-        int index = root.getElementIndex(rowStartOffset);
-        Element line = root.getElement(index);
+    protected String getTextLineNumber(int paramInt) {
+        Element element1 = this.component.getDocument().getDefaultRootElement();
+        int i = element1.getElementIndex(paramInt);
+        Element element2 = element1.getElement(i);
 
-        if (line.getStartOffset() == rowStartOffset)
-            return String.valueOf(index + 1);
-        else
-            return "";
+        if (element2.getStartOffset() == paramInt) {
+            return String.valueOf(i + 1);
+        }
+        return "";
     }
 
-    /*
-     * Determine the X offset to properly align the line number when drawn
-     */
-    private int getOffsetX(int availableWidth, int stringWidth) {
-        return (int) ((availableWidth - stringWidth) * digitAlignment);
+    private int getOffsetX(int paramInt1, int paramInt2) {
+        return (int) ((paramInt1 - paramInt2) * this.digitAlignment);
     }
 
-    /*
-     * Determine the Y offset for the current row
-     */
-    private int getOffsetY(int rowStartOffset, FontMetrics fontMetrics)
-            throws BadLocationException {
-        // Get the bounding rectangle of the row
+    private int getOffsetY(int paramInt, FontMetrics paramFontMetrics) throws BadLocationException {
+        Rectangle rectangle = this.component.modelToView(paramInt);
+        int i = paramFontMetrics.getHeight();
+        int j = rectangle.y + rectangle.height;
+        int k = 0;
 
-        Rectangle r = component.modelToView(rowStartOffset);
-        int lineHeight = fontMetrics.getHeight();
-        int y = r.y + r.height;
-        int descent = 0;
+        if (rectangle.height == i) {
+            k = paramFontMetrics.getDescent();
+        } else {
+            if (this.fonts == null) {
+                this.fonts = new HashMap<>();
+            }
 
-        // The text needs to be positioned above the bottom of the bounding
-        // rectangle based on the descent of the font(s) contained on the row.
+            Element element1 = this.component.getDocument().getDefaultRootElement();
+            int m = element1.getElementIndex(paramInt);
+            Element element2 = element1.getElement(m);
 
-        if (r.height == lineHeight) // default font is being used
-        {
-            descent = fontMetrics.getDescent();
-        } else // We need to check all the attributes for font changes
-        {
-            if (fonts == null)
-                fonts = new HashMap<String, FontMetrics>();
+            for (byte b = 0; b < element2.getElementCount(); b++) {
+                Element element = element2.getElement(b);
+                AttributeSet attributeSet = element.getAttributes();
+                String str1 = (String) attributeSet.getAttribute(StyleConstants.FontFamily);
+                Integer integer = (Integer) attributeSet.getAttribute(StyleConstants.FontSize);
+                String str2 = str1 + str1;
 
-            Element root = component.getDocument().getDefaultRootElement();
-            int index = root.getElementIndex(rowStartOffset);
-            Element line = root.getElement(index);
+                FontMetrics fontMetrics = this.fonts.get(str2);
 
-            for (int i = 0; i < line.getElementCount(); i++) {
-                Element child = line.getElement(i);
-                AttributeSet as = child.getAttributes();
-                String fontFamily = (String) as.getAttribute(StyleConstants.FontFamily);
-                Integer fontSize = (Integer) as.getAttribute(StyleConstants.FontSize);
-                String key = fontFamily + fontSize;
-
-                FontMetrics fm = fonts.get(key);
-
-                if (fm == null) {
-                    Font font = new Font(fontFamily, Font.PLAIN, fontSize);
-                    fm = component.getFontMetrics(font);
-                    fonts.put(key, fm);
+                if (fontMetrics == null) {
+                    Font font = new Font(str1, 0, integer.intValue());
+                    fontMetrics = this.component.getFontMetrics(font);
+                    this.fonts.put(str2, fontMetrics);
                 }
 
-                descent = Math.max(descent, fm.getDescent());
+                k = Math.max(k, fontMetrics.getDescent());
             }
         }
 
-        return y - descent;
+        return j - k;
     }
 
-    //
-    // Implement CaretListener interface
-    //
-    @Override
-    public void caretUpdate(CaretEvent e) {
-        // Get the line the caret is positioned on
+    public void caretUpdate(CaretEvent paramCaretEvent) {
+        int i = this.component.getCaretPosition();
+        Element element = this.component.getDocument().getDefaultRootElement();
+        int j = element.getElementIndex(i);
 
-        int caretPosition = component.getCaretPosition();
-        Element root = component.getDocument().getDefaultRootElement();
-        int currentLine = root.getElementIndex(caretPosition);
-
-        // Need to repaint so the correct line number can be highlighted
-
-        if (lastLine != currentLine) {
+        if (this.lastLine != j) {
             repaint();
-            lastLine = currentLine;
+            this.lastLine = j;
         }
     }
 
-    //
-    // Implement DocumentListener interface
-    //
-    @Override
-    public void changedUpdate(DocumentEvent e) {
+    public void changedUpdate(DocumentEvent paramDocumentEvent) {
         documentChanged();
     }
 
-    @Override
-    public void insertUpdate(DocumentEvent e) {
+    public void insertUpdate(DocumentEvent paramDocumentEvent) {
         documentChanged();
     }
 
-    @Override
-    public void removeUpdate(DocumentEvent e) {
+    public void removeUpdate(DocumentEvent paramDocumentEvent) {
         documentChanged();
     }
 
-    /*
-     * A document change may affect the number of displayed lines of text.
-     * Therefore the lines numbers will also change.
-     */
     private void documentChanged() {
-        // View of the component has not been updated at the time
-        // the DocumentEvent is fired
+        SwingUtilities.invokeLater(() -> {
+            try {
+                int i = this.component.getDocument().getLength();
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    int endPos = component.getDocument().getLength();
-                    Rectangle rect = component.modelToView(endPos);
-
-                    if (rect != null && rect.y != lastHeight) {
-                        setPreferredWidth();
-                        repaint();
-                        lastHeight = rect.y;
-                    }
-                } catch (BadLocationException ex) {
-                    /* nothing to do */ }
+                Rectangle rectangle = this.component.modelToView(i);
+                if (rectangle != null && rectangle.y != this.lastHeight) {
+                    setPreferredWidth();
+                    repaint();
+                    this.lastHeight = rectangle.y;
+                }
+            } catch (BadLocationException badLocationException) {
             }
         });
     }
 
-    //
-    // Implement PropertyChangeListener interface
-    //
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof Font) {
-            if (updateFont) {
-                Font newFont = (Font) evt.getNewValue();
-                setFont(newFont);
-                lastDigits = 0;
+    public void propertyChange(PropertyChangeEvent paramPropertyChangeEvent) {
+        if (paramPropertyChangeEvent.getNewValue() instanceof Font)
+            if (this.updateFont) {
+                Font font = (Font) paramPropertyChangeEvent.getNewValue();
+                setFont(font);
+                this.lastDigits = 0;
                 setPreferredWidth();
             } else {
                 repaint();
             }
-        }
     }
 }

@@ -7,15 +7,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
 
 public class FileDirectory {
-    JFileChooser fileChooser = new JFileChooser();
-
+    JFileChooser fileChooser;
     private File file;
     private final String[] options;
     private final String title;
@@ -35,16 +33,18 @@ public class FileDirectory {
 
     private String getTextFile(File paramFile) {
         StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(paramFile), "UTF8"))) {
+        try {
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(paramFile), "UTF8"));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line).append(System.lineSeparator());
             }
+            bufferedReader.close();
         } catch (FileNotFoundException fileNotFoundException) {
             System.err.println("El archivo no pudo ser encontrado... " + fileNotFoundException.getMessage());
-        } catch (IOException ioException) {
-            System.err.println("Error al leer el archivo... " + ioException.getMessage());
+        } catch (IOException iOException) {
+            System.err.println("Error al leer el archivo... " + iOException.getMessage());
         }
         return stringBuilder.toString();
     }
@@ -54,6 +54,7 @@ public class FileDirectory {
             FileOutputStream fileOutputStream = new FileOutputStream(paramFile);
             byte[] arrayOfByte = paramString.getBytes();
             fileOutputStream.write(arrayOfByte);
+            fileOutputStream.close(); // Close the stream
         } catch (FileNotFoundException fileNotFoundException) {
             System.err.println("El archivo no pudo ser encontrado... " + fileNotFoundException.getMessage());
             return false;
@@ -70,9 +71,10 @@ public class FileDirectory {
             i = 0;
         } else {
             i = JOptionPane.showOptionDialog(this.frame, "El archivo actual está siendo editado, ¿guardar los cambios?",
-                    "¿Descartar cambios?", -1, 3, null, (Object[]) this.options, this.options[0]);
+                    "¿Descartar cambios?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, this.options,
+                    this.options[0]);
         }
-        if (i == 0) {
+        if (i == JOptionPane.YES_OPTION) {
             if (paramJFileChooser.getSelectedFile() != null) {
                 boolean bool = saveFile(paramFile, this.textComponent.getText());
                 if (bool) {
@@ -80,13 +82,13 @@ public class FileDirectory {
                 }
             } else if (this.frame.getTitle().equals(this.title + "*")) {
                 int j = JOptionPane.showOptionDialog(this.frame, "Guardar el archivo actual?", "Editar archivo nuevo?",
-                        -1, 3, null, (Object[]) this.options, this.options[0]);
-                if (j == 0) {
-                    if (paramJFileChooser.showDialog(this.frame, "Guardar") == 0) {
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, this.options, this.options[0]);
+                if (j == JOptionPane.YES_OPTION) {
+                    if (paramJFileChooser.showDialog(this.frame, "Guardar") == JFileChooser.APPROVE_OPTION) {
                         paramFile = paramJFileChooser.getSelectedFile();
                         String str = paramFile.getName();
                         if (!str.endsWith(this.extension)) {
-                            str = str + this.extension; // Corrected extension appending
+                            str = str + this.extension;
                         }
                         if (fileNameValid(str)) {
                             if (!paramFile.exists()) {
@@ -94,14 +96,14 @@ public class FileDirectory {
                             } else {
                                 int k = JOptionPane.showConfirmDialog(this.frame,
                                         "Ya hay un archivo con este nombre, ¿sobrescribirlo?", "Sobreescribir archivo",
-                                        2);
-                                if (k == 0) {
+                                        JOptionPane.YES_NO_OPTION);
+                                if (k == JOptionPane.YES_OPTION) {
                                     saveFile(paramFile);
                                 }
                             }
                         } else {
                             JOptionPane.showMessageDialog(this.frame, "Escriba un nombre válido para el archivo",
-                                    "Nombre inválido", 2);
+                                    "Nombre inválido", JOptionPane.ERROR_MESSAGE);
                             return false;
                         }
                     }
@@ -123,9 +125,10 @@ public class FileDirectory {
             i = 0;
         } else {
             i = JOptionPane.showOptionDialog(this.frame, "El archivo actual está siendo editado, ¿guardar los cambios?",
-                    "¿Descartar edición?", -1, 3, null, (Object[]) this.options, this.options[0]);
+                    "¿Descartar edición?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, this.options,
+                    this.options[0]);
         }
-        if (i == 0) {
+        if (i == JOptionPane.YES_OPTION) {
             if (paramJFileChooser.getSelectedFile() != null) {
                 boolean bool = saveFile(paramFile, this.textComponent.getText());
                 if (bool) {
@@ -133,9 +136,10 @@ public class FileDirectory {
                 }
             } else if (this.frame.getTitle().equals(this.title + "*")) {
                 int j = JOptionPane.showOptionDialog(this.frame, "Guardar el archivo actual?",
-                        "¿Descartar edición de archivo nuevo?", -1, 3, null, (Object[]) this.options, this.options[0]);
-                if (j == 0) {
-                    if (paramJFileChooser.showDialog(this.frame, "Guardar") == 0) {
+                        "¿Descartar edición de archivo nuevo?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                        null, this.options, this.options[0]);
+                if (j == JOptionPane.YES_OPTION) {
+                    if (paramJFileChooser.showDialog(this.frame, "Guardar") == JFileChooser.APPROVE_OPTION) {
                         paramFile = paramJFileChooser.getSelectedFile();
                         String str = paramFile.getName();
                         if (!str.endsWith(this.extension)) {
@@ -146,8 +150,8 @@ public class FileDirectory {
                         } else {
                             int k = JOptionPane.showConfirmDialog(this.frame,
                                     "Ya hay un archivo con este nombre, ¿desea sobreescribirlo?",
-                                    "Sobreescribir archivo", 2);
-                            if (k == 0) {
+                                    "Sobreescribir archivo", JOptionPane.YES_NO_OPTION);
+                            if (k == JOptionPane.YES_OPTION) {
                                 saveFile(paramFile);
                             }
                         }
@@ -157,8 +161,9 @@ public class FileDirectory {
                 }
             } else {
                 int j = JOptionPane.showConfirmDialog(this.frame,
-                        "Ya hay un archivo con este nombre, ¿desea sobreescribirlo?", "Sobreescribir archivo", 2);
-                if (j == 0) {
+                        "Ya hay un archivo con este nombre, ¿desea sobreescribirlo?", "Sobreescribir archivo",
+                        JOptionPane.YES_NO_OPTION);
+                if (j == JOptionPane.YES_OPTION) {
                     saveFile(paramFile);
                 }
             }
@@ -171,7 +176,8 @@ public class FileDirectory {
         if (bool) {
             this.frame.setTitle(paramFile.getName());
         } else {
-            JOptionPane.showMessageDialog(this.frame, "No se pudo guardar el archivo", "Error desconocido", 2);
+            JOptionPane.showMessageDialog(this.frame, "No se pudo guardar el archivo", "Error desconocido",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -201,11 +207,19 @@ public class FileDirectory {
         }
     }
 
+    public void Exit() {
+        if (this.frame.getTitle().contains("*") &&
+                saveEditOpen(this.file, this.fileChooser)) {
+            this.fileChooser = new JFileChooser();
+            this.file = null;
+        }
+    }
+
     public boolean Open() {
         if (this.frame.getTitle().contains("*"))
             saveEditOpen(this.file, this.fileChooser);
         JFileChooser jFileChooser = new JFileChooser();
-        if (jFileChooser.showDialog(this.frame, "Abrir") == 0) {
+        if (jFileChooser.showDialog(this.frame, "Abrir") == JFileChooser.APPROVE_OPTION) {
             File file = jFileChooser.getSelectedFile();
             String str = file.getName();
             if (str.endsWith(this.extension)) {
@@ -213,7 +227,7 @@ public class FileDirectory {
                     if (!file.exists()) {
                         JOptionPane.showMessageDialog(this.frame,
                                 "El archivo que sea desea abrir no existe en el directorio especificado",
-                                "Archivo no encontrado", 2);
+                                "Archivo no encontrado", JOptionPane.ERROR_MESSAGE);
                     } else {
                         String str1 = getTextFile(file);
                         if (str1 != null) {
@@ -223,19 +237,19 @@ public class FileDirectory {
                             this.file = file;
                         } else {
                             JOptionPane.showMessageDialog(this.frame, "Error al leer el archivo", "Error desconocido",
-                                    2);
+                                    JOptionPane.ERROR_MESSAGE);
                             return false;
                         }
                     }
                 } else {
                     JOptionPane.showMessageDialog(this.frame, "Escriba un nombre válido para el archivo",
-                            "Nombre inválido", 2);
+                            "Nombre inválido", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
             } else {
                 JOptionPane.showMessageDialog(this.frame,
                         "El archivo debe de tener la extensión" + this.extension + "'",
-                        "Extensión invalida", 2);
+                        "Extensión invalida", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         } else {
@@ -243,5 +257,71 @@ public class FileDirectory {
         }
         this.textComponent.setCaretPosition(0);
         return true;
+    }
+
+    public boolean Save() {
+        if (this.file != null) {
+            saveFile(this.file);
+        } else {
+            JFileChooser jFileChooser = new JFileChooser();
+            if (jFileChooser.showDialog(this.frame, "Guardar") == 0) {
+                File file = jFileChooser.getSelectedFile();
+                String str = file.getName();
+                if (!str.endsWith(this.extension))
+                    str = str + str;
+                if (fileNameValid(str)) {
+                    if (!file.getName().endsWith(this.extension))
+                        file = new File(file.getAbsolutePath() + file.getAbsolutePath());
+                    if (!file.exists()) {
+                        saveFile(file);
+                        this.file = file;
+                        this.fileChooser = jFileChooser;
+                    } else {
+                        int i = JOptionPane.showConfirmDialog(this.frame,
+                                "Ya hay un archivo con este nombre, ¿desea sobreescribirlo?", "Sobreescribir archivo",
+                                2);
+                        if (i == 0) {
+                            saveFile(file);
+                            this.file = file;
+                            this.fileChooser = jFileChooser;
+                        } else {
+                            this.fileChooser = new JFileChooser();
+                            this.file = null;
+                            return false;
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this.frame, "scriba un nombre v\u00E1lido para el archivo",
+                            "Nombre inválido", 2);
+                    this.fileChooser = new JFileChooser();
+                    this.file = null;
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean SaveAs() {
+        JFileChooser jFileChooser = new JFileChooser();
+        if (jFileChooser.showDialog(this.frame, "Guardar como") == 0) {
+            File file = jFileChooser.getSelectedFile();
+            String str = file.getName();
+            if (!str.endsWith(this.extension))
+                str = str + str;
+            if (fileNameValid(str)) {
+                if (!file.getName().endsWith(this.extension))
+                    file = new File(file.getAbsolutePath() + file.getAbsolutePath());
+                saveFile(file);
+                this.file = file;
+                this.fileChooser = jFileChooser;
+                return true;
+            }
+            JOptionPane.showMessageDialog(this.frame, "Escriba un nombre válido para el archivo", "Nombre inválido", 2);
+            return false;
+        }
+        return false;
     }
 }

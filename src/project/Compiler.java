@@ -3,6 +3,11 @@ package project;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -11,8 +16,12 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import net.miginfocom.swing.MigLayout;
+import project.util.ErrorLSSL;
 import project.util.FileDirectory;
+// import project.util.LineNumber;
+import project.util.Functions;
 import project.util.LineNumber;
+import project.util.Production;
 
 public class Compiler extends JFrame {
 
@@ -26,12 +35,24 @@ public class Compiler extends JFrame {
 		// this.setTitle("Code Compiler");
 		title = "Code Compiler";
 		this.setTitle(title);
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		// this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				directory.Exit();
+				System.exit(0);
+			}
+
+		});
 		this.setSize(1660, 880);
 		this.setLocationRelativeTo(null);
 		directory = new FileDirectory(this, codeEditor, title, ".txt");
 		timerKeyRelease = new Timer((int) (1000 * 0.3), (ActionEvent e) -> {
 			timerKeyRelease.stop();
+		});
+		Functions.insertAsteriskInName(this, codeEditor, () -> {
+			timerKeyRelease.restart();
 		});
 	}
 
@@ -300,6 +321,8 @@ public class Compiler extends JFrame {
 			contentPanel.add(new JScrollPane(outputConsole), "grow, span 2");
 		}
 		contentPane.add(contentPanel, BorderLayout.CENTER);
+
+		this.pack();
 	}
 
 	private void newActionPerformed() {
@@ -327,7 +350,12 @@ public class Compiler extends JFrame {
 
 	private String title;
 	private FileDirectory directory;
+	private ArrayList<Token> tokens;
+	private ArrayList<ErrorLSSL> errors;
+
 	private Timer timerKeyRelease;
+	private ArrayList<Production> productions;
+	private HashMap<String, String> identifiers;
 	private boolean codeHasBeenCopiled = false;
 
 	private JButton btnNewFile;
