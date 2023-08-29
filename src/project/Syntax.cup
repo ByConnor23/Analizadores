@@ -1,0 +1,203 @@
+package project;
+
+import java_cup.runtime.*;
+
+parser code
+{:
+    private Symbol s;
+    
+    public void syntax_error(Symbol s){
+        this.s = s;
+    }
+
+    public Symbol get_symbol(){
+        return this.s;
+    }
+:};
+
+//Declaración de terminales
+terminal leftBrace, rightBrace, leftParethesis, rightParethesis, colon,
+    semiColon, comma;
+terminal identifier, number, chaising;
+terminal lessThan, moreThan, ltoet, gtoet;
+terminal more, menus, by, on;
+terminal awa , plus, equalSignal;
+terminal colorSymbol, color;
+terminal public, static, void, main;
+terminal define, character, screen;
+terminal menu, go, breaker;
+terminal background, sSound, pSound, hide, show;
+terminal image, sound;
+terminal intK, doubleK, stringK, boolK;
+terminal trueK, falseK;
+terminal for, if, else;
+
+//Declaracion de No Terminales
+non terminal A, B, C, D, E, F, LLA, LLC, CA, DEF, N, OPE, Q, T, IGU, 
+R, NUM, PYC, CAD, TF, CHA, O, S, PA, PC, DD, COM, U, DE, BQ, AB, AC,
+SRC, AI, AJ, CB, AL, AN, MEN, DP, Y, AO, DF, AT, BRE, GO, KP, Z, RR,
+L, K, FOR, BK, BL, BM, BU, BD, PLU, BN, BO, IF, BF, BG, ELS, BP;
+
+//Gramatica
+A ::= B C D E F;
+B ::= public;
+C ::= static;
+D ::= void;
+E ::= main;
+F ::= LLA CA LLC;
+LLA ::= leftBrace;
+LLC ::= rightBrace;
+CA ::= 
+    DEF CA
+  | SRC CA
+;
+DEF::= define N;
+N ::= 
+    OPE Q
+  | CHA O
+  | AB
+;
+OPE ::= 
+    intK
+  | doubleK
+  | stringK 
+  | boolK 
+;
+Q ::= T IGU R;
+T ::= identifier;
+IGU ::= equalSignal;
+R ::= 
+    NUM PYC
+  | CAD PYC
+  | TF PYC
+  | T PYC
+;
+NUM ::= number;
+PYC ::= semiColon;
+CAD ::= chaising;
+TF ::= 
+    trueK
+  | falseK
+;
+CHA ::= character;
+O ::= T IGU CHA S;
+S ::= PA DD PC PYC;
+PA ::= leftParethesis;
+PC ::= rightParethesis;
+DD ::= CAD COM U;
+COM ::= comma;
+U ::= color DE;
+DE ::= PA BQ PC;
+BQ ::= colorSymbol CAD;
+AB ::= 
+    image AC
+  | sound AC
+;
+AC ::= T IGU CAD PYC;
+SCR ::= screen AI;
+AI ::= T PA PC AJ;
+AJ ::=  LLA CB LLC;
+CB ::=
+    DEF CB
+  | OPE Y CB
+  | AL CB
+  | MEN CB
+  | FOR CB
+  | IF CB
+  | T IGU R CB
+  | T PA DF PYC CB
+  | T KP PYC CB
+  | K PYC CB
+  | NUM KP PYC CB
+;
+AL ::=
+    background AN
+  | show AN
+  | hide AN
+  | pSound AN
+  | sSound AN
+;
+AN ::= PA T PC PYC;
+MEN ::= menu DP AO;
+DP ::= colon;
+AO ::= PA DF DP AT AO;
+DF ::= CAD PC;
+AT ::=
+    AL AT
+  | OPE Y AT
+  | BRE AO
+  | GO AO
+  | FOR AT
+  | IF AT
+  | T IGU R AT
+  | T PA DF PYC AT
+  | T KP PYC AT
+  | K PYC AT
+  | NUM KP PYC AT
+;
+BRE ::= breaker;
+GO ::= go;
+KP ::= 
+    more Z
+  | menus Z
+  | by Z
+  | on Z
+  | more L KP
+  | menus L KP
+  | by L KP
+  | on L KP
+;
+Z ::= IGU RR;
+RR ::= 
+    NUM
+  | T
+;
+L ::= 
+    PA DF
+  | PA K PC
+  | T 
+  | NUM
+;
+K ::= L KP;
+FOR ::= for PA BK PC BN;
+BK ::= BL PYC BM PYC BP;
+BL ::= T IGU NUM;
+BM ::= T BU RR;
+BU ::= 
+    lessThan
+  | moreThan
+  | ltoet
+  | gtoet
+;
+BD ::= 
+    T PLU
+  | T more RR
+;
+PLU ::= awa;
+BN ::= LLA BO LLC;
+BO ::= 
+    FOR BO
+  | IF BO
+  | T IGU R BO
+  | T PA DF PYC BO
+  | T KP PYC BO
+  | K PYC BO
+  | NUM KP PYC BO
+;   
+IF ::= if PA BM PC BF ELS;
+BF ::= LLA BG LLC;
+BG ::= 
+    AL BG
+  | MEN BG
+  | FOR BG
+  | IF BG
+  | T IGU R BG
+  | T PA DF PYC BG
+  | T KP PYC BG
+  | K PYC BG
+  | NUM KP PYC BG
+;
+ELS ::= 
+    else TF
+  | else BF
+;
