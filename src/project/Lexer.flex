@@ -6,6 +6,8 @@ import static project.TokenType.*;
 %{
     public String lexeme;
     private int lastBreak = 0;
+    public TokenType lexeme;
+
 %}
     /* spaces */
     lineTerminator = \r|\n|\r\n
@@ -139,7 +141,7 @@ import static project.TokenType.*;
     else = "else"
 
 %%
-    {comment} | {whiteSpace} 
+    {comment} | {whiteSpace} {/* ignore */}
     
     /* Identifer */
 

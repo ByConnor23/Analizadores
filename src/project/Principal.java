@@ -18,7 +18,7 @@ public class Principal {
 
     public void run() throws IOException {
         int count = 1;
-        String sourceCode = "public static void main(){show();[] }";
+        String sourceCode = "public static void main(){show();[]\n}";
         Lexer lexer = new Lexer(new StringReader(sourceCode));
         List<Token> tokens = new ArrayList<>();
         while(true){
