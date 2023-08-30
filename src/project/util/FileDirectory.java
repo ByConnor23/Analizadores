@@ -106,15 +106,19 @@ public class FileDirectory {
                                     "Nombre inválido", JOptionPane.ERROR_MESSAGE);
                             return false;
                         }
+                    }else{
+                        return false;
                     }
                 } else {
-                    this.textComponent.setText("");
-                    this.frame.setTitle(this.title);
+                    // this.textComponent.setText("");
+                    // this.frame.setTitle(this.title);
+                    return false;
                 }
             }
         } else {
-            this.textComponent.setText("");
-            this.frame.setTitle(this.title);
+            // this.textComponent.setText("");
+            // this.frame.setTitle(this.title);
+            return false;
         }
         return true;
     }
@@ -171,6 +175,42 @@ public class FileDirectory {
         return true;
     }
 
+    private void OpFile() {
+        this.fileChooser = new JFileChooser();
+        this.file = null;
+        if (this.fileChooser.showDialog(this.frame, "Abrir") == JFileChooser.APPROVE_OPTION) {
+            File file = this.fileChooser.getSelectedFile();
+            String str = file.getName();
+            if (str.endsWith(this.extension)) {
+                if (fileNameValid(str)) {
+                    if (!file.exists()) {
+                        JOptionPane.showMessageDialog(this.frame,
+                                "El archivo que sea desea abrir no existe en el directorio especificado",
+                                "Archivo no encontrado", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        String str1 = getTextFile(file);
+                        if (str1 != null) {
+                            this.textComponent.setText(str1);
+                            this.frame.setTitle(file.getName());
+                            this.fileChooser = this.fileChooser;
+                            this.file = file;
+                        } else {
+                            JOptionPane.showMessageDialog(this.frame, "Error al leer el archivo",
+                                    "Error desconocido", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this.frame, "Escriba un nombre válido para el archivo",
+                            "Nombre inválido", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this.frame,
+                        "El archivo debe de tener la extensión" + this.extension + "'",
+                        "Extensión invalida", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     private void saveFile(File paramFile) {
         boolean bool = saveFile(paramFile, this.textComponent.getText());
         if (bool) {
@@ -195,7 +235,6 @@ public class FileDirectory {
         if (this.frame.getTitle().contains("*")) {
             if (saveEditNew(this.file, this.fileChooser)) {
                 this.frame.setTitle(this.title);
-                this.textComponent.setText("");
                 this.fileChooser = new JFileChooser();
                 this.file = null;
             }
@@ -208,55 +247,26 @@ public class FileDirectory {
     }
 
     public void Exit() {
-        if (this.frame.getTitle().contains("*") &&
-                saveEditOpen(this.file, this.fileChooser)) {
-            this.fileChooser = new JFileChooser();
-            this.file = null;
+        if (this.frame.getTitle().contains("*")) {
+            if (saveEditOpen(this.file, this.fileChooser)) {
+                this.frame.setTitle(this.title);
+                this.fileChooser = new JFileChooser();
+                this.file = null;
+                System.exit(0);
+            }
+        } else {
+            System.exit(0);
         }
     }
 
-    public boolean Open() {
-        if (this.frame.getTitle().contains("*"))
-            saveEditOpen(this.file, this.fileChooser);
-        JFileChooser jFileChooser = new JFileChooser();
-        if (jFileChooser.showDialog(this.frame, "Abrir") == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser.getSelectedFile();
-            String str = file.getName();
-            if (str.endsWith(this.extension)) {
-                if (fileNameValid(str)) {
-                    if (!file.exists()) {
-                        JOptionPane.showMessageDialog(this.frame,
-                                "El archivo que sea desea abrir no existe en el directorio especificado",
-                                "Archivo no encontrado", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        String str1 = getTextFile(file);
-                        if (str1 != null) {
-                            this.textComponent.setText(str1);
-                            this.frame.setTitle(file.getName());
-                            this.fileChooser = jFileChooser;
-                            this.file = file;
-                        } else {
-                            JOptionPane.showMessageDialog(this.frame, "Error al leer el archivo", "Error desconocido",
-                                    JOptionPane.ERROR_MESSAGE);
-                            return false;
-                        }
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this.frame, "Escriba un nombre válido para el archivo",
-                            "Nombre inválido", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            } else {
-                JOptionPane.showMessageDialog(this.frame,
-                        "El archivo debe de tener la extensión" + this.extension + "'",
-                        "Extensión invalida", JOptionPane.ERROR_MESSAGE);
-                return false;
+    public void Open() {
+        if (this.frame.getTitle().contains("*")){
+            if (saveEditOpen(this.file, this.fileChooser)) {
+                OpFile();
             }
-        } else {
-            return false;
+        }else{
+            OpFile();
         }
-        this.textComponent.setCaretPosition(0);
-        return true;
     }
 
     public boolean Save() {
