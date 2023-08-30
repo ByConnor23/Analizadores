@@ -17,62 +17,28 @@ public class Principal {
     }
 
     public void run() throws IOException {
-        int count = 1;
-        String sourceCode = "public static void main(){show();[]\n}";
+        String sourceCode = "public static void main(){\nshow();\nint x = 0;\n[]}";
         Lexer lexer = new Lexer(new StringReader(sourceCode));
         List<Token> tokens = new ArrayList<>();
         while(true){
-            TokenType token = lexer.yylex();
+            Token token = lexer.yylex();
             if(token == null){
                 if(!tokens.isEmpty()){
-                    System.out.println("Tokens encontrados:\n");
+                    System.out.println("\nTokens encontrados:");
                     tokens.forEach(toke -> {
-                        System.out.println("Token: " + toke.getValue() + " " + toke.getLine());
+                        System.out.println("Token: " + toke.getValue() + " " + toke.getType() + " " + toke.getLine() + " " + toke.getColumn());
                     });
                 }
                 
                 return;
             }
-            if(token == TokenType.ERROR_TOKEN_DESCONOCIDO){
-                System.out.println("Token desconocido: " + lexer.lexeme + " " + count);
+            if(token.getType() == TokenType.ERROR_TOKEN_DESCONOCIDO){
+                System.out.println("Token desconocido: " + token.getValue() + " " + token.getLine() + " " + token.getColumn());
                 // return;
             }else{
-                Token token1 = new Token(token, lexer.lexeme, count, lexer.yylength());
+                Token token1 = new Token(token.getType(), token.getValue(), token.getLine(), token.getColumn());
                 tokens.add(token1);
             }
-            
-            // switch(token){
-            //     case PUBLIC:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            //     case STATIC:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            //     case VOID:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            //     case MAIN:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            //     case PARENTESIS_DE_APERTURA:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            //     case PARENTESIS_DE_CERRADURA:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            //     case LLAVE_DE_APERTURA:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            //     case LLAVE_DE_CERRADURA:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            //     case ERROR_TOKEN_DESCONOCIDO:
-            //         System.out.println("Token desconocido: " + lexer.lexeme + " " + count);
-            //         break;
-            //     default:
-            //         System.out.println("Token: " + lexer.lexeme + " " + count);
-            //         break;
-            // }
         }
     }
 }

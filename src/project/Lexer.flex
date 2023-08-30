@@ -4,24 +4,28 @@ import static project.TokenType.*;
 %class Lexer
 %type Token
 %{
-    public String lexeme;
-    private int lastBreak = 0;
-    public TokenType lexeme;
+    private int fila = 1;
+    private int columna = 1;
+
+    private Token newToken(TokenType type, String text) {
+        Token token = new Token(type, text, fila, columna);
+        columna += text.length();
+        return token;
+    }
 
 %}
     /* spaces */
-    lineTerminator = \r|\n|\r\n
-    inputCharacter = [^\r\n]
-    whiteSpace     = {lineTerminator} | [ \t\f]
+whiteSpace     = [ \t\r\n]+
 
-    /* comments */
-    comment = {endOfLineComment} | {documentationComment} | {newStyleMultilineComment}
+/* comments */
+comment = {endOfLineComment} | {documentationComment} | {newStyleMultilineComment}
 
-    // Comment can be the last line of the file, without line terminator.
-    endOfLineComment       = "##" {inputCharacter}* {lineTerminator}?
-    documentationComment   = "#*" {commentContent} "*#"
-    newStyleMultilineComment = "#*"
-    commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
+// Comment can be the last line of the file, without line terminator.
+endOfLineComment       = "##" [^\r\n]* (\r|\n|\r\n)?
+documentationComment   = "#*" {commentContent} "*#"
+newStyleMultilineComment = "#*"
+commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
+
 
     /* indentifer */
 
@@ -141,276 +145,230 @@ import static project.TokenType.*;
     else = "else"
 
 %%
-    {comment} | {whiteSpace} {/* ignore */}
-    
-    /* Identifer */
 
-    //{lexeme=yytext(); return "IDENTIFICADOR";}
+    \n { fila++; columna=1;}
+    \r\n?               { fila++; columna = 1; }
+    [\u2028\u2029]     { fila++; columna = 1; }
 
-    {identifer} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.IDENTIFICADOR, lexeme=yytext(), yyline + 1, column);
-                }
+    {comment} | {whiteSpace} { }
 
     /* delimiters */
 
     {leftBrace} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.LLAVE_DE_APERTURA, lexeme=yytext(), yyline + 1, column);
+                    return newToken(TokenType.LLAVE_DE_APERTURA, yytext());
                 }
 
     {rightBrace} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.LLAVE_DE_CERRADURA, lexeme=yytext(), yyline + 1, column);
+                    return newToken(TokenType.LLAVE_DE_CERRADURA, yytext());
                 }
 
     {leftParethesis} {
-                        int column = yychar - lastBreak + 1;
-                        return new Token(TokenType.PARENTESIS_DE_APERTURA, lexeme=yytext(), yyline + 1, column);
+                        return  newToken(TokenType.PARENTESIS_DE_APERTURA, yytext());
                     }
 
     {rightParethesis} {
-                        int column = yychar - lastBreak + 1;
-                        return new Token(TokenType.LLAVE_DE_CERRADURA, lexeme=yytext(), yyline + 1, column);
+                        return  newToken(TokenType.LLAVE_DE_CERRADURA, yytext());
                     }
 
     {colon} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.DOS_PUNTOS, lexeme=yytext(), yyline + 1, column);
+                return  newToken(TokenType.DOS_PUNTOS, yytext());
             }
 
     {semiColon} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.PUNTO_Y_COMA, lexeme=yytext(), yyline + 1, column);
+                    return newToken(TokenType.PUNTO_Y_COMA, yytext());
                 }
 
     {comma} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.COMA, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.COMA, yytext());
             }
 
     /* dataType */
 
     {number} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.NUMERO, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.NUMERO, yytext());
             }
 
     {chaising} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.CADENA, lexeme=yytext(), yyline + 1, column);
+                    return newToken(TokenType.CADENA, yytext());
                 }
 
     /* operators */
 
     
     {lessThan} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.MENOR_QUE, lexeme=yytext(), yyline + 1, column);
+                    return newToken(TokenType.MENOR_QUE, yytext());
                 }
 
     {moreThan} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.MAYOR_QUE, lexeme=yytext(), yyline + 1, column);
+
+                    return newToken(TokenType.MAYOR_QUE, yytext());
                 }
 
     {ltoet} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.MENOR_O_IGUAL_QUE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.MENOR_O_IGUAL_QUE, yytext());
             }
 
     {gtoet} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.MAYOR_O_IGUAL_QUE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.MAYOR_O_IGUAL_QUE, yytext());
             }
 
     {awa} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.IGUALACION, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.IGUALACION, yytext());
             }
 
     {more} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.SUMA, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.SUMA, yytext());
             }
 
     {menus} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.RESTA, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.RESTA, yytext());
             }
 
     {by} {
-            int column = yychar - lastBreak + 1;
-            return new Token(TokenType.MULTIPLICACION, lexeme=yytext(), yyline + 1, column);
+            return newToken(TokenType.MULTIPLICACION, yytext());
         }
 
     {on} {
-            int column = yychar - lastBreak + 1;
-            return new Token(TokenType.DIVISION, lexeme=yytext(), yyline + 1, column);
+            return newToken(TokenType.DIVISION, yytext());
         }
 
     {plus} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.OPERADOR_DE_AUMENTO, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.OPERADOR_DE_AUMENTO, yytext());
             }
 
     {equalSignal} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.ASIGNACION, lexeme=yytext(), yyline + 1, column);
+                    return newToken(TokenType.ASIGNACION, yytext());
                 }
 
     /* color */
 
     {colorSymbol} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.ASIGNACION_DE_COLOR, lexeme=yytext(), yyline + 1, column);
+                    return newToken(TokenType.ASIGNACION_DE_COLOR, yytext());
                 }
 
     /* keywords */
     
     {public} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.PUBLIC, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.PUBLIC, yytext());
             }
 
     {static} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.STATIC, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.STATIC, yytext());
             }
 
     {void} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.VOID, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.VOID, yytext());
             }
 
     {main} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.MAIN, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.MAIN, yytext());
             }
 
     {define} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.DEFINE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.DEFINE, yytext());
             }
 
     {character} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.CHARACTER, lexeme=yytext(), yyline + 1, column);
+                    return newToken(TokenType.CHARACTER, yytext());
                 }
 
     {screen} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.SCREEN, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.SCREEN, yytext());
             }
 
     {background} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.BACKGROUND, lexeme=yytext(), yyline + 1, column);
+
+                    return newToken(TokenType.BACKGROUND, yytext());
                 }
 
     {sSound} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.STOP_SOUND, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.STOP_SOUND, yytext());
             }
 
     {pSound} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.PLAY_SOUND, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.PLAY_SOUND, yytext());
             }
 
     {hide} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.HIDE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.HIDE, yytext());
             }
     
     {show} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.SHOW, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.SHOW, yytext());
             }
 
     {menu} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.MENU, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.MENU, yytext());
             }
 
     {go} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.GO, lexeme=yytext(), yyline + 1, column);
-            }
+            return newToken(TokenType.GO, yytext());
+        }
 
     {breaker} {
-                    int column = yychar - lastBreak + 1;
-                    return new Token(TokenType.BREAKER, lexeme=yytext(), yyline + 1, column);
-                }
+                return newToken(TokenType.BREAKER, yytext());
+            }
 
     {color} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.COLOR, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.COLOR, yytext());
             }
 
     {image} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.IMAGE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.IMAGE, yytext());
             }
 
     {sound} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.SOUND, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.SOUND, yytext());
             }
 
     /* dataTypes */
 
     {intK} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.INT, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.INT, yytext());
             }
 
     {doubleK} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.DOUBLE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.DOUBLE, yytext());
             }
 
     {stringK} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.STRING, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.STRING, yytext());
             }
 
     {boolK} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.BOOLEANO, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.BOOLEANO, yytext());
             }
 
     {trueK} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.TRUE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.TRUE, yytext());
             }
 
     {falseK} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.FALSE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.FALSE, yytext());
             }
 
     /* assignamentTypes */
 
     {for} {
-            int column = yychar - lastBreak + 1;
-            return new Token(TokenType.FOR, lexeme=yytext(), yyline + 1, column);
+            return newToken(TokenType.FOR, yytext());
         }
 
-    {if} {
-            int column = yychar - lastBreak + 1;
-            return new Token(TokenType.IF, lexeme=yytext(), yyline + 1, column);
+    {if} { 
+            return newToken(TokenType.IF, yytext());
         }
 
     {else} {
-                int column = yychar - lastBreak + 1;
-                return new Token(TokenType.ELSE, lexeme=yytext(), yyline + 1, column);
+                return newToken(TokenType.ELSE, yytext());
             }
+
+    /* Identifer */
+    {identifer} {
+                    return  newToken(TokenType.IDENTIFICADOR, yytext());
+                }
 
     /* errors */
     .    {
-            int column = yychar - lastBreak + 1;
-            return new Token(TokenType.ERROR_TOKEN_DESCONOCIDO, lexeme=yytext(), yyline + 1, column);
+            return newToken(TokenType.ERROR_TOKEN_DESCONOCIDO, yytext());
         }
 
 
