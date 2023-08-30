@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -109,7 +108,7 @@ public class Compiler extends JFrame {
 				newMenuItem.setAccelerator(
 						KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 				newMenuItem.setMnemonic('N');
-				newMenuItem.addActionListener(e -> newActionPerformed());
+				newMenuItem.addActionListener(e -> newActionPerformed(e));
 				fileMenu.add(newMenuItem);
 
 				// ==================== Open Menu Item ====================
@@ -125,7 +124,7 @@ public class Compiler extends JFrame {
 				saveMenuItem.setAccelerator(
 						KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 				saveMenuItem.setMnemonic('S');
-				saveMenuItem.addActionListener(e -> newActionPerformed());
+				saveMenuItem.addActionListener(e -> saveActionPerformed(e));
 				fileMenu.add(saveMenuItem);
 
 				// ==================== Save As Menu Item ====================
@@ -134,7 +133,7 @@ public class Compiler extends JFrame {
 						KeyStroke.getKeyStroke(KeyEvent.VK_S,
 								Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | KeyEvent.SHIFT_DOWN_MASK));
 				saveAsMenuItem.setMnemonic('A');
-				saveAsMenuItem.addActionListener(e -> newActionPerformed());
+				saveAsMenuItem.addActionListener(e -> saveAsActionPerformed(e));
 				fileMenu.add(saveAsMenuItem);
 
 				// ==================== Exit Menu Item ====================
@@ -158,7 +157,7 @@ public class Compiler extends JFrame {
 									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 					undoMenuItem.setMnemonic('U');
 					undoMenuItem.setIcon(new FlatSVGIcon("resources/icons/undo.svg"));
-					undoMenuItem.addActionListener(e -> newActionPerformed());
+					undoMenuItem.addActionListener(e -> newActionPerformed(e));
 					editMenu.add(undoMenuItem);
 
 					// ==================== Redo Menu Item ====================
@@ -168,7 +167,7 @@ public class Compiler extends JFrame {
 									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 					redoMenuItem.setMnemonic('R');
 					redoMenuItem.setIcon(new FlatSVGIcon("resources/icons/redo.svg"));
-					redoMenuItem.addActionListener(e -> newActionPerformed());
+					redoMenuItem.addActionListener(e -> newActionPerformed(e));
 					editMenu.add(redoMenuItem);
 
 					// ==================== Cut Menu Item ====================
@@ -178,7 +177,7 @@ public class Compiler extends JFrame {
 									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 					cutMenuItem.setMnemonic('t');
 					cutMenuItem.setIcon(new FlatSVGIcon("resources/icons/cut.svg"));
-					cutMenuItem.addActionListener(e -> newActionPerformed());
+					cutMenuItem.addActionListener(e -> newActionPerformed(e));
 					editMenu.add(cutMenuItem);
 
 					// ==================== Copy Menu Item ====================
@@ -188,7 +187,7 @@ public class Compiler extends JFrame {
 									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 					copyMenuItem.setMnemonic('C');
 					copyMenuItem.setIcon(new FlatSVGIcon("resources/icons/copy.svg"));
-					copyMenuItem.addActionListener(e -> newActionPerformed());
+					copyMenuItem.addActionListener(e -> newActionPerformed(e));
 					editMenu.add(copyMenuItem);
 
 					// ==================== Paste Menu Item ====================
@@ -198,7 +197,7 @@ public class Compiler extends JFrame {
 									Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 					pasteMenuItem.setMnemonic('P');
 					pasteMenuItem.setIcon(new FlatSVGIcon("resources/icons/paste.svg"));
-					pasteMenuItem.addActionListener(e -> newActionPerformed());
+					pasteMenuItem.addActionListener(e -> newActionPerformed(e));
 					editMenu.add(pasteMenuItem);
 				}
 			}
@@ -213,7 +212,7 @@ public class Compiler extends JFrame {
 					aboutMenuItem.setAccelerator(
 							KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
 					aboutMenuItem.setMnemonic('A');
-					aboutMenuItem.addActionListener(e -> newActionPerformed());
+					aboutMenuItem.addActionListener(e -> newActionPerformed(e));
 					helpMenu.add(aboutMenuItem);
 				}
 			}
@@ -291,6 +290,9 @@ public class Compiler extends JFrame {
 			symbolTable.setModel(new DefaultTableModel(
 					new Object[][] {
 							{ "item 1", "item 2", "[item, item]", "item 4", "item 5", "item 6" },
+							{ "item 1", "item 2", "[item, item]", "item 4", "item 5", "item 6" },
+							{ "item 1", "item 2", "[item, item]", "item 4", "item 5", "item 6" },
+
 					},
 					new String[] {
 							"Lexical Component", "Lexeme", "[Column, Row]", "Type", "Value", "Error"
@@ -325,7 +327,7 @@ public class Compiler extends JFrame {
 		this.pack();
 	}
 
-	private void newActionPerformed() {
+	private void newActionPerformed(ActionEvent event) {
 		directory.New();
 	}
 
@@ -335,6 +337,18 @@ public class Compiler extends JFrame {
 
 	private void exitActionPerformed() {
 		directory.Exit();
+	}
+
+	private void saveActionPerformed(ActionEvent event) {
+		directory.Save();
+	}
+
+	private void saveAsActionPerformed(ActionEvent event) {
+		directory.SaveAs();
+	}
+
+	private void clearFields() {
+		Functions.clearDataInTable(symbolTable);
 	}
 
 	public static void main(String args[]) {
