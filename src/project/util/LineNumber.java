@@ -41,7 +41,7 @@ public final class LineNumber extends JPanel implements CaretListener, DocumentL
     private HashMap<String, FontMetrics> fonts;
 
     public LineNumber(JTextComponent paramJTextComponent) {
-        this(paramJTextComponent, 2, Color.GRAY);
+        this(paramJTextComponent, 3, Color.GRAY);
     }
 
     public LineNumber(JTextComponent paramJTextComponent, int paramInt) {
@@ -60,8 +60,6 @@ public final class LineNumber extends JPanel implements CaretListener, DocumentL
         paramJTextComponent.getDocument().addDocumentListener(this);
         paramJTextComponent.addCaretListener(this);
         paramJTextComponent.addPropertyChangeListener("font", this);
-        // System.out.println(Functions.ANSI_BLUE_BLACK + "LineNumber v2.47 (By Yisus
-        // Efebei and M45t3r L3g10n)");
     }
 
     public boolean getUpdateFont() {

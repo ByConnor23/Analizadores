@@ -106,7 +106,7 @@ public class FileDirectory {
                                     "Nombre inválido", JOptionPane.ERROR_MESSAGE);
                             return false;
                         }
-                    }else{
+                    } else {
                         return false;
                     }
                 } else {
@@ -175,7 +175,7 @@ public class FileDirectory {
         return true;
     }
 
-    private void OpFile() {
+    public boolean Open() {
         this.fileChooser = new JFileChooser();
         this.file = null;
         if (this.fileChooser.showDialog(this.frame, "Abrir") == JFileChooser.APPROVE_OPTION) {
@@ -192,23 +192,29 @@ public class FileDirectory {
                         if (str1 != null) {
                             this.textComponent.setText(str1);
                             this.frame.setTitle(file.getName());
-                            this.fileChooser = this.fileChooser;
+                            this.fileChooser = fileChooser;
                             this.file = file;
                         } else {
                             JOptionPane.showMessageDialog(this.frame, "Error al leer el archivo",
                                     "Error desconocido", JOptionPane.ERROR_MESSAGE);
+                            return false;
                         }
                     }
                 } else {
                     JOptionPane.showMessageDialog(this.frame, "Escriba un nombre válido para el archivo",
                             "Nombre inválido", JOptionPane.ERROR_MESSAGE);
+                    return false;
                 }
             } else {
                 JOptionPane.showMessageDialog(this.frame,
                         "El archivo debe de tener la extensión" + this.extension + "'",
                         "Extensión invalida", JOptionPane.ERROR_MESSAGE);
+                return false;
             }
+        } else {
+            return false;
         }
+        return false;
     }
 
     private void saveFile(File paramFile) {
@@ -259,15 +265,20 @@ public class FileDirectory {
         }
     }
 
-    public void Open() {
-        if (this.frame.getTitle().contains("*")){
-            if (saveEditOpen(this.file, this.fileChooser)) {
-                OpFile();
-            }
-        }else{
-            OpFile();
-        }
-    }
+    /*
+     * public boolean Open() {
+     * if (this.frame.getTitle().contains("*")) {
+     * if (saveEditOpen(this.file, this.fileChooser)) {
+     * OpFile();
+     * return true;
+     * }
+     * } else {
+     * OpFile();
+     * return false;
+     * }
+     * return false;
+     * }
+     */
 
     public boolean Save() {
         if (this.file != null) {

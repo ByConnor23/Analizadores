@@ -104,7 +104,7 @@ public class Compiler extends JFrame {
 
 			{// ==================== File Menu ====================
 				// ==================== New Menu Item ====================
-				newMenuItem = new JMenuItem("New");
+				newMenuItem = new JMenuItem("New File");
 				newMenuItem.setAccelerator(
 						KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 				newMenuItem.setMnemonic('N');
@@ -228,6 +228,7 @@ public class Compiler extends JFrame {
 			{// ==================== New File Button ====================
 				btnNewFile.setToolTipText("New File");
 				btnNewFile.setIcon(new FlatSVGIcon("resources/icons/newFile.svg"));
+				btnNewFile.addActionListener(e -> newActionPerformed(e));
 				toolBar.add(btnNewFile);
 				toolBar.addSeparator();
 			}
@@ -273,7 +274,7 @@ public class Compiler extends JFrame {
 				btnRun.setToolTipText("Run");
 				btnRun.setIcon(new FlatSVGIcon("resources/icons/run.svg"));
 				toolBar.add(btnRun);
-				toolBar.addSeparator();
+				// toolBar.addSeparator();
 			}
 		}
 		contentPane.add(toolBar, BorderLayout.NORTH);
@@ -332,7 +333,9 @@ public class Compiler extends JFrame {
 	}
 
 	private void openActionPerformed(ActionEvent event) {
-		directory.Open();
+		if (directory.Open()) {
+			clearFields();
+		}
 	}
 
 	private void exitActionPerformed() {
