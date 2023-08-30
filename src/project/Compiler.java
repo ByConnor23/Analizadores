@@ -141,7 +141,7 @@ public class Compiler extends JFrame {
 				exitMenuItem.setAccelerator(
 						KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 				exitMenuItem.setMnemonic('x');
-				exitMenuItem.addActionListener(e -> System.exit(0));
+				exitMenuItem.addActionListener(e -> exitActionPerformed());
 				fileMenu.add(exitMenuItem);
 			}
 			menu.add(fileMenu);
@@ -332,9 +332,11 @@ public class Compiler extends JFrame {
 	}
 
 	private void openActionPerformed(ActionEvent event) {
-		if (directory.Open()) {
+		directory.Open();
+	}
 
-		}
+	private void exitActionPerformed() {
+		directory.Exit();
 	}
 
 	private void saveActionPerformed(ActionEvent event) {
