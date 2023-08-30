@@ -138,6 +138,7 @@ public class FileDirectory {
                 if (bool) {
                     this.frame.setTitle(paramFile.getName());
                 }
+                return true;
             } else if (this.frame.getTitle().equals(this.title + "*")) {
                 int j = JOptionPane.showOptionDialog(this.frame, "Guardar el archivo actual?",
                         "¿Descartar edición de archivo nuevo?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
@@ -151,17 +152,17 @@ public class FileDirectory {
                         }
                         if (!paramFile.exists()) {
                             saveFile(paramFile);
+                            return true;
                         } else {
                             int k = JOptionPane.showConfirmDialog(this.frame,
                                     "Ya hay un archivo con este nombre, ¿desea sobreescribirlo?",
                                     "Sobreescribir archivo", JOptionPane.YES_NO_OPTION);
                             if (k == JOptionPane.YES_OPTION) {
                                 saveFile(paramFile);
+                                return true;
                             }
                         }
                     }
-                } else {
-                    return true;
                 }
             } else {
                 int j = JOptionPane.showConfirmDialog(this.frame,
@@ -169,10 +170,11 @@ public class FileDirectory {
                         JOptionPane.YES_NO_OPTION);
                 if (j == JOptionPane.YES_OPTION) {
                     saveFile(paramFile);
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private void OpFile() {
@@ -235,6 +237,7 @@ public class FileDirectory {
         if (this.frame.getTitle().contains("*")) {
             if (saveEditNew(this.file, this.fileChooser)) {
                 this.frame.setTitle(this.title);
+                this.textComponent.setText("");
                 this.fileChooser = new JFileChooser();
                 this.file = null;
             }
