@@ -4,7 +4,7 @@ import java_cup.runtime.Symbol;
 
 %%
 %class LexerCup
-%type java_cup.runtime.Symbol;
+%type java_cup.runtime.Symbol
 %cup
 %full
 %line
@@ -12,12 +12,12 @@ import java_cup.runtime.Symbol;
 %{  
     //Cadena analizada
     private Symbol symbol(int type, Object value){
-        return new Symbol(type, yyline, yycolum ,value);
+        return new Symbol(type, yyline, yycolumn ,value);
     }
 
     //Cadena no analizada
-    private Symbol symbol(int type, Object value){
-        return new Symbol(type, yyline, yycolum);
+    private Symbol symbol(int type){
+        return new Symbol(type, yyline, yycolumn);
     }
 %}
     /* spaces */
@@ -44,7 +44,7 @@ import java_cup.runtime.Symbol;
     number = -?[0-9]+(\.[0-9]+)?
 
     /* string */
-    string = "\"" ([^\n\r\"] | "\\" .)* "\""
+    String = "\"" ([^\n\r\"] | "\\" .)* "\""
 
     /* delimiters */
     leftBrace = \{
@@ -86,17 +86,19 @@ import java_cup.runtime.Symbol;
     /* asignment operators */
     plus = "++"
 
+    equalSignal = "="
+
     /* color */
     colorSymbol = "#"
 
     /* keywords */
     
     //Main method
-    public = "public"
+    Public = "public"
 
-    static = "static"
+    Static = "static"
 
-    void = "void"
+    Void = "void"
 
     main = "main"
 
@@ -135,7 +137,7 @@ import java_cup.runtime.Symbol;
 
     doubleK = "double"
 
-    stringK = "string"
+    stringK = "String"
 
     boolK = "bool"
 
@@ -144,11 +146,11 @@ import java_cup.runtime.Symbol;
     falseK = "false"
 
     //control structures
-    for = "for"
+    For = "for"
 
-    if = "if"
+    If = "if"
 
-    else = "else"
+    Else = "else"
 
 %%
     {comment} | {whiteSpace} 
@@ -177,7 +179,7 @@ import java_cup.runtime.Symbol;
 
     {number} {return new Symbol(sym.number, yychar, yyline, yytext());}
 
-    {string} {return new Symbol(sym.string, yychar, yyline, yytext());}
+    {String} {return new Symbol(sym.String, yychar, yyline, yytext());}
 
     /* operators */
 
@@ -209,11 +211,11 @@ import java_cup.runtime.Symbol;
 
     /* keywords */
     
-    {public} {return new Symbol(sym.public, yychar, yyline, yytext());}
+    {Public} {return new Symbol(sym.Public, yychar, yyline, yytext());}
 
-    {static} {return new Symbol(sym.static, yychar, yyline, yytext());}
+    {Static} {return new Symbol(sym.Static, yychar, yyline, yytext());}
 
-    {void} {return new Symbol(sym.void, yychar, yyline, yytext());}
+    {Void} {return new Symbol(sym.Void, yychar, yyline, yytext());}
 
     {main} {return new Symbol(sym.main, yychar, yyline, yytext());}
 
@@ -261,11 +263,11 @@ import java_cup.runtime.Symbol;
 
     /* assignamentTypes */
 
-    {for} {return new Symbol(sym.for, yychar, yyline, yytext());}
+    {For} {return new Symbol(sym.For, yychar, yyline, yytext());}
     
-    {if} {return new Symbol(sym.if, yychar, yyline, yytext());}
+    {If} {return new Symbol(sym.If, yychar, yyline, yytext());}
 
-    {else} {return new Symbol(sym.else, yychar, yyline, yytext());}
+    {Else} {return new Symbol(sym.Else, yychar, yyline, yytext());}
 
     /* errors */
     .    { return new Symbol(sym.error, yychar, yyline, yytext());}
