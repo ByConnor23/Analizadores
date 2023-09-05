@@ -184,12 +184,17 @@ public class Syntax {
             CB(); // Para la recursividad
         }else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
             T(); // Si llega un identificador
-            
             //Y luego un = quiere decir que es una inicializacion de variable
             if(match("=")){
                 IGU(); //Para el igual
-                R(); // Para determinar el tipo de dato
-                CB(); // Para la recursividad
+                if(match("\\(")){
+                    K();
+                    CB();
+                }else if(match("\\d+") || match("(['\"])(.*?)\\1") || match("True") 
+                || match("False") || match("[a-zA-Z_][a-zA-Z0-9_]*") ){
+                    R(); // Para determinar el tipo de dato
+                    CB(); // Para la recursividad
+                }
             }else if(match("\\(")){
                 PA(); // Para el parentesis de apertura
                 DF(); // Para lo que va despues
@@ -201,7 +206,9 @@ public class Syntax {
                 CB(); // Para llamar de nuevo al metodo
             } 
         }else if(match("\\(")){
-            K(); // Si llegue primero un parentesis llamo a K
+            //K(); // Si llegue primero un parentesis llamo a K
+            PA();
+            DF();
             PYC(); // Para el " ; "
             CB(); // Para la recursividad
             
@@ -218,8 +225,11 @@ public class Syntax {
         if(match(";")){
             PYC(); // Si llega el punto y coma termina
         }else if(match("=")){
-            IGU(); // Si llega el igual es necesario recibir el valor y el punto y coma
+            IGU(); // Si llega el igual es necesario recibir el valor
             R(); // Para validar el valor y, punto y coma
+        }else if(match(",")){
+            COM(); // Coma
+            T();// recursivo
         }
     }
 
@@ -243,9 +253,7 @@ public class Syntax {
     private void L()throws Exception{
         if(match("\\(")){
             PA(); // Parentesis de apertura
-            if(match("(['\"])(.*?)\\1")){
-                DF(); // Para la cadena
-            }else if(match("\\(") || match("\\d+") || match("[a-zA-Z_][a-zA-Z0-9_]*")){
+            if(match("\\(") || match("\\d+") || match("[a-zA-Z_][a-zA-Z0-9_]*")){
                 K(); // para llamar a la funcion de K
                 PC(); // Para el )
             }
@@ -317,8 +325,14 @@ public class Syntax {
             //Y luego un = quiere decir que es una inicializacion de variable
             if(match("=")){
                 IGU(); //Para el igual
-                R(); // Para determinar el tipo de dato
-                AT();
+                if(match("\\(")){
+                    K();
+                    AT();
+                }else if(match("\\d+") || match("(['\"])(.*?)\\1") || match("True") 
+                || match("False") || match("[a-zA-Z_][a-zA-Z0-9_]*")){
+                    R(); // Para determinar el tipo de dato
+                    AT();    
+                }
             }else if(match("\\(")){
                 PA(); // Para el parentesis de apertura
                 DF(); // Para lo que va despues
@@ -330,7 +344,9 @@ public class Syntax {
                 AT(); // Para llamar de nuevo al metodo
             } 
         }else if(match("\\(")){
-            K(); // Si llegue primero un parentesis llamo a K
+            //K(); // Si llegue primero un parentesis llamo a K
+            PA();
+            DF();
             PYC(); // Para el " ; "
             AT(); // Para la recursividad
         }else if(match("\\d+")){
@@ -400,12 +416,17 @@ public class Syntax {
             BO(); // Para la recursividad
         }else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
             T(); // Si llega un identificador
-            
             //Y luego un = quiere decir que es una inicializacion de variable
             if(match("=")){
                 IGU(); //Para el igual
-                R(); // Para determinar el tipo de dato
-                BO();
+                if(match("\\(")){
+                    K();
+                    BO();
+                }else if(match("\\d+") || match("(['\"])(.*?)\\1") || match("True") 
+                || match("False") || match("[a-zA-Z_][a-zA-Z0-9_]*")){
+                    R(); // Para determinar el tipo de dato
+                    BO();
+                }
             }else if(match("\\(")){
                 PA(); // Para el parentesis de apertura
                 DF(); // Para lo que va despues
@@ -417,7 +438,9 @@ public class Syntax {
                 BO(); // Para llamar de nuevo al metodo
             } 
         }else if(match("\\(")){
-            K(); // Si llegue primero un parentesis llamo a K
+            //K(); // Si llegue primero un parentesis llamo a K
+            PA();
+            DF();
             PYC(); // Para el " ; "
             BO(); // Para la recursividad
         }else if(match("\\d+")){
@@ -462,12 +485,18 @@ public class Syntax {
             BG(); // Para la recursividad del metodo
         }else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
             T(); // Si llega un identificador
-            
             //Y luego un = quiere decir que es una inicializacion de variable
             if(match("=")){
                 IGU(); //Para el igual
-                R(); // Para determinar el tipo de dato
-                BG(); // Para la recursividad
+                if(match("\\(")){
+                    K();
+                    BG();
+                }else if(match("\\d+") || match("(['\"])(.*?)\\1") || match("True") 
+                || match("False") || match("[a-zA-Z_][a-zA-Z0-9_]*")){
+                    R(); // Para determinar el tipo de dato
+                    BG(); // Para la recursividad
+                }
+                
             }else if(match("\\(")){
                 PA(); // Para el parentesis de apertura
                 DF(); // Para lo que va despues
@@ -479,7 +508,9 @@ public class Syntax {
                 BG(); // Para llamar de nuevo al metodo
             } 
         }else if(match("\\(")){
-            K(); // Si llegue primero un parentesis llamo a K
+            //K(); // Si llegue primero un parentesis llamo a K
+            PA();
+            DF();
             PYC(); // Para el " ; "
             BG(); // Para la recursividad
         }else if(match("\\d+")){

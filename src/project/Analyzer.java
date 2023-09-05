@@ -12,7 +12,7 @@ public class Analyzer {
         // Remuevo los comentarios
         String removeComm = removeComments(sourceCode);
         //Genero los tokens y clasifico
-        tokens = Token.tokenize(removeComm);
+        tokens = Tokens.tokenize(removeComm);
         //Genero el archivo tabla de simbolos y escribo los tokens que anteriormente analice
         generateTable(tokens);
     }
