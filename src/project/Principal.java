@@ -11,31 +11,49 @@ public class Principal {
         try {
             principal.run();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
     public void run() throws IOException {
-        String sourceCode = "public static void main(){\nshow();\nint x = 0;\n[]}";
+        String sourceCode = "public void main(){\nshow();\nint x = 0;\n[]}";
         Lexer lexer = new Lexer(new StringReader(sourceCode));
         List<Token> tokens = new ArrayList<>();
-        while(true){
+        
+        while (true) {
             Token token = lexer.yylex();
-            if(token == null){
-                if(!tokens.isEmpty()){
+            if (token == null) {
+                if (!tokens.isEmpty()) {
                     System.out.println("\nTokens encontrados:");
-                    tokens.forEach(toke -> {
-                        System.out.println("Token: " + toke.getValue() + " " + toke.getType() + " " + toke.getLine() + " " + toke.getColumn());
+                    tokens.forEach(tok -> {
+                        System.out.println("Token: " + tok.getValue() + " " + tok.getType() + " " + tok.getLine() + " " + tok.getColumn());
                     });
+                }
+                
+                // Llamar al análisis sintáctico y manejar los errores aquí
+                try {
+                    Syntax syntax = new Syntax(tokens); // Cambiar "Parser" a "Sintax"
+                    syntax.parse();
+                    // Comprobar si hubo errores y mostrarlos
+                    List<String> errores = syntax.getErrors();
+                    if (!errores.isEmpty()) {
+                        System.out.println("Errores sintácticos:");
+                        for (String error : errores) {
+                            System.out.println(error);
+                        }
+                    }else{
+                        System.out.println("Análisis sintáctico exitoso.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error general: " + e.getMessage());
                 }
                 
                 return;
             }
-            if(token.getType() == TokenType.ERROR_TOKEN_DESCONOCIDO){
+            
+            if (token.getType() == TokenType.ERROR_TOKEN_DESCONOCIDO) {
                 System.out.println("Token desconocido: " + token.getValue() + " " + token.getLine() + " " + token.getColumn());
-                // return;
-            }else{
+            } else {
                 Token token1 = new Token(token.getType(), token.getValue(), token.getLine(), token.getColumn());
                 tokens.add(token1);
             }

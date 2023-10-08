@@ -1,6 +1,7 @@
 package project;
 import java.io.EOFException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,39 +9,80 @@ import java.util.regex.Pattern;
 import javax.swing.tree.ExpandVetoException;
 
 public class Syntax {
-    private final List<String> tokens;
+    private final List<Token> tokens;
     private int index;
+    private List<String> errors;
 
-    public Syntax(List<String> tokens) {
+    public Syntax(List<Token> tokens) {
         this.tokens = tokens;
         this.index = 0;
+        this.errors = new ArrayList<>();
     }
 
     public String parse() {
         try {
             A();
             if (index != tokens.size()) {
-                throw new Exception("Error: código fuente no válido");
+                errors.add("Error: código fuente no válido");
             }
-            return "Análisis sintáctico existoso.";
         } catch (Exception e) {
-            return "Error de análisis sintáctico: " + e.getMessage();
+            errors.add("Error de análisis sintáctico: " + e.getMessage());
+        }
+
+        if (!errors.isEmpty()) {
+            StringBuilder errorMessage = new StringBuilder();
+            errorMessage.append("Se encontraron los siguientes errores:\n");
+            for (String error : errors) {
+                errorMessage.append(error).append("\n");
+            }
+            return errorMessage.toString();
+        } else {
+            return "Análisis sintáctico exitoso.";
         }
     }
 // -------------------------------------------------------------------------------------------------------------------------------
 
     // Para el metodo principal
     private void A() throws Exception {
-        B(); // Para el "public"
-        C(); // Para el "static"
-        D(); // Para el "void"
-        E(); // Para el "main"
-        F(); /*Para la apartura y cierre de llaves 
-            {
-                y ademas para todo el contenido adentro de ellas
-            } 
-        */ 
-    }    
+        if (!match(TokenType.PUBLIC)) {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'public' en la línea " + line + ", columna " + column);
+        } else {
+            consume();
+        }
+    
+        if (!match(TokenType.STATIC)) {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'static' en la línea " + line + ", columna " + column);
+        } else {
+            consume();
+        }
+    
+        if (!match(TokenType.VOID)) {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'void' en la línea " + line + ", columna " + column);
+        } else {
+            consume();
+        }
+    
+        if (!match(TokenType.MAIN)) {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'main' en la línea " + line + ", columna " + column);
+        } else {
+            consume();
+        }
+        // Si no hubo errores, continúa con el análisis
+        //F();
+    }
+
     
     private void F() throws Exception{
         LLA(); // Para la llave de " { "
@@ -229,7 +271,7 @@ public class Syntax {
             R(); // Para validar el valor y, punto y coma
         }else if(match(",")){
             COM(); // Coma
-            T();// recursivo
+            Y();// recursivo
         }
     }
 
@@ -245,7 +287,7 @@ public class Syntax {
         PC(); // Para el parentesis de Cerradura 
     }
     
-    private void K() throws Exception{
+private void K() throws Exception{
         L(); // Para los simbolos
         KP();
     }
@@ -276,7 +318,7 @@ public class Syntax {
                 KP();
             }
             
-           //PYC();
+            PYC();
         }
     }
 
@@ -313,9 +355,6 @@ public class Syntax {
         }else if(match("go")){ // Para marcar el final de una opción
             GO(); // Para el Go
             AO(); // Para la recursividad
-        }else if(match("for")){
-            FOR(); // Para el for
-            AT(); // Para llamar de manera recursiva al metodo
         }else if(match("if")){
             IF();
             AT();
@@ -856,19 +895,30 @@ public class Syntax {
 
 
     // Métodos auxiliares
-    private boolean match(String expectedToken) {
+    private boolean match(String expectedTokenPattern) {
         //System.out.println(tokens.get(index));
         if (index < tokens.size()) {
-            String token = tokens.get(index);
-            Pattern pattern = Pattern.compile(expectedToken);
-            Matcher matcher = pattern.matcher(token);
-            return matcher.matches();
+            Token token = tokens.get(index);
+            String tokenValue = token.getValue();
+            return tokenValue.matches(expectedTokenPattern);
+        }
+        return false;
+    }
+
+    private boolean match(TokenType expectedType) {
+        if (index < tokens.size()) {
+            Token token = tokens.get(index);
+            return token.getType() == expectedType;
         }
         return false;
     }
 
     private void consume() {
-        System.out.println(tokens.get(index));
+        System.out.println(tokens.get(index).getValue());
         index++;
+    }
+
+    public List<String> getErrors() {
+        return errors;
     }
 }
