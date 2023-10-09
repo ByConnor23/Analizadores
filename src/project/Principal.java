@@ -16,7 +16,7 @@ public class Principal {
     }
 
     public void run() throws IOException {
-        String sourceCode = "public void main(){\nshow();\nint x = 0;\n[]}";
+        String sourceCode = "public static void main (){\ndefine int x = 0;\ndefine Character p1 = Character();}";
         Lexer lexer = new Lexer(new StringReader(sourceCode));
         List<Token> tokens = new ArrayList<>();
         
@@ -28,6 +28,8 @@ public class Principal {
                     tokens.forEach(tok -> {
                         System.out.println("Token: " + tok.getValue() + " " + tok.getType() + " " + tok.getLine() + " " + tok.getColumn());
                     });
+                    int size = tokens.size();
+                    System.out.println("Size of tokens list: " + size);
                 }
                 
                 // Llamar al análisis sintáctico y manejar los errores aquí

@@ -167,7 +167,7 @@ commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
                     }
 
     {rightParethesis} {
-                        return  newToken(TokenType.LLAVE_DE_CERRADURA, yytext());
+                        return  newToken(TokenType.PARENTESIS_DE_CERRADURA, yytext());
                     }
 
     {colon} {
