@@ -46,6 +46,7 @@ public class Syntax {
             int line = currentToken.getLine();
             int column = currentToken.getColumn();
             errors.add("Se esperaba 'public' en la línea " + line + ", columna " + column);
+            consume();
         } else {
             consume();
         }
@@ -55,6 +56,7 @@ public class Syntax {
             int line = currentToken.getLine();
             int column = currentToken.getColumn();
             errors.add("Se esperaba 'static' en la línea " + line + ", columna " + column);
+            consume();
         } else {
             consume();
         }
@@ -64,6 +66,7 @@ public class Syntax {
             int line = currentToken.getLine();
             int column = currentToken.getColumn();
             errors.add("Se esperaba 'void' en la línea " + line + ", columna " + column);
+            consume();
         } else {
             consume();
         }
@@ -73,6 +76,7 @@ public class Syntax {
             int line = currentToken.getLine();
             int column = currentToken.getColumn();
             errors.add("Se esperaba 'main' en la línea " + line + ", columna " + column);
+            consume();
         } else {
             consume();
         }
@@ -85,7 +89,7 @@ public class Syntax {
         PA(); // Para el parentesis de apertura " ( "
         PC(); // Para el parentesis de cerradura " ) "
         LLA(); // Para la llave de " { "
-        CA(); // Para determinar si se declara algo dentro del metodo principal
+        //CA(); // Para determinar si se declara algo dentro del metodo principal
         LLC();// Para el parentesis de " } "
     }
 
@@ -865,27 +869,43 @@ private void K() throws Exception{
 
     //Para llaves de Apertura " { "
     private void LLA() throws Exception{
-        if (!match(TokenType.LLAVE_DE_APERTURA)) {
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba ' { ' en la línea " + line + ", columna " + column);
+        if (index <= tokens.size()) {
+            if (match(TokenType.LLAVE_DE_APERTURA)) {
+                consume(); // Consumir el token de cierre de llave '}'
+            } else {
+                Token currentToken = tokens.get(index - 1); // Obtener el último token analizado
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '{' para cerrar el bloque en la línea " + line + ", columna " + column);
+            }
         } else {
-            consume();
+            Token currentToken = tokens.get(index); // Obtener el último token analizado
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '{' para cerrar el bloque en la línea " + line + ", columna " + column);
         }
     }
 
     // /Para llaves de Cerradura " } "
-    private void LLC() throws Exception{
-        if (!match(TokenType.LLAVE_DE_CERRADURA)) {
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba ' } ' en la línea " + line + ", columna " + column);
+    private void LLC() throws Exception {
+        if (index <= tokens.size()) {
+            if (match(TokenType.LLAVE_DE_CERRADURA)) {
+                consume(); // Consumir el token de cierre de llave '}'
+            } else {
+                Token currentToken = tokens.get(index - 1); // Obtener el último token analizado
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
+            }
         } else {
-            consume();
+            Token currentToken = tokens.get(index); // Obtener el último token analizado
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
         }
     }
+    
+    
 
     // /Para el punto y coma " ; "
     private void PYC() throws Exception{
@@ -906,6 +926,7 @@ private void K() throws Exception{
             int line = currentToken.getLine();
             int column = currentToken.getColumn();
             errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
+            consume();
         }else{
             consume();
         }
@@ -918,6 +939,7 @@ private void K() throws Exception{
             int line = currentToken.getLine();
             int column = currentToken.getColumn();
             errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
+            consume();
         }else{
             consume();
         }
@@ -958,9 +980,15 @@ private void K() throws Exception{
     }
     
     private void consume() {
-        System.out.println(tokens.get(index).getValue());
-        index++;
+        if (index < tokens.size()) {
+            System.out.println(tokens.get(index).getValue());
+            index++;
+        } else {
+            // Si no quedan más tokens, puedes lanzar una excepción o simplemente mostrar un mensaje de advertencia
+            System.out.println("¡Se ha llegado al final del archivo fuente!");
+        }
     }
+    
 
     public List<String> getErrors() {
         return errors;

@@ -16,10 +16,10 @@ public class Principal {
     }
 
     public void run() throws IOException {
-        String sourceCode = "public static void main (){\ndefine int x = 0;\ndefine Character p1 = Character();}";
+        String sourceCode = "public main (){}";
         Lexer lexer = new Lexer(new StringReader(sourceCode));
         List<Token> tokens = new ArrayList<>();
-        
+
         while (true) {
             Token token = lexer.yylex();
             if (token == null) {
@@ -31,10 +31,10 @@ public class Principal {
                     int size = tokens.size();
                     System.out.println("Size of tokens list: " + size);
                 }
-                
-                // Llamar al análisis sintáctico y manejar los errores aquí
+
+                // Mover el análisis sintáctico aquí, después de procesar todos los tokens
                 try {
-                    Syntax syntax = new Syntax(tokens); // Cambiar "Parser" a "Sintax"
+                    Syntax syntax = new Syntax(tokens);
                     syntax.parse();
                     // Comprobar si hubo errores y mostrarlos
                     List<String> errores = syntax.getErrors();
@@ -43,16 +43,16 @@ public class Principal {
                         for (String error : errores) {
                             System.out.println(error);
                         }
-                    }else{
+                    } else {
                         System.out.println("Análisis sintáctico exitoso.");
                     }
                 } catch (Exception e) {
                     System.out.println("Error general: " + e.getMessage());
                 }
-                
+
                 return;
             }
-            
+
             if (token.getType() == TokenType.ERROR_TOKEN_DESCONOCIDO) {
                 System.out.println("Token desconocido: " + token.getValue() + " " + token.getLine() + " " + token.getColumn());
             } else {
