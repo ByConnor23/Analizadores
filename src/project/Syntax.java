@@ -89,7 +89,7 @@ public class Syntax {
         PA(); // Para el parentesis de apertura " ( "
         PC(); // Para el parentesis de cerradura " ) "
         LLA(); // Para la llave de " { "
-        //CA(); // Para determinar si se declara algo dentro del metodo principal
+        CA(); // Para determinar si se declara algo dentro del metodo principal
         LLC();// Para el parentesis de " } "
     }
 
@@ -102,25 +102,25 @@ public class Syntax {
     // funciones Screen () y define
 
     private void CA() throws Exception {
-        
-        if (match(TokenType.DEFINE)) {
-            // Si es "define", consume y va a N()
-            consume();
-            N();
-        } else if (match(TokenType.SCREEN)) {
-            // Si es "Screen", consume y va a AI()
-            consume();
-            //AI();
-        } else if (match(TokenType.LLAVE_DE_CERRADURA)) {
-            // Si es "}", no se genera error y simplemente se regresa
-            return;
-        } else {
-            // Si no es ninguno de los tokens anteriores, se genera un error
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'define', 'Screen' o '}' en la línea " + line + ", columna " + column);
-        }
+            if (match(TokenType.DEFINE)) {
+                // Si es "define", consume y va a N()
+                consume();
+                N();
+            } else if (match(TokenType.SCREEN)) {
+                // Si es "Screen", consume y va a AI()
+                consume();
+                //AI();
+            } else if (match(TokenType.LLAVE_DE_CERRADURA)) {
+                // Si es "}", no se genera error y simplemente se regresa
+                return;
+            } else {
+                // Si no es ninguno de los tokens anteriores, se genera un error
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'define', 'Screen' o '}' en la línea " + line + ", columna " + column);
+                consume();
+            }
         
         // Continúa con la recursión
         CA();
@@ -156,6 +156,12 @@ public class Syntax {
                 errors.add("Se esperaba 'Image' o 'Sound' en la línea " + line + ", columna " + column);
             }
             AC(); // Para el resto
+        }else{
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un tipo e valor en " + line + ", columna " + column);
+            consume();
         }
     }
 
