@@ -120,6 +120,14 @@ public class Syntax {
             int column = currentToken.getColumn();
             errors.add("Se esperaba 'define', 'Screen' o '}' en la línea " + line + ", columna " + column);
             consume();
+
+            //Para tratar de predecir
+            if(match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO) || 
+                match(TokenType.CHARACTER) || match(TokenType.IMAGE) || match(TokenType.SOUND)){
+                N();//Para seguir el camino
+            }else if(match(TokenType.IDENTIFICADOR)){
+                AI();//Para seguir el camino
+            }
         }
 
         // Continúa con la recursión
@@ -641,7 +649,7 @@ public class Syntax {
     // -------------------------------------------------------------------------------------------------------------------------------
     // Para palabras reservadas
     private void X() throws Exception {
-        if (match("define")) {
+        if (match(TokenType.DEFINE)) {
             consume();
         } 
         N();
