@@ -275,7 +275,7 @@ public class Syntax {
     // Para lo que se puede escribir dentro de los metodos de Screen
 
     private void CB() throws Exception {
-        if (match("define")) {
+        if (match(TokenType.DEFINE)) {
             X(); // Verifico que me llegue un define
             CB(); // Vuelvo a llamar al metodo para que sea recursivo
         }else if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
@@ -287,7 +287,7 @@ public class Syntax {
         } else if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
             H(); // Para en caso de un tipo de dato
             CB(); // Para la recursividad
-        } else  if (match("Menu")) {
+        } else  if (match(TokenType.MENU)) {
             MEN(); // Para el Menu
             CB(); // Para la recursividad
         } //Consideracion a tomar: Aqui podría haber un error.
@@ -369,12 +369,12 @@ public class Syntax {
 
     private void Y() throws Exception {
         T(); // Verifico que me llegue un id
-        if (match(";")) {
+        if (match(TokenType.COMA)) {
             PYC(); // Si llega el punto y coma termina
-        } else if (match("=")) {
+        } else if (match(TokenType.ASIGNACION)) {
             IGU(); // Si llega el igual es necesario recibir el valor
             R(); // Para validar el valor y, punto y coma
-        } else if (match(",")) {
+        } else if (match(TokenType.COMA)) {
             // Coma
             if (match(TokenType.COMA)) {
                 consume();
@@ -471,13 +471,13 @@ public class Syntax {
 
     // -------------------------------------------------------------------------------------------------------------------------------
     // Para la estructura del for
-    private void BK() throws Exception {
-        BL(); // Para el iterador
-        PYC(); // Para el " ; "
-        BM(); // Para la la condición
-        PYC(); // Para el " ; "
-        BP(); // Para el incremento
-    }
+    // private void BK() throws Exception {
+    //     BL(); // Para el iterador
+    //     PYC(); // Para el " ; "
+    //     BM(); // Para la la condición
+    //     PYC(); // Para el " ; "
+    //     BP(); // Para el incremento
+    // }
 
     private void BL() throws Exception {
         T(); // Para el identificador
@@ -507,66 +507,66 @@ public class Syntax {
         }
     }
 
-    private void BP() throws Exception {
-        T(); // Para el identificador
-        if (match("\\+\\+")) {
-            PLU(); // En caso de que me llegue un aumento de 1
-        } else if (match("\\+")) {
-            consume(); // Consumo y llamo al siguiente
-            RR(); // En caso de que me llegue un incremento que tenga un valor númerico o con un
-                  // identificador
-        }
-    }
+    // private void BP() throws Exception {
+    //     T(); // Para el identificador
+    //     if (match("\\+\\+")) {
+    //         PLU(); // En caso de que me llegue un aumento de 1
+    //     } else if (match("\\+")) {
+    //         consume(); // Consumo y llamo al siguiente
+    //         RR(); // En caso de que me llegue un incremento que tenga un valor númerico o con un
+    //               // identificador
+    //     }
+    // }
 
-    private void BN() throws Exception {
-        LLA(); // Para la llave de apertura
-        BO(); // Para lo que se puede llamar dentro del for
-        LLC(); // Para la llave de cerradura
-    }
+    // private void BN() throws Exception {
+    //     LLA(); // Para la llave de apertura
+    //     BO(); // Para lo que se puede llamar dentro del for
+    //     LLC(); // Para la llave de cerradura
+    // }
 
-    private void BO() throws Exception {
-        if (match("for")) {
-            FOR(); // Para el for
-            BO(); // Para la recursividad
-        } else if (match("if")) {
-            IF(); // Para verificar que es un if
-            BO(); // Para la recursividad
-        } else if (match("[a-zA-Z_][a-zA-Z0-9_]*")) {
-            T(); // Si llega un identificador
-            // Y luego un = quiere decir que es una inicializacion de variable
-            if (match("=")) {
-                IGU(); // Para el igual
-                if (match("\\(")) {
-                    K();
-                    BO();
-                } else if (match("\\d+") || match("(['\"])(.*?)\\1") || match("True")
-                        || match("False") || match("[a-zA-Z_][a-zA-Z0-9_]*")) {
-                    R(); // Para determinar el tipo de dato
-                    BO();
-                }
-            } else if (match("\\(")) {
-                PA(); // Para el parentesis de apertura
-                DF(); // Para lo que va despues
-                PYC(); // Para el punto y coma
-                BO(); // Para llamar al metodo de nuevo
-            } else if (match("[+*-/]")) {
-                KP(); // Llamo a K prima, porque lo siquiente que debe esperar es un signo
-                PYC(); // Para el " ; "
-                BO(); // Para llamar de nuevo al metodo
-            }
-        } else if (match("\\(")) {
-            // K(); // Si llegue primero un parentesis llamo a K
-            PA();
-            DF();
-            PYC(); // Para el " ; "
-            BO(); // Para la recursividad
-        } else if (match("\\d+")) {
-            NUM(); // Para verificar que sea un número
-            KP(); // Para verificar que lo siguiente del número sea un operador
-            PYC(); // Para el " ; "
-            BO(); // Para la recursividad
-        }
-    }
+    // private void BO() throws Exception {
+    //     if (match("for")) {
+    //         FOR(); // Para el for
+    //         BO(); // Para la recursividad
+    //     } else if (match("if")) {
+    //         IF(); // Para verificar que es un if
+    //         BO(); // Para la recursividad
+    //     } else if (match("[a-zA-Z_][a-zA-Z0-9_]*")) {
+    //         T(); // Si llega un identificador
+    //         // Y luego un = quiere decir que es una inicializacion de variable
+    //         if (match("=")) {
+    //             IGU(); // Para el igual
+    //             if (match("\\(")) {
+    //                 K();
+    //                 BO();
+    //             } else if (match("\\d+") || match("(['\"])(.*?)\\1") || match("True")
+    //                     || match("False") || match("[a-zA-Z_][a-zA-Z0-9_]*")) {
+    //                 R(); // Para determinar el tipo de dato
+    //                 BO();
+    //             }
+    //         } else if (match("\\(")) {
+    //             PA(); // Para el parentesis de apertura
+    //             DF(); // Para lo que va despues
+    //             PYC(); // Para el punto y coma
+    //             BO(); // Para llamar al metodo de nuevo
+    //         } else if (match("[+*-/]")) {
+    //             KP(); // Llamo a K prima, porque lo siquiente que debe esperar es un signo
+    //             PYC(); // Para el " ; "
+    //             BO(); // Para llamar de nuevo al metodo
+    //         }
+    //     } else if (match("\\(")) {
+    //         // K(); // Si llegue primero un parentesis llamo a K
+    //         PA();
+    //         DF();
+    //         PYC(); // Para el " ; "
+    //         BO(); // Para la recursividad
+    //     } else if (match("\\d+")) {
+    //         NUM(); // Para verificar que sea un número
+    //         KP(); // Para verificar que lo siguiente del número sea un operador
+    //         PYC(); // Para el " ; "
+    //         BO(); // Para la recursividad
+    //     }
+    // }
 
     private void Z() throws Exception {
         IGU(); // Para los operadores
@@ -672,13 +672,13 @@ public class Syntax {
         }
     }
 
-    private void CHA() throws Exception {
-        if (match("Character")) {
-            consume();
-        } else {
-            throw new Exception("Se esperaba 'Character' ");
-        }
-    }
+    // private void CHA() throws Exception {
+    //     if (match("Character")) {
+    //         consume();
+    //     } else {
+    //         throw new Exception("Se esperaba 'Character' ");
+    //     }
+    // }
 
     private void U() throws Exception {
         if (match(TokenType.COLOR)) {
@@ -692,21 +692,21 @@ public class Syntax {
         DE(); // Para el color
     }
 
-    private void AB() throws Exception {
-        if (match("Image") || match("Sound")) {
-            consume();
-        }
-        AC(); // Para lo que va despues, ("dirección")
-    }
+    // private void AB() throws Exception {
+    //     if (match("Image") || match("Sound")) {
+    //         consume();
+    //     }
+    //     AC(); // Para lo que va despues, ("dirección")
+    // }
 
-    private void SCR() throws Exception {
-        if (match("Screen")) {
-            consume();
-        } else {
-            throw new Exception("Se esperaba 'Screen' ");
-        }
-        AI();// Para lo que va despues de la palabra reservada Screen
-    }
+    // private void SCR() throws Exception {
+    //     if (match("Screen")) {
+    //         consume();
+    //     } else {
+    //         throw new Exception("Se esperaba 'Screen' ");
+    //     }
+    //     AI();// Para lo que va despues de la palabra reservada Screen
+    // }
 
     private void AL() throws Exception {
         if (match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
@@ -763,17 +763,17 @@ public class Syntax {
         PYC(); // Para el " ; "
     }
 
-    private void FOR() throws Exception {
-        if (match("for")) {
-            consume();
-        } else {
-            throw new Exception("Se esperaba un 'for' ");
-        }
-        PA(); // Para el parentesis de apertura
-        BK(); // Para el tema del condicional del for
-        PC(); // Para el parentesis de cerradura
-        BN(); // Para lo que va dentro del for
-    }
+    // private void FOR() throws Exception {
+    //     if (match("for")) {
+    //         consume();
+    //     } else {
+    //         throw new Exception("Se esperaba un 'for' ");
+    //     }
+    //     PA(); // Para el parentesis de apertura
+    //     BK(); // Para el tema del condicional del for
+    //     PC(); // Para el parentesis de cerradura
+    //     BN(); // Para lo que va dentro del for
+    // }
 
     private void IF() throws Exception {
         if (match(TokenType.IF)) {
@@ -849,13 +849,13 @@ public class Syntax {
      * }
      */
 
-    private void PLU() throws Exception {
-        if (match("\\+\\+")) {
-            consume();
-        } else {
-            throw new Exception("Se esperaba un '++' ");
-        }
-    }
+    // private void PLU() throws Exception {
+    //     if (match("\\+\\+")) {
+    //         consume();
+    //     } else {
+    //         throw new Exception("Se esperaba un '++' ");
+    //     }
+    // }
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
@@ -989,15 +989,15 @@ public class Syntax {
     // -------------------------------------------------------------------------------------------------------------------------------
 
     // Métodos auxiliares
-    private boolean match(String expectedTokenPattern) {
-        // System.out.println(tokens.get(index));
-        if (index < tokens.size()) {
-            Token token = tokens.get(index);
-            String tokenValue = token.getValue();
-            return tokenValue.matches(expectedTokenPattern);
-        }
-        return false;
-    }
+    // private boolean match(String expectedTokenPattern) {
+    //     // System.out.println(tokens.get(index));
+    //     if (index < tokens.size()) {
+    //         Token token = tokens.get(index);
+    //         String tokenValue = token.getValue();
+    //         return tokenValue.matches(expectedTokenPattern);
+    //     }
+    //     return false;
+    // }
 
     private boolean match(TokenType expectedType) {
         if (index >= 0 && index < tokens.size()) { // Verifica los límites antes de acceder
