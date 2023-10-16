@@ -6,9 +6,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.formdev.flatlaf.FlatLightLaf;
@@ -92,7 +95,7 @@ public class Compiler extends JFrame {
 		// ==================== Content Panel ====================
 		codeEditor = new JTextPane();
 		symbolTable = new JTable();
-		outputConsole = new JPanel();
+		outputConsole = new JTextArea();
 
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
@@ -282,34 +285,44 @@ public class Compiler extends JFrame {
 		{// ==================== Code Editor ====================
 			codeEditor.setBackground(Color.WHITE);
 			codeEditor.setMargin(new Insets(10, 10, 10, 10));
+			//Si recibe un cambio en el documento, se ejecuta el metodo analyse
+			codeEditor.getDocument().addDocumentListener(new DocumentListener() {
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					analyse();
+				}
+
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					analyse();
+				}
+
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					analyse();
+				}		
+			});
 			LineNumber line = new LineNumber(codeEditor);
 			JScrollPane rootCode = new JScrollPane(codeEditor);
 			rootCode.setRowHeaderView(line);
 			contentPanel.add(rootCode, "grow");
 		}
 		{// ==================== Symbol Table ====================
-			symbolTable.setModel(new DefaultTableModel(
-					new Object[][] {
-							{ "item 1", "item 2", "[item, item]", "item 4", "item 5", "item 6" },
-							{ "item 1", "item 2", "[item, item]", "item 4", "item 5", "item 6" },
-							{ "item 1", "item 2", "[item, item]", "item 4", "item 5", "item 6" },
-
-					},
-					new String[] {
-							"Lexical Component", "Lexeme", "[Column, Row]", "Type", "Value", "Error"
-					}) {
+			symbolTable.setModel(new DefaultTableModel(new Object[][] {}, new String[] {
+				"Token Value", "Token Type", "Token Row", "Token Column"
+			}) {
 				Class<?>[] columnTypes = new Class<?>[] {
-						String.class, String.class, String.class, String.class, String.class, String.class
+					String.class, String.class, String.class, String.class
 				};
 				boolean[] columnEditable = new boolean[] {
-						false, false, false, false, false, false
+					false, false, false, false
 				};
-
+			
 				@Override
 				public Class<?> getColumnClass(int columnIndex) {
 					return columnTypes[columnIndex];
 				}
-
+			
 				@Override
 				public boolean isCellEditable(int rowIndex, int columnIndex) {
 					return columnEditable[columnIndex];
@@ -321,11 +334,55 @@ public class Compiler extends JFrame {
 		}
 		{// ==================== Output Console ====================
 			outputConsole.setBackground(Color.WHITE);
+			outputConsole.setEditable(false);
 			contentPanel.add(new JScrollPane(outputConsole), "grow, span 2");
 		}
 		contentPane.add(contentPanel, BorderLayout.CENTER);
 
 		this.pack();
+	}
+
+	private void analyse() {
+		outputConsole.setText("");
+		try {
+			// Análisis Léxico
+			String content = codeEditor.getText().trim();
+	
+			Analyzer analizador = new Analyzer(content);
+	
+			List<Token> tokens = analizador.getTokens();
+	
+			Object[][] data = new Object[tokens.size()][4];
+	
+			for (int i = 0; i < tokens.size(); i++) {
+				Token token = tokens.get(i);
+				data[i][0] = token.getValue();
+				data[i][1] = token.getType();
+				data[i][2] = token.getLine();
+				data[i][3] = token.getColumn();
+			}
+	
+			symbolTable.setModel(new DefaultTableModel(data, new String[] {
+				"Token Value", "Token Type", "Token Row", "Token Column"
+			}));
+	
+			// Análisis Sintáctico
+			Syntax syntax = new Syntax(tokens);
+			syntax.parse();
+			// Comprobar si hubo errores y mostrarlos
+			List<String> errores = syntax.getErrors();
+			if (!errores.isEmpty()) {
+				outputConsole.append("Errores:\n");
+				for (String error : errores) {
+					outputConsole.append(error + "\n");
+				}
+			} else {
+				outputConsole.append("Análisis sintáctico exitoso.");
+			}
+	
+		} catch (Exception e) {
+			outputConsole.append("Error general: " + e.getMessage() + "\n");
+		}
 	}
 
 	private void newActionPerformed(ActionEvent event) {
@@ -410,7 +467,7 @@ public class Compiler extends JFrame {
 	// Content panel
 	private JPanel contentPanel;
 	private JTextPane codeEditor;
-	private JPanel outputConsole;
+	private JTextArea outputConsole;
 	private JTable symbolTable;
 
 }

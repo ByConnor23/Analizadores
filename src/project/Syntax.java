@@ -892,7 +892,7 @@ public class Syntax {
 
     // Para llaves de Apertura " { "
     private void LLA() throws Exception {
-        if (index <= tokens.size()) {
+        if (index < tokens.size()) {
             if (match(TokenType.LLAVE_DE_APERTURA)) {
                 consume(); // Consumir el token de cierre de llave '}'
             } else {
@@ -913,7 +913,7 @@ public class Syntax {
     // /Para llaves de Cerradura " } "
     private void LLC() throws Exception {
         // try {
-            //if (index <= tokens.size()) {
+            if (index < tokens.size()) {
                 if (match(TokenType.LLAVE_DE_CERRADURA)) {
                     consume(); // Consumir el token de cierre de llave '}'
                 } else {
@@ -923,12 +923,12 @@ public class Syntax {
                     errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
                     consume();
                 }
-            // } else {
-            //     Token currentToken = tokens.get(index); // Obtener el último token analizado
-            //     int line = currentToken.getLine();
-            //     int column = currentToken.getColumn();
-            //     errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
-            //}
+            } else {
+                Token currentToken = tokens.get(index); // Obtener el último token analizado
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
+            }
         // } catch (Exception e) {
         //     // TODO: handle exception
         // }

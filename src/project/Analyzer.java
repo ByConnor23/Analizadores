@@ -12,19 +12,31 @@ public class Analyzer {
         // Remuevo los comentarios
         String removeComm = removeComments(sourceCode);
         //Genero los tokens y clasifico
-        tokens = Tokens.tokenize(removeComm);
+        // tokens = Tokens.tokenize(removeComm);
+        //Creo una instancia para el Lexico
+        Lexer lexer = new Lexer(new StringReader(removeComm));
+        //Para los tokens que trajo el Lexico
+        tokens = new ArrayList<>();
+        Token token;
+        try {
+            while ((token = lexer.yylex()) != null) {
+                tokens.add(token);
+            }
+        } catch (IOException e) {
+            System.err.println("Error de entrada/salida: " + e.getMessage());
+        }
         //Genero el archivo tabla de simbolos y escribo los tokens que anteriormente analice
         generateTable(tokens);
     }
 
-    public List<String> getTokens() {
+    public List<Token> getTokens() {
         return tokens;
     }
 
-    private static void generateTable(List<String> tokens) {
+    private static void generateTable(List<Token> tokens) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("tabla_simbolos.txt"))) {
-            for (String token : tokens) {
-                writer.write(token);
+            for (Token token : tokens) {
+                writer.write(token.getValue());
                 writer.newLine();
             }
         } catch (Exception e) {
@@ -40,6 +52,6 @@ public class Analyzer {
         return input;
     }
 
-    List<String> tokens;
+    List<Token> tokens;
 
 }
