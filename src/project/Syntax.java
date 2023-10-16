@@ -43,40 +43,56 @@ public class Syntax {
     // Para el metodo principal
     private void A() throws Exception {
         if (!match(TokenType.PUBLIC)) {
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'public' en la línea " + line + ", columna " + column);
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'public' en la línea " + line + ", columna " + column);
+            }else{
+                errors.add("Se esperaba 'public'");
+            }
             consume();
         } else {
             consume();
         }
 
         if (!match(TokenType.STATIC)) {
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'static' en la línea " + line + ", columna " + column);
+            if(index < tokens.size()){
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'static' en la línea " + line + ", columna " + column);
+            }else{
+                errors.add("Se esperaba 'static'");
+            }
             consume();
         } else {
             consume();
         }
 
         if (!match(TokenType.VOID)) {
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'void' en la línea " + line + ", columna " + column);
+            if(index < tokens.size()){
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'void' en la línea " + line + ", columna " + column);
+            }else{
+                errors.add("Se esperaba 'void'");
+            }
             consume();
         } else {
             consume();
         }
 
         if (!match(TokenType.MAIN)) {
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'main' en la línea " + line + ", columna " + column);
+            if(index < tokens.size()){
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'main' en la línea " + line + ", columna " + column);
+            }else{
+                errors.add("Se esperaba 'main'");
+            }
             consume();
         } else {
             consume();
@@ -116,10 +132,12 @@ public class Syntax {
             return;
         } else {
             // Si no es ninguno de los tokens anteriores, se genera un error
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'define', 'Screen' o '}' en la línea " + line + ", columna " + column);
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'define', 'Screen' o '}' en la línea " + line + ", columna " + column);
+            }
             consume();
         }
 
@@ -879,43 +897,36 @@ public class Syntax {
 
     // Para llaves de Apertura " { "
     private void LLA() throws Exception {
-        if (index <= tokens.size()) {
-            if (match(TokenType.LLAVE_DE_APERTURA)) {
-                consume(); // Consumir el token de cierre de llave '}'
-            } else {
+        if (match(TokenType.LLAVE_DE_APERTURA)) {
+            consume(); // Consumir el token de cierre de llave '}'
+        } else {
+            if (index < tokens.size()) {
                 Token currentToken = tokens.get(index - 1); // Obtener el último token analizado
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn();
                 errors.add("Se esperaba '{' para cerrar el bloque en la línea " + line + ", columna " + column);
+            }else{
+                errors.add("Se esperaba '{' ");
             }
-        } else {
-            Token currentToken = tokens.get(index); // Obtener el último token analizado
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba '{' para cerrar el bloque en la línea " + line + ", columna " + column);
+            consume();
         }
     }
 
     // /Para llaves de Cerradura " } "
     private void LLC() throws Exception {
-        try {
-            //if (index <= tokens.size()) {
-                if (match(TokenType.LLAVE_DE_CERRADURA)) {
-                    consume(); // Consumir el token de cierre de llave '}'
-                } else {
-                    Token currentToken = tokens.get(index - 1); // Obtener el último token analizado
-                    int line = currentToken.getLine();
-                    int column = currentToken.getColumn();
-                    errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
-                }
-            // } else {
-            //     Token currentToken = tokens.get(index); // Obtener el último token analizado
-            //     int line = currentToken.getLine();
-            //     int column = currentToken.getColumn();
-            //     errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
-            //}
-        } catch (Exception e) {
-            // TODO: handle exception
+            
+        if (match(TokenType.LLAVE_DE_CERRADURA)) {
+            consume(); // Consumir el token de cierre de llave '}'
+        } else {
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index - 1); // Obtener el último token analizado
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
+            }else{
+                errors.add("Se esperaba '}' ");
+            }
+            consume();
         }
     }
 
@@ -934,10 +945,14 @@ public class Syntax {
     /// Para parentesis de Aparetura " ( "
     private void PA() throws Exception {
         if (!match(TokenType.PARENTESIS_DE_APERTURA)) {
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
+            }else{
+                errors.add("Se esperaba ' ( '");
+            }
             consume();
         } else {
             consume();
@@ -947,10 +962,14 @@ public class Syntax {
     /// Para parentensis de cerradura " ) "
     private void PC() throws Exception {
         if (!match(TokenType.PARENTESIS_DE_CERRADURA)) {
-            Token currentToken = tokens.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
+            }else{
+                errors.add("Se esperaba ' ) '");
+            }
             consume();
         } else {
             consume();
@@ -991,22 +1010,15 @@ public class Syntax {
     }
 
     private void consume() {
-        try {
-            if (index < tokens.size()) {
-                System.out.println(tokens.get(index).getValue());
-                index++;
-            }
-        } catch (Exception e) {
+        if (index < tokens.size()) {
+            System.out.println(tokens.get(index).getValue());
+            index++;
+            } else {
+            // Si no quedan más tokens, puedes lanzar una excepción o simplemente mostrar
+            //un mensaje de advertencia
             System.out.println("¡Se ha llegado al final del archivo fuente!");
+            System.exit(0);
         }
-        // if (index < tokens.size()) {
-        // System.out.println(tokens.get(index).getValue());
-        // index++;
-        // } else {
-        // // Si no quedan más tokens, puedes lanzar una excepción o simplemente mostrar
-        // un mensaje de advertencia
-        // System.out.println("¡Se ha llegado al final del archivo fuente!");
-        // }
     }
 
     public List<String> getErrors() {
