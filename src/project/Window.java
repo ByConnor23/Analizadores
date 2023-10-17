@@ -329,9 +329,9 @@ public class Window extends JFrame {
             Analyzer analizador = new Analyzer(content);
 
             StringBuilder output = new StringBuilder();
-            List<String> tokens = analizador.getTokens();
+            List<Token> tokens = analizador.getTokens();
 
-            for (String token : tokens) {
+            for (Token token : tokens) {
                 output.append(token).append("\n");
             }
             //outputArea.setText(output.toString());
@@ -348,7 +348,7 @@ public class Window extends JFrame {
 
             Analyzer analyzer = new Analyzer(sourceCode);
 
-            List<String> tokens = analyzer.getTokens();
+            List<Token> tokens = analyzer.getTokens();
             // Analizar sintácticamente los tokens
             syntax = new Syntax(tokens);
             String result = syntax.parse();

@@ -1,0 +1,394 @@
+package project;
+
+import java_cup.runtime.Symbol;
+
+parser code
+{:
+    private Symbol s;
+    
+    public void syntax_error(Symbol s){
+        this.s = s;
+    }
+
+    public Symbol get_symbol(){
+        return this.s;
+    }
+:};
+
+//Declaración de terminales
+terminal leftBrace, rightBrace, leftParethesis, rightParethesis, colon,
+    semiColon, comma;
+terminal identifier, number, chaising;
+terminal lessThan, moreThan, ltoet, gtoet;
+terminal more, menus, by, on;
+terminal awa , plus, equalSignal;
+terminal colorSymbol, color;
+terminal public, static, void, main;
+terminal define, character, screen;
+terminal menu, go, breaker;
+terminal background, sSound, pSound, hide, show;
+terminal image, sound;
+terminal intK, doubleK, stringK, boolK;
+terminal trueK, falseK;
+terminal if, else;
+
+//Declaracion de No Terminales
+non terminal A, B, C, D, E, F, LLA, LLC, CA, DEF, N, OPE, Q, T, IGU, 
+R, NUM, PYC, CAD, TF, CHA, O, S, PA, PC, DD, COM, U, DE, BQ, AB, AC,
+SRC, AI, AJ, CB, AL, AN, MEN, DP, Y, AO, DF, AT, BRE, GO, KP, Z, RR,
+L, K, BK, BL, BM, BU, BD, PLU, BN, BO, IF, BF, BG, ELS, BP;
+
+//Gramatica
+A ::= B C D E F
+    | error C D E F { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba 'public' al inicio."); }
+    | B error D E F { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba 'static' despues del 'public'."); }
+    | B C error E F { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba 'main' despues del 'static'."); }
+    | B C D error F { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba 'void' despues del 'main'."); }
+;
+
+B ::= public;
+C ::= static;
+D ::= void;
+E ::= main;
+
+F ::= LLA CA LLC
+  | error CA LLC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba '{' despues del 'void'."); }
+  | LLA CA error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba '}' al final del metodo principal."); }
+;
+
+LLA ::= leftBrace;
+LLC ::= rightBrace;
+
+CA ::= 
+    DEF CA
+  | SRC CA
+;
+DEF::= define N
+  | error N { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba 'define' al inicio de la sentencia."); }
+;
+
+N ::= 
+    OPE Q
+  | CHA O
+  | AB
+;
+
+OPE ::= 
+    intK
+  | doubleK
+  | stringK 
+  | boolK
+  | error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un tipo de dato valido."); }
+;
+
+Q ::= T IGU R
+  | error IGU R { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error R { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un simbolo de asignacion."); }
+;
+
+T ::= identifier;
+
+IGU ::= equalSignal;
+
+R ::= 
+    NUM PYC
+  | CAD PYC
+  | TF PYC
+  | T PYC
+  | NUM error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';' al final."); }
+  | CAD error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';' al final."); }
+  | TF error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';' al final."); }
+  | T error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';' al final."); }
+;
+
+NUM ::= number
+  | error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un numero."); }  
+;
+
+PYC ::= semiColon;
+
+CAD ::= chaising
+  | error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba una cadena."); }
+;
+TF ::= 
+    trueK
+  | falseK
+  | error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un valor booleano."); }
+;
+
+CHA ::= character
+  | error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba 'Character'."); }
+;
+
+O ::= T IGU CHA S
+  | error IGU CHA S { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error CHA S { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un simbolo de asignacion."); }
+;
+
+S ::= PA DD PC PYC
+  | error DD PC PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | PA DD error PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ')'."); }
+  | PA DD PC error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+;
+
+PA ::= leftParethesis;
+PC ::= rightParethesis;
+
+DD ::= CAD COM U
+  | CAD error U { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ','."); }
+;
+
+COM ::= comma;
+
+U ::= color DE
+  |  error DE { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba la palabra 'color'."); }
+;
+
+DE ::= PA BQ PC
+  | error BQ PC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | PA BQ error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ')'."); }
+;
+
+BQ ::= colorSymbol CAD
+  | error CAD { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un simbolo de '#'."); }
+;
+
+AB ::= 
+    image AC
+  | sound AC
+  | error AC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba la palabra 'image' o 'sound'."); }
+;
+
+AC ::= T IGU CAD PYC
+  | error IGU CAD PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error CAD PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un simbolo de asignacion."); }
+  | T IGU CAD error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+;
+
+SCR ::= screen AI
+  | error AI { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba la palabra 'screen'."); }
+;
+
+AI ::= T PA PC AJ
+  | error PA PC AJ { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error PC AJ { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | T PA error AJ { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ')'."); }
+;
+
+AJ ::=  LLA CB LLC
+  | error CB LLC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '{'."); }
+  | LLA CB error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '}'."); }
+;
+
+CB ::=
+    DEF CB
+  | OPE Y CB
+  | AL CB
+  | MEN CB
+  | IF CB
+  | T IGU K CB
+  | T IGU R CB
+  | T PA DF PYC CB
+  | T KP PYC CB
+  | K PYC CB
+  | PA DF PYC CB
+  | NUM KP PYC CB
+  | error IGU K CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error K CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un simbolo de asignacion."); }
+  | error IGU R CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error R CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un simbolo de asignacion."); }
+  | error PA DF PYC CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error DF PYC CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | T PA DF error CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | error KP PYC CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T KP error CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | K error CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | error DF PYC CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | PA DF error CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | NUM KP error CB { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+;
+
+AL ::=
+    background AN
+  | show AN
+  | hide AN
+  | pSound AN
+  | sSound AN
+  | error AN { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba 'background' o 'show' o 'hide' o 'playSound' o 'stopSound'."); }
+;
+
+AN ::= PA T PC PYC
+  | error T PC PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | PA error PC PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | PA T error PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ')'."); }
+  | PA T PC error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+;
+
+MEN ::= menu DP AO
+  | error DP AO { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba la palabra 'menu'."); }
+  | menu error AO { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ':' despues del 'menu'."); }
+;
+
+DP ::= colon;
+
+AO ::= PA DF DP AT AO
+  | error DF DP AT AO { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | PA DF error AT AO { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ':' despues del ')'."); }
+;
+
+DF ::= CAD PC
+  | CAD error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ')'."); }
+;
+
+AT ::=
+    AL AT
+  | OPE Y AT
+  | BRE AO
+  | GO AO
+  | IF AT
+  | T IGU K AT
+  | T IGU R AT
+  | T PA DF PYC AT
+  | T KP PYC AT
+  | PA DF PYC AT
+  | NUM KP PYC AT
+  | error IGU K AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error K AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un simbolo de asignación."); }
+  | error IGU R AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error R AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un simbolo de asignacion."); }
+  | error PA DF PYC AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T error DF PYC AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | T PA DF error AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | error KP PYC AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un identificador."); }
+  | T KP error AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | error DF PYC AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | PA DF error AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | NUM KP error AT { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " ((Symbol) $1)right + ": Se esperaba un ';'."); }
+;
+
+BRE ::= breaker PYC
+  | error PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba la palabra 'breaker'."); }
+  | breaker error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';' despues del 'breaker'."); }
+;
+
+GO ::= go PYC
+  | error PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba la palabra 'go'."); }
+  | go error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';' despues del 'go'."); }
+;
+
+KP ::= 
+    more Z PYC
+  | menus Z PYC
+  | by Z PYC
+  | on Z PYC
+  | more L KP PYC
+  | menus L KP PYC
+  | by L KP PYC
+  | on L KP PYC
+  | error Z PYC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un comparador valido."); }
+  | more Z error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); } 
+  | menus Z error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | by Z error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | on Z error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | more L KP error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un ';'."); }
+  | menus L KP error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un ';'."); }
+  | on L KP error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un ';'."); }
+  | by L KP error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un ';'."); }
+;
+
+Z ::= IGU RR
+  | error RR { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un operador de asignacion."); }
+  | IGU error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un número o un identificador."); }
+;
+
+RR ::= 
+    NUM
+  | T
+;
+
+L ::= 
+    PA DF
+  | PA K PC
+  | T 
+  | NUM
+  | error DF { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | error K PC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un '('."); }
+  | PA K error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un ')'."); }
+  | error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperaba un número o un identificador."); }
+;
+
+K ::= L KP;
+
+// FOR ::= for PA BK PC BN;
+// BK ::= BL PYC BM PYC BP;
+// BL ::= T IGU NUM;
+
+BM ::= T BU RR
+  | error BU RR { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un identificador."); }
+  | T error RR { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un operador de comparacion."); }
+  | T BU error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un número o operador."); }
+;
+
+BU ::= 
+    lessThan
+  | moreThan
+  | ltoet
+  | gtoet
+;
+// BD ::= 
+//     T PLU
+//   | T more RR
+// ;
+// PLU ::= awa;
+// BN ::= LLA BO LLC;
+// BO ::= 
+//     FOR BO
+//   | IF BO
+//   | T IGU R BO
+//   | T PA DF PYC BO
+//   | T KP PYC BO
+//   | K PYC BO
+//   | NUM KP PYC BO
+// ;   
+
+IF ::= if PA BM PC BF ELS
+  | error PA BM PC BF ELS { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un 'if'."); }
+  | if error BM PC BF ELS { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un '('."); }
+  | if PA BM error BF ELS { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un ')'."); }
+;
+
+BF ::= LLA BG LLC
+  | error BG LLC { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un '{'."); }
+  | LLA BG error { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un '}'."); }
+;
+
+BG ::= 
+    AL BG
+  | MEN BG
+  | IF BG
+  | T IGU K BG 
+  | T IGU R BG
+  | T PA DF PYC BG
+  | T KP PYC BG
+  | PA DF PYC BG
+  | NUM KP PYC BG
+  | error IGU K BG { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un identificador."); }
+  | T error K BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un simbolo de asignacion."); }
+  | error IGU R BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un identificador."); }
+  | T error R BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un simbolo de asignacion."); }
+  | error PA DF PYC BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un identificador."); }
+  | T error DF PYC BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un '('."); }
+  | T PA DF error BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un ';'."); }
+  | error KP PYC BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un identificador."); }
+  | T KP error BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un ';'."); }
+  | error DF PYC BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " ((Symbol) $1).right + ": Se esperaba un '('."); }
+  | PA DF error BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " ((Symbol) $1).right + ": Se esperaba un ';'."); }
+  | NUM KP error BG  { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " ((Symbol) $1)right + ": Se esperaba un ';'."); }
+;
+
+ELS ::= 
+    else IF
+  | else BF
+  | error IF { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un 'else'."); }
+  | error BF { System.err.println("Error en la línea " + ((Symbol) $1).left + ", columna " + ((Symbol) $1).right + ": Se esperab un 'else'."); }
+;

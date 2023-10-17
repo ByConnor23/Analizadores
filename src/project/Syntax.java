@@ -1,700 +1,1071 @@
 package project;
+
+import java.io.EOFException;
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Syntax {
-    private final List<String> tokens;
-    private int index;
+import javax.swing.tree.ExpandVetoException;
 
-    public Syntax(List<String> tokens) {
+public class Syntax {
+    private final List<Token> tokens;
+    private int index;
+    private List<String> errors;
+
+    public Syntax(List<Token> tokens) {
         this.tokens = tokens;
         this.index = 0;
+        this.errors = new ArrayList<>();
     }
 
-    public String parse() {
-        try {
-            A();
-            if (index != tokens.size()) {
-                throw new Exception("Error: código fuente no válido");
+    public String parse() throws Exception {
+
+        A();
+        if (index != tokens.size()) {
+            errors.add("Error: código fuente no válido");
+        }
+
+        if (!errors.isEmpty()) {
+            StringBuilder errorMessage = new StringBuilder();
+            errorMessage.append("Se encontraron los siguientes errores:\n");
+            for (String error : errors) {
+                errorMessage.append(error).append("\n");
             }
-            return "Análisis sintáctico existoso.";
-        } catch (Exception e) {
-            return "Error de análisis sintáctico: " + e.getMessage();
+            return errorMessage.toString();
+        } else {
+            return "Análisis sintáctico exitoso.";
         }
     }
+    // -------------------------------------------------------------------------------------------------------------------------------
 
+    // Para el metodo principal
     private void A() throws Exception {
-        B();
-        C();
-        D();
-        E();
+        if (!match(TokenType.PUBLIC)) {
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'public' en la línea " + line + ", columna " + column);
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba 'public' en la línea " + line + ", columna " + column);
+            }
+            consume();
+        } else {
+            consume();
+        }
+
+        if (!match(TokenType.STATIC)) {
+            if(index < tokens.size()){
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'static' en la línea " + line + ", columna " + column);
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba 'static' en la línea " + line + ", columna " + column);
+                return;
+            }
+            consume();
+        } else {
+            consume();
+        }
+
+        if (!match(TokenType.VOID)) {
+            if(index < tokens.size()){
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'void' en la línea " + line + ", columna " + column);
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba 'void' en la línea " + line + ", columna " + column);
+                return;
+            }
+            consume();
+        } else {
+            consume();
+        }
+
+        if (!match(TokenType.MAIN)) {
+            if(index < tokens.size()){
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'main' en la línea " + line + ", columna " + column);
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba 'main' en la línea " + line + ", columna " + column);
+                return;
+            }
+            consume();
+        } else {
+            consume();
+        }
+        // Continúa con el análisis
         F();
     }
 
-    private void B() throws Exception {
-        if (match("public")) {
-            consume();
-        } else {
-            throw new Exception("Se esperaba un 'public'");
-        }
-    }
-
-    private void C() throws Exception {
-        if (match("static")) {
-            consume();
-        } else {
-            throw new Exception("Se esperaba 'static'");
-        }
-    }
-
-    private void D() throws Exception {
-        if (match("void")) {
-            consume();
-        } else {
-            throw new Exception("Se esperaba 'void'");
-        }
-    }
-
-    private void E() throws Exception {
-        if (match("main")) {
-            consume();
-        } else {
-            throw new Exception("Se esperaba 'main'");
-        }
-        //()
-        PA();
-        PC();
-    }
-
-
-
     private void F() throws Exception {
-        if (match("\\{")) {
-            consume();
-            CD();
-            if (match("\\}")) {
-                consume();
-            } else {
-                throw new Exception("Se esperaba '}'");
-            }
-        } else {
-            throw new Exception("Se esperaba '{'");
-        }
+        PA(); // Para el parentesis de apertura " ( "
+        PC(); // Para el parentesis de cerradura " ) "
+        LLA(); // Para la llave de " { "
+        CA(); // Para determinar si se declara algo dentro del metodo principal
+        LLC();// Para el parentesis de " } "
     }
 
-    private void CD() throws Exception{
-        if(match("define")) {
-            consume();
-            N();
-            CD();
-        } else if(match("Screen")){
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // Para lo que se puede escribir dentro del metodo principal y tanto dentro como
+    // fuera de la
+    // funciones Screen () y define
+
+    private void CA() throws Exception {
+        if (match(TokenType.DEFINE)) {
+            X(); // Para el camino de 'define'
+            CA(); // Para la recursividad
+        } else if (match(TokenType.SCREEN)) {
+            // Si es "Screen", consume y va a AI()
             consume();
             AI();
-            CD();
-        }else if (match("Image") || match("Sound")){
-            consume();
-            AC();
-            CD();
-        }
-    }
-
-    private void N() throws Exception{
-        if (match("int") || match("double") || match("string") || match("bool")) {
-            consume();
-            T();
-            IG();
-            R();
-        } else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
-            consume();
-            X();
-        }else {
-            throw new Exception("Se esperaba otro valor v1");
-        }
-    }
-
-
-    private void T() throws Exception{
-        System.out.println(tokens.get(index));
-        if (match("public") || match("static") || match("void") || match("main")
-                || match("int") || match("double") || match("string") || match("bool") || match("false")
-                || match("true") || match("If") || match("else") || match("breaker") || match("Menu")
-                || match("Screen") || match("go") || match("define") || match("color") || match("Image")
-                || match("Sound") || match("setBackground") || match("playSound") || match("stopSound")
-                || match("Character")) {
-            throw new Exception("No se puede usar palabras reservadas");
-        } else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
-            consume();
+            // Continúa con la recursión
+            CA();
+        } else if (match(TokenType.LLAVE_DE_CERRADURA)) {
+            // Si es "}", no se genera error y simplemente se regresa
+            //consume();
+            return;
         } else {
-            throw new Exception("Identificador no valido");
+            // Si no es ninguno de los tokens anteriores, se genera un error
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'define', 'Screen' o '}' en la línea " + line + ", columna " + column);
+            }
+            consume();
+
+            //Para tratar de predecir
+            if(match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO) || 
+                match(TokenType.CHARACTER) || match(TokenType.IMAGE) || match(TokenType.SOUND)){
+                N();//Para seguir el camino
+                // Continúa con la recursión
+                CA();
+            }else if(match(TokenType.IDENTIFICADOR)){
+                AI();//Para seguir el camino
+                // Continúa con la recursión
+                CA();
+            }
         }
-    }
-    private void R() throws Exception{
-        if(match("\\d+")){
-            consume();
-        } else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
-            consume();
-        }else{
-            throw new Exception("Se esperaba otro valor");
-        }
-        //Punto y coma
-        YC();
+
     }
 
-    private void X() throws Exception{
-        IG();
-        if (match("Character")){
-            consume();
-        }else {
-            throw new Exception("Se esperaba 'Character'");
-        }
-        S();
-    }
+    private void N() throws Exception {
 
-    private void S() throws Exception{
-        PA();
-        DD();
-        PC();
-        YC();
-    }
-
-    private void DD() throws Exception{
-        P();
-        if (match(",")){
-            consume();
-        }else {
-            throw new Exception("Se esperaba una ','");
-        }
-        U();
-    }
-
-    private void U() throws Exception{
-        if (match("Color")){
-            consume();
-        }else{
-            throw new Exception("Se esperaba una 'Color'");
-        }
-        DE();
-    }
-
-    private void DE() throws Exception{
-        IG();
-        P();////////////////////////////////////////////
-    }
-
-    private void BQ() throws Exception{
-        if(match("/")){
-            consume();
-        }else{
-            throw new Exception("Se esperaba un #");
-        }
-        P();
-    }
-
-    private void P() throws Exception{
-        if (match("(['\"])(.*?)\\1")){
-            consume();
-        }else{
-            throw new Exception("Se esperaba una Cadena válida");
-        }
-    }
-
-    private void IG() throws Exception{
-        if(match("=")){
-            consume();
-        }else{
-            throw new Exception("Se esperaba '='");
-        }
-    }
-
-    private void AC() throws Exception{
-        T();
-        IG();
-        P();
-        YC();
-    }
-
-    private void AI() throws Exception{
-        T();
-        PA();
-        PC();
-        AJ();
-    }
-
-    private void AJ() throws Exception{
-        if (match("\\{")) {
-            consume();
-            CE();
-            if (match("\\}")) {
+        // Si despues del define recibo un tipo de dato hago esto
+        if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
+            // consumo y reviso el resto
+            OPE();
+            Q(); // Para el resto
+        } else if (match(TokenType.CHARACTER)) {
+            // Consume y sigo con el resto
+            if (match(TokenType.CHARACTER)) {
                 consume();
             } else {
-                throw new Exception("Se esperaba '}'");
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
+                consume();
             }
+            O();// Para el resto
+        } else if (match(TokenType.IMAGE) || match(TokenType.SOUND)) {
+            // Consumo y sigo con el resto
+            if (match(TokenType.IMAGE) || match(TokenType.SOUND)) {
+                consume();
+            } else {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'Image' o 'Sound' en la línea " + line + ", columna " + column);
+            }
+            AC(); // Para el resto
         } else {
-            throw new Exception("Se esperaba '{'");
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un tipo dato, un 'Character' o un 'Image/Sound' en " + line + ", columna " + column);
+            consume();
         }
     }
 
-    private void YC() throws Exception{
-        System.out.println("Token actual: " + tokens.get(index));
-        if (match(";")){
-            consume();
-        }else{
-            throw new Exception("Se esperaba ';'");
-        }
-    }
-
-    private void PA() throws Exception{
-        if (match("\\(")){
-            consume();
-        }else{
-            throw new Exception("Se esperaba '('");
-        }
-    }
-
-    private void PC() throws Exception{
-        if (match("\\)")){
-            consume();
-        }else{
-            throw new Exception("Se esperaba ')'");
-        }
-    }
-
-    public void CE()throws Exception{
-        System.out.println("Para por CE");
-        if(match("define")){
-            consume();
-            N();
-            CE();
-        }else if(match("int") || match("double") || match("string") || match("bool")){
-            consume();
-            T();
-            if(match("=")){
-                consume();
-                CE();
-            }
-            YC();
-            CE();
-        }
-
-        if(match("\\(")){
-            System.out.println("pasa");
-            consume();
-            if(match("(['\"])(.*?)\\1")){
-                consume();
-                PC();
-                YC();
-                CE();
-            } else if(match("\\(") || match("\\d+") || match("[a-zA-Z_][a-zA-Z0-9_]*")){
-                K();
-                CE();
-            }
-
-        }
-
-        if(match("\\d+")){
-            consume();
-            KP();
-            CE();
-        }
-        if(match("setBackground") || match("playSound") || match("stopSound") || match("show") || match("hide")){
-            AL();
-            CE();
-        }
-
-
-        if (match("Image") || match("Sound")){
-            consume();
-            AC();
-            CE();
-        }else if (match("Menu")){
-            consume();
-            if(match(":")){
-                consume();
-            }else{
-                throw new Exception("Esperando ':'");
-            }
-            AO();
-            CE();
-
-        }else if(match("if")){
-            BB();
-            CE();
-
-        }else if(match("for")){
-            consume();
-            PA();
-            BK();
-            PC();
-            BN();
-        }else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
-            System.out.println("------------?");
-            consume();
-            //
-            if(match("[+*-/]")){
-                System.out.println("asina");
-                consume();
-                L();
-                KP();
-                YC();
-            }
-
-            if (match("=")){
-                consume();
-                R();
-            }
-
-            if (match("\\(")){
-
-                //consume();
-                PA();
-                P();
-                PC();
-                YC();
-                System.out.println("aqui termina (string)");
-            }else {
-                throw new Exception("Se esperaba '('");
-            }
-            CE();
-
-
-        }
-    }
-
-    public void BK() throws Exception{
-        BL();
-        YC();
-        BM();
-        YC();
-        BP();
-    }
-
-    public void BL() throws Exception{
-        T();
-        IG();
-        if (match("\\d+")){
-            consume();
-        }else {
-            throw new Exception("Se esperaba un número");
-        }
-    }
-
-    public void BM() throws Exception{
-        T();
-        BU();
-        R();
-    }
-
-    public void BU() throws Exception{
-        System.out.println(tokens.get(index));
-        if (match("<") || match(">") || match(">=") || match("<=")){
-            consume();
-            T();
-        }else{
-            throw new Exception("Se esperaba un signo de comparación");
-        }
+    private void Q() throws Exception {
+        T(); // Para determinar que sea un Identificador y no una palabra clave
+        IGU(); // Para el signo de '='
+        R(); // Para el Numero o Identificador
 
     }
 
-    public void BP() throws Exception{
-        T();
-        if (match("++") || match("--")){
+    private void O() throws Exception {
+        T(); // Para determinar que sea un Identificador y no una palabra clave
+        IGU(); // Para el igual
+        // Para la palabra reservada Character
+        if (match(TokenType.CHARACTER)) {
             consume();
-        } else if(match("+") || match("-")){
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
             consume();
-            R();
-        }else{
-            throw new Exception("Se esperaba un incremento valido");
         }
+        S(); // Para lo que va despues
 
     }
 
-    private void BN() throws Exception{
-        if (match("\\{")){
-            consume();
-            BO();
-            if (match("\\}")){
-                consume();
-            }else{
-                throw  new Exception("Se esperaba '}'");
-            }
-        }else {
-            throw new Exception("Se esperaba '{'");
-        }
+    private void S() throws Exception {
+        PA(); // Parantesis de apertura
+        DD(); // Para lo que va dentro del parentensis
+        PC(); // Parentesis de cerradura
+        PYC(); // Punto y coma
     }
 
-    private void BO() throws Exception{
-        if (match("if")){
+    private void DD() throws Exception {
+        CAD(); // Para el string
+        // Para la coma
+        if (match(TokenType.COMA)) {
             consume();
-            BO();
-        }else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
             consume();
-            //
-            if(match("+=") || match("-=") || match("==") || match("/=")
-                    || match(("*="))){
-                consume();
-                T();
-            }
-
-            if(match("[+*-/]")){
-                consume();
-                L();
-                KP();
-                YC();
-            }
-
-            if (match("\\(")){
-                consume();
-                PA();
-                P();
-                PC();
-                YC();
-            }else {
-                throw new Exception("Se esperaba '('");
-            }
-
         }
-
-        if(match("\\(")){
-            consume();
-            if(match("(['\"])(.*?)\\1")){
-                consume();
-                PC();
-                YC();
-            }
-            if(match("\\(") || match("\\d+") || match("[a-zA-Z_][a-zA-Z0-9_]*")){
-                K();
-                CE();
-            }
-
-        }
-
+        U(); // Para la palabra reservada de Color
     }
 
-    public void K() throws Exception{
-        L();
+    private void DE() throws Exception {
+        PA(); // Parantesis de apertura
+        BQ(); // Para el color
+        PC(); // Parentesis de cerradura
+    }
+
+    private void R() throws Exception {
+        if (match(TokenType.NUMERO)) {
+            NUM(); // validar si es un número
+            // PYC(); // Para el ;
+        } else if (match(TokenType.CADENA)) {
+            CAD(); // validar si es una cadena
+            // PYC(); // Para el ;
+        } else if (match(TokenType.TRUE) || match(TokenType.FALSE)) {
+            TF(); // Para falso y verdadero
+            // PYC(); // Para el ;
+        } else if (match(TokenType.IDENTIFICADOR)) {
+            T(); // Para validar que es un identificador
+
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un número o cadena o 'True' o 'False' o identificador en la línea " + line
+                    + ", columna " + column);
+        }
+
+        PYC(); // Para el ;
+    }
+
+    private void AC() throws Exception {
+        T(); // Para el identificador
+        IGU(); // Para el igual
+        CAD(); // Para el String
+        PYC(); // Para el ;
+    }
+
+    private void AI() throws Exception {
+        T(); // Verifico que sea un identificador
+        PA(); // Para el parentesis de apertura
+        PC(); // Para el parentesis de cerradura
+        AJ(); // Para lo que va despues de eso
+    }
+
+    private void AJ() throws Exception {
+        LLA(); // Para la llave de apertura
+        CB(); // Para lo que se puede escribir dentro de la función Screen
+        LLC(); // Para la llave de cerradura
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Para lo que se puede escribir dentro de los metodos de Screen
+
+    private void CB() throws Exception {
+        if (match(TokenType.DEFINE)) {
+            X(); // Verifico que me llegue un define
+            CB(); // Vuelvo a llamar al metodo para que sea recursivo
+        }else if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
+                match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
+                match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)
+                ){
+            B(); // Para todas estas opciones
+            CB(); // Para la recursividad
+        } else if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
+            H(); // Para en caso de un tipo de dato
+            CB(); // Para la recursividad
+        } else  if (match(TokenType.MENU)) {
+            MEN(); // Para el Menu
+            CB(); // Para la recursividad
+        } //Consideracion a tomar: Aqui podría haber un error.
+        // else {
+
+        // }
+    }
+
+    private void AN() throws Exception {
+        PA(); // Para el parentesis de apertura
+        T(); // Para el identificador
+        PC(); // Para el parentesis de cerradura
+        PYC(); // Para el punto y coma
+    }
+
+    private void DF() throws Exception {
+        CAD(); // ¨Para el String
+        PC(); // Para el parentesis de Cerradura
+    }
+
+    private void K() throws Exception {
+        L(); // Para los simbolos
         KP();
-        YC();
     }
 
-    public void KP()throws Exception{
-        if(match("[+*-/]")){
-            consume();
-            L();
-            KP();
-            YC();
-        }
-    }
-
-    public void L()throws Exception{
-        if(match("\\(")){
-            consume();
-            K();
-            if(match("\\)")){
-                consume();
-            }else {
-                throw new Exception("Se espera una ')'");
+    private void L() throws Exception {
+        if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+            PA(); // Parentesis de apertura
+            if (match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO) || match(TokenType.IDENTIFICADOR)) {
+                K(); // para llamar a la funcion de K
+                PC(); // Para el )
             }
-        } else if (match("[a-zA-Z_][a-zA-Z0-9_]*")) {
+        } else if (match(TokenType.IDENTIFICADOR)) {
+            T(); // Para el identificador
+        } else if (match(TokenType.NUMERO)) {
+            NUM(); // Para el numero
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba '(', identificador o numero en la línea" + line + ", columna " + column);
             consume();
-        } else if (match("\\d+")) {
-            consume();
-        }else {
-            throw new Exception("Se esperaba '(', identificador o numero");
         }
     }
 
-    public void AL()throws Exception{
-        if(match("setBackground") || match("playSound") || match("stopSound") || match("show") || match("hide")){
+    private void KP() throws Exception {
+        if (match(TokenType.SUMA) || match(TokenType.RESTA) || match(TokenType.MULTIPLICACION) || 
+            match(TokenType.DIVISION)) {
             consume();
-            AN();
-            YC();
-        }else{
-            throw new Exception("Se esperaba setBackground, playSound,stopSound,show, hide");
-        }
-    }
-
-    public void AN()throws Exception{
-        PA();
-        T();
-        PC();
-    }
-
-    public void AP()throws Exception{
-        if(match(":")){
-            consume();
-        }else {
-            throw new Exception("Se espera un ':'");
-        }
-        AO();
-    }
-
-    public void AO()throws Exception{
-
-        if(match("\\(")){
-            DF();//("")
-            if(match(":")){
-                consume();
-                AT();//...
-                LL();
-                //AO();
-            }else {
-                throw new Exception("Esperando ':'");
-            }
-
-        }
-
-    }
-
-    public void DF()throws Exception{
-        PA();
-        P();
-        PC();
-    }
-
-    public void AT()throws Exception{
-        if(match("\\(")){
-            consume();
-            if(match("(['\"])(.*?)\\1")){
-
-                P();
-                PC();
-                YC();
-                AT();
-            }
-            if(match("\\(") || match("[a-zA-Z_][a-zA-Z0-9_]*") || match("\\d+")){
-
-                K();
-                AT();
-            }
-        }
-        if(match("setBackground") || match("playSound") || match("stopSound") || match("show") || match("hide")){
-            consume();
-            AL();
-            AT();
-        }
-        if(match("if")){
-
-            BB();
-            AT();
-        }
-        if(match("\\d+")){
-            K();
-            AT();
-        }else if(match("[a-zA-Z_][a-zA-Z0-9_]*")){
-            consume();
-            //
-            if(match("[+*-/]")){
-
+            if (match(TokenType.ASIGNACION)) {
+                Z(); // en caso de que tenga una operacion iterativa
+            } else {
                 L();
                 KP();
-                YC();
-                AT();
             }
 
-            if(match("\\(")){
+        }else{
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();  
+            errors.add("Se esperaba un operador en la línea" + line + ", columna " + column);
+            consume();
+        }
+        PYC();
+    }
 
-                P();
-                PC();
-                YC();
-                AT();
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Para las producciones que se comparten en su mayoria
+
+    private void H() throws Exception{
+        if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
+            OPE(); // Verfico que sea un tipo de dato
+            Y(); // Verifico que es lo siguiente que llega
+        }
+    }
+
+    private void Y() throws Exception {
+        T(); // Verifico que me llegue un id
+        if (match(TokenType.COMA)) {
+            PYC(); // Si llega el punto y coma termina
+        } else if (match(TokenType.ASIGNACION)) {
+            IGU(); // Si llega el igual es necesario recibir el valor
+            R(); // Para validar el valor y, punto y coma
+        } else if (match(TokenType.COMA)) {
+            // Coma
+            if (match(TokenType.COMA)) {
+                consume();
+            } else {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
+                consume();
             }
+            Y();// recursivo
+        }
+    }
+
+    private void B() throws Exception{
+        if (match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
+                match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND)) {
+            AL(); // Para determinar si me llega una de estas palabras reservadas
+            
+        } else if (match(TokenType.IF)) {
+            IF(); // Para el if
+        } else if (match(TokenType.IDENTIFICADOR)) {
+            T(); // Si llega un identificador
+            // Y luego un = quiere decir que es una inicializacion de variable
+            if (match(TokenType.ASIGNACION)) {
+                IGU(); // Para el igual
+                if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+                    K();
+                } else if (match(TokenType.NUMERO) || match(TokenType.CADENA) || match(TokenType.TRUE)
+                        || match(TokenType.FALSE) || match(TokenType.IDENTIFICADOR)) {
+                    R(); // Para determinar el tipo de dato
+                }
+            } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+                PA(); // Para el parentesis de apertura
+                DF(); // Para lo que va despues
+                PYC(); // Para el punto y coma
+            } else if (match(TokenType.SUMA) || match(TokenType.RESTA) || match(TokenType.MULTIPLICACION) 
+                    || match(TokenType.DIVISION)) {
+                KP(); // Llamo a K prima, porque lo siquiente que debe esperar es un signo
+                PYC(); // Para el " ; "
+            }
+        } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+            // K(); // Si llegue primero un parentesis llamo a K
+            PA();
+            DF();
+            PYC(); // Para el " ; "
+
+        } else if (match(TokenType.NUMERO)) {
+            NUM(); // Para verificar que sea un número
+            KP(); // Para verificar que lo siguiente del número sea un operador
+            PYC(); // Para el " ; "
+        }
+        //¿Aquí podría haber un error?
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Para la estructura de menu
+
+    // Opciones del Menu
+    private void AO() throws Exception {
+        if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+            PA(); // Para el parentesis de apertura
+            DF(); // Para la cadena y parentesis de cerradura
+            DP(); // Para el " : "
+            AT(); // Para lo que puede ir dentro de cada opción
+            AO(); // Para llamar esto de manera recursiva y crear tantas opciones como se desee
         }
 
     }
 
-    public void LL() throws Exception{
-        if(match("go")){
-            PP();
-        }else if (match("breaker")){
-            AY();
+    private void AT() throws Exception {
+        if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
+            H();
+            AT();
+        } else if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
+                match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
+                match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)
+                ){
+            B(); // Para todas estas opciones) {
+            AT();
+        } else if (match(TokenType.BREAKER)) { // Para marcar el final de una opción
+            BRE(); // Para determinar que me llegue un breaker
+            AO(); // Para llamar de manera recursiva a las opciones del menu
+        } else if (match(TokenType.GO)) { // Para marcar el final de una opción
+            GO(); // Para el Go
+            AO(); // Para la recursividad
+        } 
+        //¿Aquí podría haber un error?
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Para la estructura del for
+    // private void BK() throws Exception {
+    //     BL(); // Para el iterador
+    //     PYC(); // Para el " ; "
+    //     BM(); // Para la la condición
+    //     PYC(); // Para el " ; "
+    //     BP(); // Para el incremento
+    // }
+
+    private void BL() throws Exception {
+        T(); // Para el identificador
+        IGU(); // Para el " = "
+        NUM(); // Para el número
+    }
+
+    private void BM() throws Exception {
+        T(); // Para el identificador
+        BU(); // Para lo comparadores
+        RR(); // Para la igual
+    }
+
+    private void RR() throws Exception {
+        if (match(TokenType.NUMERO)) {
+            NUM(); // validar si es un número
+            // PYC(); // Para el ;
+        } else if (match(TokenType.CADENA)) {
+            T(); // Para validar que es un identificador
+            // PYC(); // Para el ;
+        }else{
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un número o cadena en la línea " + line + ", columna " + column);
+            consume();
         }
     }
 
-    public void PP()throws Exception{
-        if(match("go")){
+    // private void BP() throws Exception {
+    //     T(); // Para el identificador
+    //     if (match("\\+\\+")) {
+    //         PLU(); // En caso de que me llegue un aumento de 1
+    //     } else if (match("\\+")) {
+    //         consume(); // Consumo y llamo al siguiente
+    //         RR(); // En caso de que me llegue un incremento que tenga un valor númerico o con un
+    //               // identificador
+    //     }
+    // }
+
+    // private void BN() throws Exception {
+    //     LLA(); // Para la llave de apertura
+    //     BO(); // Para lo que se puede llamar dentro del for
+    //     LLC(); // Para la llave de cerradura
+    // }
+
+    // private void BO() throws Exception {
+    //     if (match("for")) {
+    //         FOR(); // Para el for
+    //         BO(); // Para la recursividad
+    //     } else if (match("if")) {
+    //         IF(); // Para verificar que es un if
+    //         BO(); // Para la recursividad
+    //     } else if (match("[a-zA-Z_][a-zA-Z0-9_]*")) {
+    //         T(); // Si llega un identificador
+    //         // Y luego un = quiere decir que es una inicializacion de variable
+    //         if (match("=")) {
+    //             IGU(); // Para el igual
+    //             if (match("\\(")) {
+    //                 K();
+    //                 BO();
+    //             } else if (match("\\d+") || match("(['\"])(.*?)\\1") || match("True")
+    //                     || match("False") || match("[a-zA-Z_][a-zA-Z0-9_]*")) {
+    //                 R(); // Para determinar el tipo de dato
+    //                 BO();
+    //             }
+    //         } else if (match("\\(")) {
+    //             PA(); // Para el parentesis de apertura
+    //             DF(); // Para lo que va despues
+    //             PYC(); // Para el punto y coma
+    //             BO(); // Para llamar al metodo de nuevo
+    //         } else if (match("[+*-/]")) {
+    //             KP(); // Llamo a K prima, porque lo siquiente que debe esperar es un signo
+    //             PYC(); // Para el " ; "
+    //             BO(); // Para llamar de nuevo al metodo
+    //         }
+    //     } else if (match("\\(")) {
+    //         // K(); // Si llegue primero un parentesis llamo a K
+    //         PA();
+    //         DF();
+    //         PYC(); // Para el " ; "
+    //         BO(); // Para la recursividad
+    //     } else if (match("\\d+")) {
+    //         NUM(); // Para verificar que sea un número
+    //         KP(); // Para verificar que lo siguiente del número sea un operador
+    //         PYC(); // Para el " ; "
+    //         BO(); // Para la recursividad
+    //     }
+    // }
+
+    private void Z() throws Exception {
+        IGU(); // Para los operadores
+        RR(); // Para determinar que sea un número o identificador
+        // PYC(); // Para el " ; "
+        // BO(); // Para llamar al metodo de nuevo
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Para la estructura del if
+
+    private void BF() throws Exception {
+        LLA(); // Para la llaves de apertura
+        BG(); // Para lo que va dentro del if
+        LLC(); // Para la llave de cerradura
+    }
+
+    private void BG() throws Exception {
+        if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
+                match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
+                match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)
+                ){
+            B(); // Para todas estas opciones
+            BG(); // Para la recursividad
+        }else if(match(TokenType.MENU)){
+            MEN(); //Para el menu
+            BG(); // Para la recursividad
+        }
+        //¿Aquí podría haber un error?
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Para expresiones regulares
+
+    // Para determinar si es un identificador
+    private void T() throws Exception {
+        if (match(TokenType.IDENTIFICADOR)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un identificador en la línea " + line + ", columna " + column);
+            consume();
+        }
+    }
+
+    // Para los números
+    private void NUM() throws Exception {
+        if (match(TokenType.NUMERO)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un número en la línea " + line + ", columna " + column);
+            consume();
+        }
+    }
+
+    // Para las cadenas
+    private void CAD() throws Exception {
+        if (match(TokenType.CADENA)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba una cadena en la línea " + line + ", columna " + column);
+            consume();
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Para palabras reservadas
+    private void X() throws Exception {
+        if (match(TokenType.DEFINE)) {
+            consume();
+        } 
+        N();
+    }
+
+    private void OPE() throws Exception {
+        if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
+            consume();
+        }
+    }
+
+    private void TF() throws Exception {
+        if (match(TokenType.TRUE) || match(TokenType.FALSE)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'True' o 'False' en la línea " + line + ", columna " + column);
+        }
+    }
+
+    // private void CHA() throws Exception {
+    //     if (match("Character")) {
+    //         consume();
+    //     } else {
+    //         throw new Exception("Se esperaba 'Character' ");
+    //     }
+    // }
+
+    private void U() throws Exception {
+        if (match(TokenType.COLOR)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un 'Color' en la línea " + line + ", columna " + column);
+        }
+        DE(); // Para el color
+    }
+
+    // private void AB() throws Exception {
+    //     if (match("Image") || match("Sound")) {
+    //         consume();
+    //     }
+    //     AC(); // Para lo que va despues, ("dirección")
+    // }
+
+    // private void SCR() throws Exception {
+    //     if (match("Screen")) {
+    //         consume();
+    //     } else {
+    //         throw new Exception("Se esperaba 'Screen' ");
+    //     }
+    //     AI();// Para lo que va despues de la palabra reservada Screen
+    // }
+
+    private void AL() throws Exception {
+        if (match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
+                match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND)) {
             consume();
         }else{
-            throw new Exception("Se espera go");
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' en la línea " + line + ", columna " + column);
+            consume();
         }
-        T();
-        YC();
+        AN(); // Para lo que va despues, (id)
     }
 
-    public void AY()throws Exception {
-        if (match("breaker")) {
+    private void MEN() throws Exception {
+        if (match(TokenType.MENU)) {
             consume();
-            YC();
         } else {
-            throw new Exception("Esperando breaker");
-        }
-
-    }
-
-    public void BB()throws Exception{// BB de funcion no se refuere a mi xd
-        if(match("if")){
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'Menu' en la línea " + line + ", columna " + column);
             consume();
-        }else {
-            throw new Exception("Esperando palabra 'if'");
         }
-        PA();
-        BC();
-        PC();
-        BF();
-        BI();
+        DP(); // Para el " : "
+        AO(); // Para las opciones del menu
     }
 
-    public void BC()throws Exception{
-        T();
-        BD();
-    }
-
-    public void BD()throws Exception{
-        BU();
-    }
-
-    public void BF()throws Exception{
-        if(match("\\{")){
+    private void BRE() throws Exception {
+        if (match(TokenType.BREAKER)) {
             consume();
-        }else {
-            throw new Exception("Esperando {");
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'Breaker' en la línea " + line + ", columna " + column);
+            consume();
         }
-        CE();
-
-        if(match("\\}")){
-            consume();
-        }else {
-            throw new Exception("Esperando }");
-        }
+        PYC(); // Para el " ; "
     }
 
-    public void BI()throws Exception{
-        if(match("else")){
+    private void GO() throws Exception {
+        if (match(TokenType.GO)) {
             consume();
-            if(match("\\{")){
-                BF();
-            } else if (match("if")) {
-                BB();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba 'Go' en la línea " + line + ", columna " + column);
+            consume();
+        }
+        T(); // Para el identificador
+        PYC(); // Para el " ; "
+    }
+
+    // private void FOR() throws Exception {
+    //     if (match("for")) {
+    //         consume();
+    //     } else {
+    //         throw new Exception("Se esperaba un 'for' ");
+    //     }
+    //     PA(); // Para el parentesis de apertura
+    //     BK(); // Para el tema del condicional del for
+    //     PC(); // Para el parentesis de cerradura
+    //     BN(); // Para lo que va dentro del for
+    // }
+
+    private void IF() throws Exception {
+        if (match(TokenType.IF)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un 'if' en la línea " + line + ", columna " + column);
+            consume();
+        }
+        PA(); // Para el parentesis de apertura
+        BM(); // Para el condicional
+        PC(); // Para el parentesis de cerradura
+        BF(); // Para lo que va dentro del if
+        ELS(); // Para poner o no, un else if o else
+    }
+
+    private void ELS() throws Exception {
+        if (match(TokenType.ELSE)) {
+            consume();
+            if (match(TokenType.IF)) {
+                IF(); // Si recibo un else if
+            } else {
+                BF(); // Si recibo else
             }
+        }else{
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un 'else' en la línea " + line + ", columna " + column);
+            consume();
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Metodos para signos de operadores
+
+    private void IGU() throws Exception {
+        if (match(TokenType.ASIGNACION)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un '=' en la línea " + line + ", columna " + column);
+            consume();
         }
     }
 
+    private void BU() throws Exception {
+        if (match(TokenType.MENOR_QUE) || match(TokenType.MAYOR_QUE) || match(TokenType.MENOR_O_IGUAL_QUE) || 
+            match(TokenType.MAYOR_O_IGUAL_QUE) || match(TokenType.IGUALACION)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba '<' o '>' o '<=' o '>=' en la línea " + line + ", columna " + column);
+            consume();
+        }
+    }
+
+    /*
+     * private void AX() throws Exception{
+     * if(match("\\+=") || match("\\-=") || match("\\*=") || match("/=") ||
+     * match("==")){
+     * consume();
+     * }else{
+     * throw new Exception("Se esperaba '+=' o '-=' o '*=' o '/=' o '==' ");
+     * }
+     * }
+     */
+
+    // private void PLU() throws Exception {
+    //     if (match("\\+\\+")) {
+    //         consume();
+    //     } else {
+    //         throw new Exception("Se esperaba un '++' ");
+    //     }
+    // }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // Metodos para signos
+    private void COM() throws Exception {
+        if (match(TokenType.COMA)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
+        }
+    }
+
+    private void BQ() throws Exception {
+        if (match(TokenType.ASIGNACION_DE_COLOR)) {
+            consume();
+        } else {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba un '#' en la línea " + line + ", columna " + column);
+        }
+        CAD();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    // Metodos para signos de delimitadores
+
+    // Para llaves de Apertura " { "
+    private void LLA() throws Exception {
+        if (match(TokenType.LLAVE_DE_APERTURA)) {
+            consume(); // Consumir el token de cierre de llave '}'
+        } else {
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index - 1); // Obtener el último token analizado
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '{' para cerrar el bloque en la línea " + line + ", columna " + column);
+                consume();
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba ' { ' en la línea " + line + ", columna " + column);
+            }
+            consume();
+        }
+    }
+
+    // /Para llaves de Cerradura " } "
+    private void LLC() throws Exception {
+            
+        if (!match(TokenType.LLAVE_DE_CERRADURA)) {
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index); 
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba ' } ' en la línea " + line + ", columna " + column);
+            }
+            consume();
+        } else {
+            consume(); // Consumir el token de cierre de llave '}'
+        }
+    }
+
+    // /Para el punto y coma " ; "
+    private void PYC() throws Exception {
+        if(!match(TokenType.PUNTO_Y_COMA)){
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba ' ; ' en la línea " + line + ", columna " + column);
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba ' ; ' en la línea " + line + ", columna " + column);
+            }
+            consume();
+        }else{
+            consume();
+        }
+    }
+
+    /// Para parentesis de Aparetura " ( "
+    private void PA() throws Exception {
+        if (!match(TokenType.PARENTESIS_DE_APERTURA)) {
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
+            }
+            consume();
+        } else {
+            consume();
+        }
+    }
+
+    /// Para parentensis de cerradura " ) "
+    private void PC() throws Exception {
+        if (!match(TokenType.PARENTESIS_DE_CERRADURA)) {
+            if (index < tokens.size()) {
+                Token currentToken = tokens.get(index);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
+            }
+            consume();
+        } else {
+            consume();
+        }
+    }
+
+    // Para los dos puntos " : "
+    private void DP() throws Exception {
+        if (!match(TokenType.DOS_PUNTOS)) {
+            Token currentToken = tokens.get(index);
+            int line = currentToken.getLine();
+            int column = currentToken.getColumn();
+            errors.add("Se esperaba ' : ' en la línea " + line + ", columna " + column);
+            consume();
+        } else {
+            consume();
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
     // Métodos auxiliares
-    private boolean match(String expectedToken) {
-        //System.out.println(tokens.get(index));
-        if (index < tokens.size()) {
-            String token = tokens.get(index);
-            Pattern pattern = Pattern.compile(expectedToken);
-            Matcher matcher = pattern.matcher(token);
-            return matcher.matches();
+
+    private boolean match(TokenType expectedType) {
+        if (index >= 0 && index < tokens.size()) { // Verifica los límites antes de acceder
+            Token token = tokens.get(index);
+            return token.getType() == expectedType;
         }
         return false;
     }
 
     private void consume() {
-        System.out.print("pec");
-        System.out.println(tokens.get(index));
-        index++;
+        if (index < tokens.size()) {
+            System.out.println(tokens.get(index).getValue());
+            index++;
+            } else {
+            // Si no quedan más tokens, puedes lanzar una excepción o simplemente mostrar
+            //un mensaje de advertencia
+            System.out.println("¡Se ha llegado al final del archivo fuente!");
+            // System.exit(0);
+        }
+    }
+
+    public List<String> getErrors() {
+        return errors;
     }
 }
-
