@@ -343,6 +343,7 @@ public class Compiler extends JFrame {
 	}
 
 	private void analyse() {
+		symbolTable.setModel(new DefaultTableModel());
 		outputConsole.setText("");
 		try {
 			// Análisis Léxico
@@ -351,6 +352,8 @@ public class Compiler extends JFrame {
 			Analyzer analizador = new Analyzer(content);
 	
 			List<Token> tokens = analizador.getTokens();
+
+			List<String> errores =  new ArrayList<>(); 
 	
 			Object[][] data = new Object[tokens.size()][4];
 	
@@ -360,6 +363,10 @@ public class Compiler extends JFrame {
 				data[i][1] = token.getType();
 				data[i][2] = token.getLine();
 				data[i][3] = token.getColumn();
+				if (token.getType() == TokenType.TOKEN_UNKNOWN) {
+                	// outputConsole.append("Error léxico en la línea " + token.getLine() + ", columna " + token.getColumn() + ": " + token.getValue() + "\n");
+					errores.add("Token desconocido " + token.getValue() + " : en la línea"  + token.getLine() + ", columna " + token.getColumn());
+				}
 			}
 	
 			symbolTable.setModel(new DefaultTableModel(data, new String[] {
@@ -370,7 +377,9 @@ public class Compiler extends JFrame {
 			Syntax syntax = new Syntax(tokens);
 			syntax.parse();
 			// Comprobar si hubo errores y mostrarlos
-			List<String> errores = syntax.getErrors();
+			
+
+			errores.addAll(syntax.getErrors());
 			if (!errores.isEmpty()) {
 				outputConsole.append("Errores:\n");
 				for (String error : errores) {

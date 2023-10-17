@@ -50,5 +50,5 @@ public enum TokenType {
     FOR,
     IF,
     ELSE,
-    ERROR_TOKEN_DESCONOCIDO
+    TOKEN_UNKNOWN
 }

@@ -14,7 +14,7 @@ import static project.TokenType.*;
     }
 
 %}
-    /* spaces */
+/* spaces */
 whiteSpace     = [ \t\r\n]+
 
 /* comments */
@@ -146,11 +146,23 @@ commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
 
 %%
 
-    \n { fila++; columna=1;}
-    \r\n?               { fila++; columna = 1; }
-    [\u2028\u2029]     { fila++; columna = 1; }
+    \n {
+        fila++;
+        columna = 1;
+        // Resto del código para hacer algo con el salto de línea si es necesario
+    }
 
-    {comment} | {whiteSpace} { }
+    [ \t]+ {
+        int numEspacios = yytext().length();
+        columna += numEspacios;
+    }
+    
+    [\t\n\r\u2028\u2029]+ {
+        fila += yytext().chars().filter(ch -> ch == '\n').count();
+        columna = 1;
+    }
+
+    {comment} { }
 
     /* delimiters */
 
@@ -363,12 +375,16 @@ commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
 
     /* Identifer */
     {identifer} {
-                    return  newToken(TokenType.IDENTIFICADOR, yytext());
-                }
+        if (yytext().length() > 3) {
+            return newToken(TokenType.TOKEN_UNKNOWN, yytext());
+        }else{
+            return newToken(TokenType.IDENTIFICADOR, yytext());
+        }
+    }
 
     /* errors */
     .    {
-            return newToken(TokenType.ERROR_TOKEN_DESCONOCIDO, yytext());
+            return newToken(TokenType.TOKEN_UNKNOWN, yytext());
         }
 
 
