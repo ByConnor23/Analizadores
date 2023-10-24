@@ -14,18 +14,20 @@ import static project.TokenType.*;
     }
 
 %}
-/* spaces */
-whiteSpace     = [ \t\r\n]+
+    /* spaces */
+    whiteSpace     = [ \t\r\n]+
 
-/* comments */
-comment = {endOfLineComment} | {documentationComment} | {newStyleMultilineComment}
+    /* comments */
+    comment = {endOfLineComment} | {documentationComment} | {newStyleMultilineComment}
 
-// Comment can be the last line of the file, without line terminator.
-endOfLineComment       = "##" [^\r\n]* (\r|\n|\r\n)?
-documentationComment   = "#*" {commentContent} "*#"
-newStyleMultilineComment = "#*"
-commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
+    // Comment can be the last line of the file, without line terminator.
+    endOfLineComment       = "##" [^\r\n]* (\r|\n|\r\n)?
+    documentationComment   = "#*" {commentContent} "*#"
+    newStyleMultilineComment = "#*"
+    commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
 
+    /* file management */
+    memoryManagement = "[A-Za-z]:\\[^:*?\"<>|\\r\\n]+"
 
     /* indentifer */
 
@@ -82,6 +84,8 @@ commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
 
     /* color */
     colorSymbol = "#"
+
+    colorHexadecimal = [0-9a-fA-F]{6}
 
     /* keywords */
     
@@ -258,6 +262,10 @@ commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
                     return newToken(TokenType.ASIGNACION_DE_COLOR, yytext());
                 }
 
+    {colorHexadecimal} {
+                            return newToken(TokenType.COLOR_HEX, yytext());
+                        }
+
     /* keywords */
     
     {public} {
@@ -332,6 +340,10 @@ commentContent         = ( [^*] | \*+ [^#] | \*+ \# [^*] )*
     {sound} {
                 return newToken(TokenType.SOUND, yytext());
             }
+
+    {memoryManagement} {
+                            return newToken(TokenType.MEMORY_MANAGEMENT, yytext());
+                        }                        
 
     /* dataTypes */
 
