@@ -7,6 +7,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.HashMap;
 
 import javax.swing.*;
@@ -309,7 +310,7 @@ public class Compiler extends JFrame {
 		}
 		{// ==================== Symbol Table ====================
 			symbolTable.setModel(new DefaultTableModel(new Object[][] {}, new String[] {
-				"Token Value", "Token Type", "Token Row", "Token Column"
+				"Token Value", "Token Type", "Position", "Valor"
 			}) {
 				Class<?>[] columnTypes = new Class<?>[] {
 					String.class, String.class, String.class, String.class
@@ -351,18 +352,28 @@ public class Compiler extends JFrame {
 	
 			Analyzer analizador = new Analyzer(content);
 	
-			List<Token> tokens = analizador.getTokens();
+			tokens = analizador.getTokens();
+			List<arbolSintac> tokensIds = analizador.getTokensIds();
 
 			List<String> errores =  new ArrayList<>(); 
 	
-			Object[][] data = new Object[tokens.size()][4];
+			Object[][] data = new Object[tokensIds.size()][5];
+
+			// Análisis Sintáctico
+			Syntax syntax = new Syntax(tokens, tokensIds);
+			syntax.parse();
+			// Comprobar si hubo errores y mostrarlos
 	
-			for (int i = 0; i < tokens.size(); i++) {
-				Token token = tokens.get(i);
+			// tokens.forEach(t -> System.out.println(t.getValue()));
+			for (int i = 0; i < tokensIds.size(); i++) {
+				int index = getIndex(tokensIds.get(i).getId());
+				Token token = tokens.get(index);
 				data[i][0] = token.getValue();
 				data[i][1] = token.getType();
-				data[i][2] = token.getLine();
-				data[i][3] = token.getColumn();
+				data[i][2] = "[" + tokensIds.get(i).getLine() + "," + tokensIds.get(i).getColumn() + "]";
+				data[i][3] = token.getValorToken() + "(" + token.getTipoToken() + ")";
+				// data[i][4] = token.getTipoToken();
+				//data[i][3] = token.getColumn();
 				if (token.getType() == TokenType.TOKEN_UNKNOWN) {
                 	// outputConsole.append("Error léxico en la línea " + token.getLine() + ", columna " + token.getColumn() + ": " + token.getValue() + "\n");
 					errores.add("Token desconocido " + token.getValue() + " : en la línea"  + token.getLine() + ", columna " + token.getColumn());
@@ -370,13 +381,8 @@ public class Compiler extends JFrame {
 			}
 	
 			symbolTable.setModel(new DefaultTableModel(data, new String[] {
-				"Token Value", "Token Type", "Token Row", "Token Column"
+				"Token Value", "Token Type", "Position", "Valor"
 			}));
-	
-			// Análisis Sintáctico
-			Syntax syntax = new Syntax(tokens);
-			syntax.parse();
-			// Comprobar si hubo errores y mostrarlos
 			
 
 			errores.addAll(syntax.getErrors());
@@ -421,6 +427,14 @@ public class Compiler extends JFrame {
 	}
 
 	public static void main(String args[]) {
+		/*
+public static void main(){
+	define Character vl = Character("Hol ", Color(#"FFFFFF"));
+	Screen vl (){
+		int ve
+	}
+}
+		 */
 
 		FlatLightLaf.setup();
 
@@ -431,11 +445,24 @@ public class Compiler extends JFrame {
 		});
 	}
 
+	public int getIndex(UUID id){
+		int index = -1;
+		for(Token tok : tokens){
+			index++;
+			if(tok.getId() == id){
+				// System.out.println("Index: "  + index);
+				return index;
+			}
+		}
+		return -1;
+
+	}
+
 	// ==================== Variables ====================
 
 	private String title;
 	private FileDirectory directory;
-	private ArrayList<Token> tokens;
+	private List<Token> tokens;
 	private ArrayList<ErrorLSSL> errors;
 
 	private Timer timerKeyRelease;

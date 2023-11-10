@@ -17,26 +17,79 @@ public class Analyzer {
         Lexer lexer = new Lexer(new StringReader(removeComm));
         //Para los tokens que trajo el Lexico
         tokens = new ArrayList<>();
-        Token token;
+        // Token token;
+        tokensIds = new ArrayList<>();
         try {
-            while ((token = lexer.yylex()) != null) {
-                tokens.add(token);
+            Token currentToken;
+            while ((currentToken = lexer.yylex()) != null) {
+                boolean tokenExists = false;
+                if(
+                    currentToken.getType() != TokenType.NUMERO &&
+                    currentToken.getType() != TokenType.CADENA &&
+                    currentToken.getType() != TokenType.COLOR_HEX &&
+                    currentToken.getType() != TokenType.TOKEN_UNKNOWN
+                ){
+                    if(currentToken.getType() == TokenType.IDENTIFICADOR){
+                        for (Token tok : tokens) {
+                            if(tok.getValue() != null){
+                                //System.out.println(tok.getValue() + " " + currentToken.getValue());
+                                if (currentToken.getValue().equals(tok.getValue())) {
+                                    tokenExists = true;
+                                    currentToken.setId(tok.getId());
+                                    break;
+                                }
+                            }
+                        }
+                    }else{
+                        for (Token tok : tokens) {
+                            if(
+                                tok.getType() != TokenType.NUMERO &&
+                                tok.getType() != TokenType.CADENA &&
+                                tok.getType() != TokenType.COLOR_HEX &&
+                                tok.getType() != TokenType.TOKEN_UNKNOWN
+                            ){
+                                if (tok.getType() == currentToken.getType()) {
+                                    tokenExists = true;
+                                    currentToken.setId(tok.getId());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                arbolSintac arbol = new arbolSintac(currentToken.getLine(), currentToken.getColumn(), currentToken.getId());
+                if (!tokenExists) {
+                    currentToken.setLine(0);
+                    currentToken.setColumn(0);
+                    tokens.add(currentToken);
+                }
+                tokensIds.add(arbol);
             }
         } catch (IOException e) {
             System.err.println("Error de entrada/salida: " + e.getMessage());
         }
         //Genero el archivo tabla de simbolos y escribo los tokens que anteriormente analice
-        generateTable(tokens);
+        generateTable();
     }
 
     public List<Token> getTokens() {
         return tokens;
     }
 
-    private static void generateTable(List<Token> tokens) {
+    public List<arbolSintac> getTokensIds() {
+        return tokensIds;
+    }
+
+    private void generateTable() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("tabla_simbolos.txt"))) {
             for (Token token : tokens) {
-                writer.write(token.getValue());
+                String value = token.getId().toString();
+                if(token.getValue() != null){
+                    value = value + " | " + token.getValue();
+                }else{
+                    value = value + " | " + token.getValorToken().toString();
+                }
+                writer.write(value);
                 writer.newLine();
             }
         } catch (Exception e) {
@@ -53,5 +106,6 @@ public class Analyzer {
     }
 
     List<Token> tokens;
+    List<arbolSintac> tokensIds;
 
 }
