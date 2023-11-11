@@ -350,7 +350,7 @@ public class Window extends JFrame {
 
             List<Token> tokens = analyzer.getTokens();
             // Analizar sintácticamente los tokens
-            syntax = new Syntax(tokens);
+            //syntax = new Syntax(tokens);
             String result = syntax.parse();
 
             // Mostrar el resultado en el área de texto
