@@ -428,12 +428,12 @@ public class Compiler extends JFrame {
 
 	public static void main(String args[]) {
 		/*
-public static void main(){
-	define Character vl = Character("Hol ", Color(#"FFFFFF"));
-	Screen vl (){
-		int ve
+	public static void main(){
+		define Character vl = Character("Hol ", Color(#"FFFFFF"));
+		Screen vl (){
+			int ve
+		}
 	}
-}
 		 */
 
 		FlatLightLaf.setup();
