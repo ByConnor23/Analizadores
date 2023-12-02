@@ -16,7 +16,7 @@ public class Principal {
     }
 
     public void run() throws IOException {
-        String sourceCode = "public static void main(){define int = 0;\ndefine int y 9;}";
+        String sourceCode = "static";
         Lexer lexer = new Lexer(new StringReader(sourceCode));
         List<Token> tokens = new ArrayList<>();
 

@@ -54,143 +54,184 @@ public class Syntax {
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn();
                 errors.add("Se esperaba 'public' en la línea " + line + ", columna " + column);
+                consume();
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
                 errors.add("Se esperaba 'public' en la línea " + line + ", columna " + column);
             }
-            consume();
         } else {
             consume();
         }
-
+        System.out.println(index);
         if (!match(TokenType.STATIC)) {
             if(index < arbolSintac.size()){
                 arbolSintac currentToken = arbolSintac.get(index);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn();
                 errors.add("Se esperaba 'static' en la línea " + line + ", columna " + column);
+                consume();
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
                 errors.add("Se esperaba 'static' en la línea " + line + ", columna " + column);
-                return;
             }
-            consume();
         } else {
             consume();
         }
-
+        System.out.println(index);
         if (!match(TokenType.VOID)) {
             if(index < arbolSintac.size()){
                 arbolSintac currentToken = arbolSintac.get(index);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn();
                 errors.add("Se esperaba 'void' en la línea " + line + ", columna " + column);
+                consume();
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
                 errors.add("Se esperaba 'void' en la línea " + line + ", columna " + column);
-                return;
             }
-            consume();
         } else {
             consume();
         }
-
+        System.out.println(index);
         if (!match(TokenType.MAIN)) {
             if(index < arbolSintac.size()){
                 arbolSintac currentToken = arbolSintac.get(index);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn();
                 errors.add("Se esperaba 'main' en la línea " + line + ", columna " + column);
+                consume();
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
                 errors.add("Se esperaba 'main' en la línea " + line + ", columna " + column);
-                return;
             }
-            consume();
         } else {
             consume();
         }
+        System.out.println(index);
         // Continúa con el análisis
         F();
     }
 
     private void F() throws Exception {
-        PA(); // Para el parentesis de apertura " ( "
-        PC(); // Para el parentesis de cerradura " ) "
-        LLA(); // Para la llave de " { "
-        CA(); // Para determinar si se declara algo dentro del metodo principal
-        LLC();// Para el parentesis de " } "
+        PA();
+        PC();
+        LLA();
+        if(index != arbolSintac.size()){
+            CA(); // Para determinar si se declara algo dentro del metodo principal
+        }
+        LLC();
     }
 
     // Para lo que se puede escribir dentro del metodo principal y tanto dentro como
-    // fuera de la
-    // funciones Screen () y define
+    // fuera de las funciones Screen () y define
 
     private void CA() throws Exception {
-        if (match(TokenType.DEFINE)) {
-            X(); // Para el camino de 'define'
-            CA(); // Para la recursividad
-        } else if (match(TokenType.SCREEN)) {
-            // Si es "Screen", consume y va a AI()
-            consume();
-            AI();
-            // Continúa con la recursión
-            CA();
-        } else if (match(TokenType.LLAVE_DE_CERRADURA)) {
-            // Si es "}", no se genera error y simplemente se regresa
-            //consume();
+        // System.out.println("Entro a CA");
+        if(index < arbolSintac.size()){
+            Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+            arbolSintac nextToken = null;
+            
+            if (index + 1 < arbolSintac.size()) {
+                nextToken = arbolSintac.get(index + 1);
+            }
+
+            if(actualCurrentToken.getValue().equals("}") && nextToken == null){
+                System.out.println("Entro al return CA");
+                return;
+            }else{
+                if(!match(TokenType.DEFINE) && !match(TokenType.SCREEN)){
+                    if (index < arbolSintac.size()){
+                        arbolSintac currentToken = arbolSintac.get(index);
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'define' o 'Screen' en la línea " + line + ", columna " + column);
+                        consume();
+                    }else{
+                        arbolSintac currentToken = arbolSintac.get(index-1);
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'define' o 'Screen' en la línea " + line + ", columna " + column);
+                    }
+                }
+                else{
+                    if (match(TokenType.DEFINE)) {
+                        X(); // Para el camino de 'define'
+                        CA(); // Para la recursividad
+                    } else if (match(TokenType.SCREEN)) {
+                        if(!match(TokenType.SCREEN)){
+                            if(index < arbolSintac.size()){
+                                arbolSintac currentToken = arbolSintac.get(index);
+                                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                                    int line = currentToken.getLine();
+                                    int column = currentToken.getColumn();
+                                    errors.add("Se esperaba 'Screen' en la línea " + line + ", columna " + column);
+                                }else{
+                                    int line = currentToken.getLine();
+                                    int column = currentToken.getColumn();
+                                    errors.add("Se esperaba 'Screen' en la línea " + line + ", columna " + column);
+                                    consume();
+                                }
+                            }else{
+                                arbolSintac currentToken = arbolSintac.get(index-1);
+                                int line = currentToken.getLine();
+                                int column = currentToken.getColumn() + getLength(currentToken.getId());
+                                errors.add("Se esperaba 'Screen' en la línea " + line + ", columna " + column);
+                            }
+                        }else{
+                            consume();
+                        }
+                        AI(); // Para el camino de 'Screen'
+                        CA(); // Para la recursividad
+                    }
+                }
+            }
+        }else{
             return;
-        } else {
-            // Si no es ninguno de los tokens anteriores, se genera un error
-            if (index < tokens.size()) {
-                arbolSintac currentToken = arbolSintac.get(index);
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba 'define', 'Screen' o '}' en la línea " + line + ", columna " + column);
-            }
-            consume();
-
-            //Para tratar de predecir
-            if(match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO) || 
-                match(TokenType.CHARACTER) || match(TokenType.IMAGE) || match(TokenType.SOUND)){
-                N();//Para seguir el camino
-                // Continúa con la recursión
-                CA();
-            }else if(match(TokenType.IDENTIFICADOR)){
-                AI();//Para seguir el camino
-                // Continúa con la recursión
-                CA();
-            }
         }
-
     }
 
     private void N() throws Exception {
         
         // Si despues del define recibo un tipo de dato hago esto
         if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
-            // consumo y reviso el resto
-            String tip = OPE();
-            if(tip != null)
-                Q(tip);// Para el resto
+            if(index < arbolSintac.size()){
+                String tip = OPE(); // Para el tipo de dato
+                if(tip != null)
+                    Q(tip);// Para el resto
+            }
         } else if (match(TokenType.CHARACTER)) {
             // Consume y sigo con el resto
             if (match(TokenType.CHARACTER)) {
                 consume();
             } else {
-                arbolSintac currentToken = arbolSintac.get(index);
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
-                consume();
+                if(index < arbolSintac.size()){
+                    arbolSintac currentToken = arbolSintac.get(index);
+                    Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                    if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
+                    }else{
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
+                        consume();
+                    }
+                }else {
+                    arbolSintac currentToken = arbolSintac.get(index-1);
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
+                }
             }
             O();// Para el resto
         } else if (match(TokenType.IMAGE) || match(TokenType.SOUND)) {
@@ -199,18 +240,51 @@ public class Syntax {
             if (match(TokenType.IMAGE) || match(TokenType.SOUND)) {
                 consume();
             } else {
-                arbolSintac currentToken = arbolSintac.get(index);
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba 'Image' o 'Sound' en la línea " + line + ", columna " + column);
+                if(index < arbolSintac.size()){
+                    arbolSintac currentToken = arbolSintac.get(index);
+                    Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                    if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'Image' o 'Sound' en la línea " + line + ", columna " + column);
+
+                    }else{
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'Image' o 'Sound' en la línea " + line + ", columna " + column);
+                        consume();
+                    }
+                }else {
+                    arbolSintac currentToken = arbolSintac.get(index-1);
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un tipo dato, un 'Character' o un 'Image/Sound' en " + line + ", columna " + column);
+                }                
             }
             AC(type); // Para el resto
-        } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un tipo dato, un 'Character' o un 'Image/Sound' en " + line + ", columna " + column);
-            consume();
+
+        } else if (!match(TokenType.INT) || !match(TokenType.DOUBLE) || !match(TokenType.STRING)
+                || !match(TokenType.BOOLEANO) || !match(TokenType.CHARACTER) || !match(TokenType.IMAGE)
+                || !match(TokenType.SOUND)) {
+            if(index < arbolSintac.size() ){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un 'tipo de dato' o 'Character' o 'Image' o 'Sound' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un 'tipo de dato' o 'Character' o 'Image' o 'Sound' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba un 'tipo de dato' o 'Character' o 'Image' o 'Sound' en la línea " + line + ", columna " + column);
+            }
         }
     }
 
@@ -254,7 +328,6 @@ public class Syntax {
     }
 
     private void O() throws Exception {// T = Character("Cadena", Color(#"HEX"));
-        
         UUID idT = T(); // Para determinar que sea un Identificador y no una palabra clave
         // TO = tokens.get(getIndex(idT)).getValue() + ": {nombre: string, color: string} = "; //color no se como hacerle
         // if(idT != null){
@@ -263,11 +336,25 @@ public class Syntax {
             if (match(TokenType.CHARACTER)) {
                 consume();
             } else {
-                arbolSintac currentToken = arbolSintac.get(index);
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
-                consume();
+                if(index < arbolSintac.size()){
+                    arbolSintac currentToken = arbolSintac.get(index);
+                    Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                    if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
+                    }else{
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
+                        consume();
+                    }
+                }else{
+                    arbolSintac currentToken = arbolSintac.get(index-1);
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
+                }
             }
             UUID idCad = S(); // Para lo que va despues
             if(idCad != null){
@@ -306,11 +393,25 @@ public class Syntax {
         if (match(TokenType.COMA)) {
             consume();
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
-            consume();
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
+                } else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
+            }
         }
         String color = U(); // Para la palabra reservada de Color
         if(idCad != null && color != null){
@@ -330,27 +431,37 @@ public class Syntax {
     }
 
     private UUID R() throws Exception {
+        System.out.println("Entro a R");
         UUID id = null;
         if (match(TokenType.NUMERO)) {
             id = NUM(); // validar si es un número
-            // PYC(); // Para el ;
         } else if (match(TokenType.CADENA)) {
             id = CAD();// validar si es una cadena
-            // PYC(); // Para el ;
         } else if (match(TokenType.TRUE) || match(TokenType.FALSE)) {
             id = TF(); // Para falso y verdadero
-            // PYC(); // Para el ;
         } else if (match(TokenType.IDENTIFICADOR)) {
             id = T(); // Para validar que es un identificador
-
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un número o cadena o 'True' o 'False' o identificador en la línea " + line
-                    + ", columna " + column);
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un número o una cadena o True o False o identificador en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un número o una cadena o True o False o Identificador en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba un número o una cadena o True o False o Identificador en la línea " + line + ", columna " + column);
+            }
         }
-
         PYC(); // Para el ;
         return id;
     }
@@ -358,7 +469,32 @@ public class Syntax {
     private void AC(TokenType type) throws Exception { // Image/sound T = "";
         UUID idT = T(); // Para el identificador
         IGU(); // Para el igual
-        UUID idCad = CAD(); // Para el String
+        // UUID idCad = CAD();
+        UUID idCad = null;
+        if(match(TokenType.MEMORY_MANAGEMENT)){
+            idCad = arbolSintac.get(index).getId();
+            consume();
+        }else{
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'una dirección de almacenamiento' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'una dirección de almacenamiento' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'una direccion de almacenamiento' en la línea " + line + ", columna " + column);
+            }
+        }
         if(idT != null && idCad != null){
             codigo += "def " + tokens.get(getIndex(idT)).getValue() + ", " + type + "||";
             codigo += tokens.get(getIndex(idT)).getValue() + " = \"" + tokens.get(getIndex(idCad)).getValorToken() + "\"||";
@@ -378,7 +514,9 @@ public class Syntax {
 
     private void AJ() throws Exception {
         LLA(); // Para la llave de apertura
-        CB(); // Para lo que se puede escribir dentro de la función Screen
+        if(index != arbolSintac.size()){
+            CB(); // Para lo que se puede escribir dentro de la función Screen
+        }
         LLC(); // Para la llave de cerradura
     }
 
@@ -388,25 +526,70 @@ public class Syntax {
     // Para lo que se puede escribir dentro de los metodos de Screen
 
     private void CB() throws Exception {
-        if (match(TokenType.DEFINE)) {
-            X(); // Verifico que me llegue un define
-            CB(); // Vuelvo a llamar al metodo para que sea recursivo
-        }else if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
-                match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
-                match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)
-                ){
-            B(); // Para todas estas opciones
-            CB(); // Para la recursividad
-        } else if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
-            H(); // Para en caso de un tipo de dato
-            CB(); // Para la recursividad
-        } else  if (match(TokenType.MENU)) {
-            MEN(); // Para el Menu
-            CB(); // Para la recursividad
-        } //Consideracion a tomar: Aqui podría haber un error.
-        // else {
-
-        // }
+        System.out.println("Entro a CB");
+        if(index < arbolSintac.size()){
+            Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+            arbolSintac nextToken = null;
+            Token nextTokenValue = null;
+            if(index + 1 < arbolSintac.size()){
+                nextToken = arbolSintac.get(index + 1);
+                nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
+            }
+            if (actualCurrentToken != null && nextTokenValue != null) {
+                System.out.println("Actual: " + actualCurrentToken.getType() + " Siguiente: " + nextTokenValue.getType());
+            } else {
+                if (actualCurrentToken == null) {
+                    System.out.println("El token actual es null" + " Siguiente: " + nextTokenValue.getType());
+                }
+                if (nextTokenValue == null) {
+                    System.out.println("Actual:"+ actualCurrentToken.getType() +" El siguiente token es null");
+                }
+            }
+            if((actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextToken == null) 
+            || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.LLAVE_DE_CERRADURA)) 
+            || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.SCREEN))){
+                System.out.println("Entro al return CB");
+                return;
+            }else{
+                if (match(TokenType.DEFINE)) {
+                    X(); // Verifico que me llegue un define
+                    CB(); // Vuelvo a llamar al metodo para que sea recursivo
+                }else if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
+                    match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
+                    match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)){
+                    B(); // Para todas estas opciones
+                    CB(); // Para la recursividad
+                } else if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
+                    H(); // Para en caso de un tipo de dato
+                    CB(); // Para la recursividad
+                } else  if (match(TokenType.MENU)) {
+                    MEN(); // Para el Menu
+                    CB(); // Para la recursividad
+                }else{
+                    if(index < arbolSintac.size()){
+                        arbolSintac currentToken = arbolSintac.get(index);
+                        Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                        if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba 'define' o 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                        }else{
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba 'define' o 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                            consume();    
+                        }
+                    }else{
+                        arbolSintac currentToken = arbolSintac.get(index-1);
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn() + getLength(currentToken.getId());
+                        errors.add("Se esperaba 'define' o 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                    }
+                }
+            }
+        }else{
+            return;
+        }
     }
 
     private void AN(TokenType type) throws Exception { // !Validar si los tokens son del tipo image o sound
@@ -440,119 +623,293 @@ public class Syntax {
         PC(); // Para el parentesis de Cerradura
     }
 
-    private Token K() throws Exception {
-        Token idL = L(); // Para los simbolos
-        Token tokenK = KP(idL);
-        return tokenK;
-    }
 
-    private Token L() throws Exception {
-        if (match(TokenType.PARENTESIS_DE_APERTURA)) {// EN ESPERA
-            PA(); // Parentesis de apertura
-            if (match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO) || match(TokenType.IDENTIFICADOR)) {
-                Token tokenK = K(); // para llamar a la funcion de K
-                PC(); // Para el )
-                return tokenK;
-            }
-        } else if (match(TokenType.IDENTIFICADOR)) {
-            UUID id = T(); // Para el identificador
-            return tokens.get(getIndex(id));
-        } else if (match(TokenType.NUMERO)) {
-            UUID id = NUM(); // Para el numero
-            return tokens.get(getIndex(id));
-        } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba '(', identificador o numero en la línea" + line + ", columna " + column);
-            consume();
-        }
-        return null;
-    }
+    // private Token K() throws Exception {
+    //     Token idL = L(); // Para los simbolos
+    //     Token tokenK = KP(idL);
+    //     return tokenK;
+    // }
 
-    private Token KP(Token tokL) throws Exception { //operandor operando
-        Token token = tokL;
-        if (match(TokenType.SUMA) || match(TokenType.RESTA) || match(TokenType.MULTIPLICACION) || 
-            match(TokenType.DIVISION)) {
-            TokenType opeAri = tokens.get(getIndex(arbolSintac.get(index).getId())).getType();
-            UUID idZ;
-            consume();
-            if (match(TokenType.ASIGNACION)) {
-                idZ = Z(); // en caso de que tenga una operacion iterativa
-                Token tokenZ = tokens.get(getIndex(idZ));
-                Token tokenL = tokL;
-                double valLDouble, valZDouble;
-                if(parseNumber(tokenL.getValorToken()) && parseNumber(tokenZ.getValorToken())){
-                    valLDouble = ((Number) tokenL.getValorToken()).doubleValue();
-                    valZDouble = ((Number) tokenZ.getValorToken()).doubleValue();
-                    Object valL, valZ;
-                    if(tokenL.getType() == TokenType.IDENTIFICADOR){
-                        valL = tokenL.getValue();
-                    }else{
-                        valL = tokenL.getValorToken();
-                    }
-                    if(tokenL.getType() == TokenType.IDENTIFICADOR){
-                        valZ = tokenZ.getValue();
-                    }else{
-                        valZ = tokenZ.getValorToken();
-                    }
-                    switch (opeAri) {
-                        case SUMA:
-                            codigo += "t = " + valL + " + " + valZ + "||";
-                            valLDouble += valZDouble;
-                            break;
-                        case RESTA:
-                            codigo += "t = " + valL + " - " + valZ + "||";
-                            valLDouble -= valZDouble;
-                            break;
-                        case MULTIPLICACION:
-                            codigo += "t = " + valL + " * " + valZ + "||";
-                            valLDouble *= valZDouble;
-                            break;
-                        case DIVISION:
-                            codigo += "t = " + valL + " / " + valZ + "||";
-                            valLDouble /= valZDouble;
-                            break;
-                        default:
-                            valLDouble = Double.MIN_VALUE;
-                            break;
-                    }
+    // private Token L() throws Exception {
+    //     if (match(TokenType.PARENTESIS_DE_APERTURA)) {// EN ESPERA
+    //         PA(); // Parentesis de apertura
+    //         if (match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO) || match(TokenType.IDENTIFICADOR)) {
+    //             Token tokenK = K(); // para llamar a la funcion de K
+    //             PC(); // Para el )
+    //             return tokenK;
+    //         }
+    //     } else if (match(TokenType.IDENTIFICADOR)) {
+    //         UUID id = T(); // Para el identificador
+    //         return tokens.get(getIndex(id));
+    //     } else if (match(TokenType.NUMERO)) {
+    //         UUID id = NUM(); // Para el numero
+    //         return tokens.get(getIndex(id));
+    //     } else {
+    //         arbolSintac currentToken = arbolSintac.get(index);
+    //         int line = currentToken.getLine();
+    //         int column = currentToken.getColumn();
+    //         errors.add("Se esperaba '(', identificador o numero en la línea" + line + ", columna " + column);
+    //         consume();
+    //     }
+    //     return null;
+    // }
+
+    // private Token KP(Token tokL) throws Exception { //operandor operando
+    //     Token token = tokL;
+    //     if (match(TokenType.SUMA) || match(TokenType.RESTA) || match(TokenType.MULTIPLICACION) || 
+    //         match(TokenType.DIVISION)) {
+    //         TokenType opeAri = tokens.get(getIndex(arbolSintac.get(index).getId())).getType();
+    //         UUID idZ;
+    //         consume();
+    //         if (match(TokenType.ASIGNACION)) {
+    //             idZ = Z(); // en caso de que tenga una operacion iterativa
+    //             Token tokenZ = tokens.get(getIndex(idZ));
+    //             Token tokenL = tokL;
+    //             double valLDouble, valZDouble;
+    //             if(parseNumber(tokenL.getValorToken()) && parseNumber(tokenZ.getValorToken())){
+    //                 valLDouble = ((Number) tokenL.getValorToken()).doubleValue();
+    //                 valZDouble = ((Number) tokenZ.getValorToken()).doubleValue();
+    //                 Object valL, valZ;
+    //                 if(tokenL.getType() == TokenType.IDENTIFICADOR){
+    //                     valL = tokenL.getValue();
+    //                 }else{
+    //                     valL = tokenL.getValorToken();
+    //                 }
+    //                 if(tokenL.getType() == TokenType.IDENTIFICADOR){
+    //                     valZ = tokenZ.getValue();
+    //                 }else{
+    //                     valZ = tokenZ.getValorToken();
+    //                 }
+    //                 switch (opeAri) {
+    //                     case SUMA:
+    //                         codigo += "t = " + valL + " + " + valZ + "||";
+    //                         valLDouble += valZDouble;
+    //                         break;
+    //                     case RESTA:
+    //                         codigo += "t = " + valL + " - " + valZ + "||";
+    //                         valLDouble -= valZDouble;
+    //                         break;
+    //                     case MULTIPLICACION:
+    //                         codigo += "t = " + valL + " * " + valZ + "||";
+    //                         valLDouble *= valZDouble;
+    //                         break;
+    //                     case DIVISION:
+    //                         codigo += "t = " + valL + " / " + valZ + "||";
+    //                         valLDouble /= valZDouble;
+    //                         break;
+    //                     default:
+    //                         valLDouble = Double.MIN_VALUE;
+    //                         break;
+    //                 }
     
-                    if(valLDouble != Double.MIN_VALUE){
-                        Object idObject;
-                        String tipotoken;
-                        int val = (int) valLDouble;
-                        double isEntero = valLDouble - val;
-                        if(isEntero == 0.0){
-                            idObject =  (Object)val;
-                            tipotoken = "INT";
-                        }else{
-                            idObject = (Object)valLDouble;
-                            tipotoken = "DOUBLE";
-                        }
-                        codigo += tokenL.getValue() + " = t||";
-                        token = new Token(TokenType.NUMERO, 0, 0, null, tipotoken, idObject);
-                    }else{
-                        errors.add("Error: no se puede realizar la operación aritmética (línea " + arbolSintac.get(index-1).getLine() + ", columna " + arbolSintac.get(index-1).getColumn() + ")");
-                    }
-                }
+    //                 if(valLDouble != Double.MIN_VALUE){
+    //                     Object idObject;
+    //                     String tipotoken;
+    //                     int val = (int) valLDouble;
+    //                     double isEntero = valLDouble - val;
+    //                     if(isEntero == 0.0){
+    //                         idObject =  (Object)val;
+    //                         tipotoken = "INT";
+    //                     }else{
+    //                         idObject = (Object)valLDouble;
+    //                         tipotoken = "DOUBLE";
+    //                     }
+    //                     codigo += tokenL.getValue() + " = t||";
+    //                     token = new Token(TokenType.NUMERO, 0, 0, null, tipotoken, idObject);
+    //                 }else{
+    //                     errors.add("Error: no se puede realizar la operación aritmética (línea " + arbolSintac.get(index-1).getLine() + ", columna " + arbolSintac.get(index-1).getColumn() + ")");
+    //                 }
+    //             }
                 
-            } else {
-                Token tokenL2 = L();
-                token = KP(tokenL2);
-            }
+    //         } else {
+    //             Token tokenL2 = L();
+    //             token = KP(tokenL2);
+    //         }
 
-        }else{
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();  
-            errors.add("Se esperaba un operador en la línea" + line + ", columna " + column);
-            consume();
+    //     }else{
+    //         arbolSintac currentToken = arbolSintac.get(index);
+    //         int line = currentToken.getLine();
+    //         int column = currentToken.getColumn();  
+    //         errors.add("Se esperaba un operador en la línea" + line + ", columna " + column);
+    //         consume();
         
-        }
-        PYC();
-        return token;
-    }
+    //     }
+    //     PYC();
+    //     return token;
+    // }
+
+    // private void XR() throws Exception{
+    //     if(index < arbolSintac.size()){
+
+    //     }else{
+    //         if(index < arbolSintac.size()){
+    //             arbolSintac currentToken = arbolSintac.get(index);
+    //             Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+    //             if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+    //                 int line = currentToken.getLine();
+    //                 int column = currentToken.getColumn();
+    //                 errors.add("Se esperaba un número o una cadena o True o False o Identificador en la línea " + line + ", columna " + column);
+    //             }else{
+    //                 int line = currentToken.getLine();
+    //                 int column = currentToken.getColumn();
+    //                 errors.add("Se esperaba un número o una cadena o True o False o Identificador en la línea " + line + ", columna " + column);
+    //                 consume();
+    //             }
+    //         }else{
+    //             arbolSintac currentToken = arbolSintac.get(index-1);
+    //             int line = currentToken.getLine();
+    //             int column = currentToken.getColumn();
+    //             errors.add("Se esperaba un número o una cadena o True o False o Identificador en la línea " + line + ", columna " + column);
+    //         }
+    //     }
+    // }
+
+    // private void K() throws Exception {
+    //     if(index < arbolSintac.size()){
+    //         Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+    //         arbolSintac nextToken = null;
+    //         Token nextTokenValue = null;
+    //         if(index + 1 < arbolSintac.size()){
+    //             nextToken = arbolSintac.get(index + 1);
+    //             nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
+    //         }
+
+    //         if((actualCurrentToken.getType().equals(TokenType.PARENTESIS_DE_CERRADURA) && nextToken == null) || (actualCurrentToken.getType().equals(TokenType.PARENTESIS_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.PARENTESIS_DE_CERRADURA))){
+    //             System.out.println("Entro al return K");
+    //             return;
+    //         }else{
+    //             L(); // Para los simbolos
+    //             KP();
+    //         }
+    //     }else{
+    //         return;
+    //     }
+        
+    // }
+
+    // private void L() throws Exception {
+    //     if(index < arbolSintac.size()){
+    //         Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+    //         arbolSintac nextToken = null;
+    //         Token nextTokenValue = null;
+    //         if(index + 1 < arbolSintac.size()){
+    //             nextToken = arbolSintac.get(index + 1);
+    //             nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
+    //         }
+
+    //         if((actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextToken == null) || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.LLAVE_DE_CERRADURA))){
+    //             System.out.println("Entro al return CB");
+    //             return;
+    //         }else{
+    //             if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+    //                 PA(); // Parentesis de apertura
+    //                 if (match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO) || match(TokenType.IDENTIFICADOR)) {
+    //                     K(); // para llamar a la funcion de K
+    //                     PC(); // Para el )
+    //                 }else{
+    //                     if(index < arbolSintac.size()){
+    //                         arbolSintac currentToken = arbolSintac.get(index);
+    //                         Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+    //                         if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+    //                             int line = currentToken.getLine();
+    //                             int column = currentToken.getColumn();
+    //                             errors.add("Se esperaba un '(' o un Número o Identificador en la línea " + line + ", columna " + column);
+    //                         }else{
+    //                             int line = currentToken.getLine();
+    //                             int column = currentToken.getColumn();
+    //                             errors.add("Se esperaba un '(' o un Número o Identificador en la línea " + line + ", columna " + column);
+    //                             consume();
+    //                         }
+    //                     }else{
+    //                         arbolSintac currentToken = arbolSintac.get(index-1);
+    //                         int line = currentToken.getLine();
+    //                         int column = currentToken.getColumn() + getLength(currentToken.getId());
+    //                         errors.add("Se esperaba un '(' o un Número o Identificador en la línea " + line + ", columna " + column);
+    //                     }
+    //                 }
+    //             } else if (match(TokenType.IDENTIFICADOR)) {
+    //                 T(); // Para el identificador
+    //             } else if (match(TokenType.NUMERO)) {
+    //                 NUM(); // Para el numero
+    //             } else {
+    //                 if(index < arbolSintac.size()){
+    //                     arbolSintac currentToken = arbolSintac.get(index);
+    //                     Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+    //                     if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+    //                         int line = currentToken.getLine();
+    //                         int column = currentToken.getColumn();
+    //                         errors.add("Se esperaba un '(' o un Número o Identificador en la línea " + line + ", columna " + column);
+    //                     }else{
+    //                         int line = currentToken.getLine();
+    //                         int column = currentToken.getColumn();
+    //                         errors.add("Se esperaba un '(' o un Número o Identificador en la línea " + line + ", columna " + column);
+    //                         consume();
+    //                     }
+    //                 }else{
+    //                     arbolSintac currentToken = arbolSintac.get(index-1);
+    //                     int line = currentToken.getLine();
+    //                     int column = currentToken.getColumn() + getLength(currentToken.getId());
+    //                     errors.add("Se esperaba un '(' o un Número o Identificador en la línea " + line + ", columna " + column);
+    //                 }
+    //             }
+    //         }
+    //     }else{
+    //         return;
+    //     }
+
+        
+    // }
+
+    // private void KP() throws Exception {
+    //     if(index < arbolSintac.size()){
+    //         Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+    //         arbolSintac nextToken = null;
+    //         Token nextTokenValue = null;    
+    //         if(index + 1 < arbolSintac.size()){
+    //             nextToken = arbolSintac.get(index + 1);
+    //             nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
+    //         }
+
+    //         if(actualCurrentToken.getType().equals(TokenType.PARENTESIS_DE_CERRADURA) && nextToken == null || actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+    //             System.out.println("Entro al return KP");
+    //             return;
+    //         }else{
+    //             if (match(TokenType.SUMA) || match(TokenType.RESTA) || match(TokenType.MULTIPLICACION) || 
+    //             match(TokenType.DIVISION)) {
+    //                 consume();
+    //                 if (match(TokenType.ASIGNACION)) {
+    //                     Z(); // en caso de que tenga una operacion iterativa
+    //                 } else {
+    //                     L();
+    //                     KP();
+    //                 }
+    //             }else{ 
+    //                 if(index < arbolSintac.size()){
+    //                     arbolSintac currentToken = arbolSintac.get(index);
+    //                     Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+    //                     if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+    //                         int line = currentToken.getLine();
+    //                         int column = currentToken.getColumn();
+    //                         errors.add("Se esperaba un '+' o un '-' o un '*' o un '/' en la línea " + line + ", columna " + column);
+    //                     }else{
+    //                         int line = currentToken.getLine();
+    //                         int column = currentToken.getColumn();
+    //                         errors.add("Se esperaba un '+' o un '-' o un '*' o un '/' en la línea " + line + ", columna " + column);
+    //                         consume();
+    //                     }
+    //                 }else{
+    //                     arbolSintac currentToken = arbolSintac.get(index-1);
+    //                     int line = currentToken.getLine();
+    //                     int column = currentToken.getColumn();
+    //                     errors.add("Se esperaba un '+' o un '-' o un '*' o un '/' en la línea " + line + ", columna " + column);
+    //                 }   
+    //             }
+    //         PYC();
+    //         }
+    //     }else{
+    //         return;
+    //     }
+    // }
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
@@ -561,16 +918,13 @@ public class Syntax {
     // Para las producciones que se comparten en su mayoria
 
     private void H() throws Exception{
-        if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
-            String ope = OPE(); // Verfico que sea un tipo de dato
-            Y(ope); // Verifico que es lo siguiente que llega
-        }
+        String ope = OPE(); // Verfico que sea un tipo de dato
+        Y(ope); // Verifico que es lo siguiente que llega
     }
 
     private void Y(String ope) throws Exception {
         UUID idT =  T(); // Verifico que me llegue un id
         if(idT != null && ope != null)
-            System.out.println(ope);
             tokens.get(getIndex(idT)).setTipoToken(ope);
             codigo += "def " + tokens.get(getIndex(idT)).getValue() + ", " + ope + "||";
         if (match(TokenType.PUNTO_Y_COMA)) {
@@ -598,17 +952,135 @@ public class Syntax {
                 }
             }
         } else if (match(TokenType.COMA)) {
-            // Coma
+            // Si me llega una coma
             if (match(TokenType.COMA)) {
                 consume();
             } else {
-                arbolSintac currentToken = arbolSintac.get(index);
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
-                consume();
+                if(index < arbolSintac.size()){
+                    arbolSintac currentToken = arbolSintac.get(index);
+                    Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                    if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
+                    }else{
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
+                        consume();
+                    }
+                }else{
+                    arbolSintac currentToken = arbolSintac.get(index);
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
+                }
             }
             Y(ope);// recursivo
+        }else{
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un ';' o un '=' o una ',' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un ';' o un '=' o una ',' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba un ';' o un '=' o una ',' en la línea " + line + ", columna " + column);
+            }
+        }
+    }
+
+    private void G() throws Exception{
+        if(match(TokenType.CADENA) || match(TokenType.TRUE) || match(TokenType.FALSE)){
+            consume(); // Para consumir el token
+        }else{
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba una cadena o True o False en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba una cadena o True o False en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba una cadena o True o False en la línea " + line + ", columna " + column);
+            }
+        }
+    }
+
+    private void E() throws Exception{
+        J();
+        EP();
+    }
+
+    private void EP() throws Exception{
+        if(match(TokenType.SUMA) || match(TokenType.RESTA)){
+            consume();
+            J();
+            EP();
+        }
+    }
+
+    private void J() throws Exception{
+        M();
+        JP();
+    }
+
+    private void JP() throws Exception{
+        if(match(TokenType.MULTIPLICACION) || match(TokenType.DIVISION)){
+            consume();
+            M();
+            JP();
+        }
+    }
+
+    private void M() throws Exception{
+        if(match(TokenType.IDENTIFICADOR)){
+            T();
+        }else if(match(TokenType.NUMERO)){
+            NUM();
+        }else if(match(TokenType.PARENTESIS_DE_APERTURA)){
+            PA();
+            E();
+            PC();
+        }else{
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un identificador o un número o un '(' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un identificador o un número o un '(' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba un identificador o un número o un '(' en la línea " + line + ", columna " + column);
+            }
         }
     }
 
@@ -616,7 +1088,6 @@ public class Syntax {
         if (match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
                 match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND)) {
             AL(); // Para determinar si me llega una de estas palabras reservadas
-            
         } else if (match(TokenType.IF)) {
             IF(); // Para el if
         } else if (match(TokenType.IDENTIFICADOR)) {
@@ -624,127 +1095,220 @@ public class Syntax {
             // Y luego un = quiere decir que es una inicializacion de variable
             if (match(TokenType.ASIGNACION) && idT != null) {
                 IGU(); // Para el igual
-                if (match(TokenType.PARENTESIS_DE_APERTURA)) {
-                    Token tokenK = K();
-                    if(tokenK != null){
-                        if(isNumber(tokens.get(getIndex(idT)).getTipoToken()) && 
-                        isNumber(tokenK.getTipoToken())){
-                            codigo += tokens.get(getIndex(idT)).getValue() + " = " + tokenK.getValorToken() + "||";
-                            tokens.get(getIndex(idT)).setValorToken(tokenK.getValorToken());
-                        }
-                    }
-                } else if (match(TokenType.NUMERO) || match(TokenType.CADENA) || match(TokenType.TRUE)
-                        || match(TokenType.FALSE) || match(TokenType.IDENTIFICADOR)) {
-                    UUID idR = R(); // Para determinar el tipo de dato
-                    if(idR != null){
-                        if(isNumber(tokens.get(getIndex(idT)).getTipoToken()) &&
-                        isNumber(tokens.get(getIndex(idR)).getTipoToken())){
-                            codigo += tokens.get(getIndex(idT)).getValue() + " = " + tokens.get(getIndex(idR)).getValorToken() + "||";
-                            tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idR)).getValorToken());
-                        }
-                    }
 
+                // if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+                //     Token tokenK = K();
+                //     if(tokenK != null){
+                //         if(isNumber(tokens.get(getIndex(idT)).getTipoToken()) && 
+                //         isNumber(tokenK.getTipoToken())){
+                //             codigo += tokens.get(getIndex(idT)).getValue() + " = " + tokenK.getValorToken() + "||";
+                //             tokens.get(getIndex(idT)).setValorToken(tokenK.getValorToken());
+                //         }
+                //     }
+                // } else if (match(TokenType.NUMERO) || match(TokenType.CADENA) || match(TokenType.TRUE)
+                //         || match(TokenType.FALSE) || match(TokenType.IDENTIFICADOR)) {
+                //     UUID idR = R(); // Para determinar el tipo de dato
+                //     if(idR != null){
+                //         if(isNumber(tokens.get(getIndex(idT)).getTipoToken()) &&
+                //         isNumber(tokens.get(getIndex(idR)).getTipoToken())){
+                //             codigo += tokens.get(getIndex(idT)).getValue() + " = " + tokens.get(getIndex(idR)).getValorToken() + "||";
+                //             tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idR)).getValorToken());
+                //         }
+                //     }
+
+
+                if (match(TokenType.CADENA) || match(TokenType.TRUE) || match(TokenType.FALSE)) {
+                    G(); // En caso de recibir esos datos 
+                    PYC(); // Para el punto y coma
+                } else if (match(TokenType.NUMERO) || match(TokenType.IDENTIFICADOR)) {
+                    E(); // Para la declaracion de una variable o identificador
+                    PYC(); // Para el punto y coma
+                }else if (match(TokenType.PARENTESIS_DE_APERTURA)) { 
+                    PA(); // Para el parentesis de apertura
+                    E(); // Para la declaracion de una variable o identificador
+                    PC(); // Para el parentesis de cerradura
+                    PYC(); // Para el " ; ""
+                }else{
+                    if(index < arbolSintac.size()){
+                        arbolSintac currentToken = arbolSintac.get(index);
+                        Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                        if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba un '(' o un Número o Cadena o Identificador o True o False en la línea " + line + ", columna " + column);
+                        }else{
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba un '(' o un Número o Cadena o Identificador o True o False en la línea " + line + ", columna " + column);
+                            consume();
+                        }
+                    }else{
+                        arbolSintac currentToken = arbolSintac.get(index-1);
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba un '(' o un Número o Cadena o Identificador o True o False en la línea " + line + ", columna " + column);
+                    }
                 }
-            } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+            }
+        } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
                 PA(); // Para el parentesis de apertura
                 DF(); // Para lo que va despues
                 PYC(); // Para el punto y coma
-            } else if (match(TokenType.SUMA) || match(TokenType.RESTA) || match(TokenType.MULTIPLICACION) 
-                    || match(TokenType.DIVISION)) {
-                Token tokenKP = KP(tokens.get(getIndex(idT))); // Llamo a K prima, porque lo siquiente que debe esperar es un signo
-                if(tokenKP != null){
-                    if(isNumber(tokens.get(getIndex(idT)).getTipoToken()) && 
-                    parseNumber(tokenKP.getValorToken())){
-                        tokens.get(getIndex(idT)).setValorToken(tokenKP.getValorToken());
-                    }
+        }else{
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Background' o 'show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o un '(' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Background' o 'show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o un '(' en la línea " + line + ", columna " + column);                    consume();
                 }
-                PYC(); // Para el " ; "
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + getLength(currentToken.getId());
+                errors.add("Se esperaba 'Background' o 'show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o un '(' en la línea " + line + ", columna " + column);
             }
-        } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
-            // K(); // Si llegue primero un parentesis llamo a K
-            PA();
-            DF();
-            PYC(); // Para el " ; "
-
-        } else if (match(TokenType.NUMERO)) {// num ope= num??
-            UUID idNum = NUM(); // Para verificar que sea un número
-            KP(tokens.get(getIndex(idNum))); // Para verificar que lo siguiente del número sea un operador
-            PYC(); // Para el " ; "
         }
-        //¿Aquí podría haber un error? si.. tu
     }
     // -------------------------------------------------------------------------------------------------------------------------------
-
 
     // -------------------------------------------------------------------------------------------------------------------------------
     // Para la estructura de menu
 
     // Opciones del Menu
     private void AO() throws Exception {
-        if (match(TokenType.PARENTESIS_DE_APERTURA)) {
-            PA(); // Para el parentesis de apertura
-            DF(); // Para la cadena y parentesis de cerradura
-            DP(); // Para el " : "
+        PA(); // Para el parentesis de apertura
+        DF(); // Para la cadena y parentesis de cerradura
+        DP(); // Para el " : "
+        if(index != arbolSintac.size()){
             AT(); // Para lo que puede ir dentro de cada opción
-            AO(); // Para llamar esto de manera recursiva y crear tantas opciones como se desee
+            if (match(TokenType.BREAKER)) { // Para marcar el final de una opción
+                BRE(); // Para determinar que me llegue un breaker
+            } else if (match(TokenType.GO)) { // Para marcar el final de una opción
+                GO(); // Para el Go
+            }else{
+                if(index < arbolSintac.size()){
+                    arbolSintac currentToken = arbolSintac.get(index);
+                    Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                    if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'Breaker' o 'Go' en la línea " + line + ", columna " + column);
+                    }else{
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba 'Breaker' o 'Go' en la línea " + line + ", columna " + column);
+                        consume();
+                    }
+                }else{
+                    arbolSintac currentToken = arbolSintac.get(index-1);
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn() + getLength(currentToken.getId());
+                    errors.add("Se esperaba 'Breaker' o 'Go' en la línea " + line + ", columna " + column);
+                }
+            }
+            Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+            arbolSintac nextToken = null;
+            Token nextTokenValue = null;
+            if(index + 1 < arbolSintac.size()){
+                nextToken = arbolSintac.get(index + 1);
+                nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
+            }
+            if (actualCurrentToken != null && nextToken != null) {
+                System.out.println("PostMenu - Actual: " + actualCurrentToken.getType() + " Siguiente: " + nextTokenValue.getType());
+            } else {
+                if (actualCurrentToken == null) {
+                    System.out.println("PostMenu - El token actual es null" + " Siguiente: " + nextTokenValue.getType());
+                }
+                if (nextTokenValue == null) {
+                    System.out.println("PostMenu - Anterior: "+ actualCurrentToken.getType() +" El siguiente token es null");
+                }
+            }
+            if((actualCurrentToken.getType().equals(TokenType.PARENTESIS_DE_APERTURA) && nextTokenValue.getType().equals(TokenType.CADENA))){
+            // || (actualCurrentToken.getType().equals(TokenType.GO) && nextTokenValue.getType().equals(TokenType.PUNTO_Y_COMA))){
+                System.out.println("Entro a recursividad de AO");
+                AO();
+            }
         }
-
+     AO(); // Para llamar esto de manera recursiva y crear tantas opciones como se desee
     }
 
     private void AT() throws Exception {
-        if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
-            H();
-            AT();
-        } else if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
-                match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
-                match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)
-                ){
-            B(); // Para todas estas opciones) {
-            AT();
-        } else if (match(TokenType.BREAKER)) { // Para marcar el final de una opción
-            BRE(); // Para determinar que me llegue un breaker
-            AO(); // Para llamar de manera recursiva a las opciones del menu
-        } else if (match(TokenType.GO)) { // Para marcar el final de una opción
-            GO(); // Para el Go
-            AO(); // Para la recursividad
-        } 
-        //¿Aquí podría haber un error?
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------------------------------------------------------------
-    // Para la estructura del for
-    // private void BK() throws Exception {
-    //     BL(); // Para el iterador
-    //     PYC(); // Para el " ; "
-    //     BM(); // Para la la condición
-    //     PYC(); // Para el " ; "
-    //     BP(); // Para el incremento
-    // }
-
-    private void BL() throws Exception {
-        T(); // Para el identificador
-        IGU(); // Para el " = "
-        NUM(); // Para el número
-    }
-
-    private boolean BM() throws Exception {
-        UUID idT = T(); // Para el identificador
-        int comp = BU(); // Para lo comparadores
-        UUID idRR = RR(); // Para la igual
-        if(idT != null && comp > 0 && idRR != null){
-            Token tokenT = tokens.get(getIndex(idT));
-            Token tokenRR = tokens.get(getIndex(idRR));
-            if(parseNumber(tokenRR.getValorToken()) && parseNumber(tokenT.getValorToken())){
-                boolean isEquals = areEquals(comp, tokenT.getValorToken(), tokenRR.getValorToken());
-                return isEquals;
-            }else{
-                System.out.println("Error");
-                errors.add("Error: no se puede comparar un valor de tipo '" + tokenRR.getTipoToken() + "' con un valor de tipo '" + tokenT.getTipoToken() + "' (línea " + arbolSintac.get(getIndexArbol(idRR)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idRR)).getColumn() + ")");
+        if(index < arbolSintac.size()){
+            Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+            arbolSintac nextToken = null;
+            Token nextTokenValue = null;
+            if(index + 1 < arbolSintac.size()){
+                nextToken = arbolSintac.get(index + 1);
+                nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
             }
+            if (actualCurrentToken != null && nextTokenValue != null) {
+                System.out.println("Menu - Actual: " + actualCurrentToken.getType() + " Siguiente: " + nextTokenValue.getType());
+            } else {
+                if (actualCurrentToken == null) {
+                    System.out.println("Menu - El token actual es null" + " Siguiente: " + nextTokenValue.getType());
+                }
+                if (nextTokenValue == null) {
+                    System.out.println("Menu - Anterior: "+ actualCurrentToken.getType() +" El siguiente token es null");
+                }
+            }
+            if((actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextToken == null) 
+            || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.LLAVE_DE_CERRADURA))
+            || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.SCREEN))
+            || (actualCurrentToken.getType().equals(TokenType.BREAKER) && nextTokenValue.getType().equals(TokenType.PUNTO_Y_COMA))
+            || (actualCurrentToken.getType().equals(TokenType.GO) && nextTokenValue.getType().equals(TokenType.PUNTO_Y_COMA))){
+                System.out.println("Entro al return AT");
+                return;
+            }else{
+                if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
+                    H(); // Para la declaracion de una variable
+                    AT();
+                } else if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
+                        match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
+                        match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)
+                        ){
+                    B(); // Para todas estas opciones) {
+                    AT();
+                } else{
+                    if(index < arbolSintac.size()){
+                        arbolSintac currentToken = arbolSintac.get(index);
+                        Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                        if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                        }else{
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                            consume();
+                        }
+                    }else{
+                        arbolSintac currentToken = arbolSintac.get(index-1);
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn() + getLength(currentToken.getId());
+                        errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                    }
+                    System.out.println("Error en el Menu");
+                }
+            }
+        }else{
+            return;
         }
-        return false;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+
+    private void BM() throws Exception {
+        T(); // Para el identificador
+        BU(); // Para lo comparadores
+        RR(); // Para la igual
     }
 
     private UUID RR() throws Exception {
@@ -756,105 +1320,100 @@ public class Syntax {
             id = T(); // Para validar que es un identificador
             // PYC(); // Para el ;
         }else{
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un número o cadena en la línea " + line + ", columna " + column);
-            consume();
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un número o una cadena en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un número o una cadena en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + getLength(currentToken.getId());
+                errors.add("Se esperaba un número o una cadena en la línea " + line + ", columna " + column);
+            }
         }
         return id;
     }
 
-    // private void BP() throws Exception {
-    //     T(); // Para el identificador
-    //     if (match("\\+\\+")) {
-    //         PLU(); // En caso de que me llegue un aumento de 1
-    //     } else if (match("\\+")) {
-    //         consume(); // Consumo y llamo al siguiente
-    //         RR(); // En caso de que me llegue un incremento que tenga un valor númerico o con un
-    //               // identificador
-    //     }
+    // private void Z() throws Exception {
+    //     IGU(); // Para los operadores
+    //     RR(); // Para determinar que sea un número o identificador
+    //     // PYC(); // Para el " ; "
+    //     // BO(); // Para llamar al metodo de nuevo
     // }
-
-    // private void BN() throws Exception {
-    //     LLA(); // Para la llave de apertura
-    //     BO(); // Para lo que se puede llamar dentro del for
-    //     LLC(); // Para la llave de cerradura
-    // }
-
-    // private void BO() throws Exception {
-    //     if (match("for")) {
-    //         FOR(); // Para el for
-    //         BO(); // Para la recursividad
-    //     } else if (match("if")) {
-    //         IF(); // Para verificar que es un if
-    //         BO(); // Para la recursividad
-    //     } else if (match("[a-zA-Z_][a-zA-Z0-9_]*")) {
-    //         T(); // Si llega un identificador
-    //         // Y luego un = quiere decir que es una inicializacion de variable
-    //         if (match("=")) {
-    //             IGU(); // Para el igual
-    //             if (match("\\(")) {
-    //                 K();
-    //                 BO();
-    //             } else if (match("\\d+") || match("(['\"])(.*?)\\1") || match("True")
-    //                     || match("False") || match("[a-zA-Z_][a-zA-Z0-9_]*")) {
-    //                 R(); // Para determinar el tipo de dato
-    //                 BO();
-    //             }
-    //         } else if (match("\\(")) {
-    //             PA(); // Para el parentesis de apertura
-    //             DF(); // Para lo que va despues
-    //             PYC(); // Para el punto y coma
-    //             BO(); // Para llamar al metodo de nuevo
-    //         } else if (match("[+*-/]")) {
-    //             KP(); // Llamo a K prima, porque lo siquiente que debe esperar es un signo
-    //             PYC(); // Para el " ; "
-    //             BO(); // Para llamar de nuevo al metodo
-    //         }
-    //     } else if (match("\\(")) {
-    //         // K(); // Si llegue primero un parentesis llamo a K
-    //         PA();
-    //         DF();
-    //         PYC(); // Para el " ; "
-    //         BO(); // Para la recursividad
-    //     } else if (match("\\d+")) {
-    //         NUM(); // Para verificar que sea un número
-    //         KP(); // Para verificar que lo siguiente del número sea un operador
-    //         PYC(); // Para el " ; "
-    //         BO(); // Para la recursividad
-    //     }
-    // }
-
-    private UUID Z() throws Exception {
-        IGU(); // Para los operadores
-        UUID idRR = RR(); // Para determinar que sea un número o identificador
-        // PYC(); // Para el " ; "
-        // BO(); // Para llamar al metodo de nuevo
-        return idRR;
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------------------------------------------------------------
     // Para la estructura del if
 
     private void BF() throws Exception {
         LLA(); // Para la llaves de apertura
-        BG(); // Para lo que va dentro del if
+        if(index != arbolSintac.size()){
+            BG(); // Para lo que va dentro del if
+        }
         LLC(); // Para la llave de cerradura
     }
 
     private void BG() throws Exception {
-        if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
-                match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
-                match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)
-                ){
-            B(); // Para todas estas opciones
-            BG(); // Para la recursividad
-        }else if(match(TokenType.MENU)){
-            MEN(); //Para el menu
-            BG(); // Para la recursividad
+        if(index < arbolSintac.size()){
+            Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+            arbolSintac nextToken = null;
+            Token nextTokenValue = null;
+
+            if(index + 1 < arbolSintac.size()){
+                nextToken = arbolSintac.get(index + 1);
+                nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
+            }
+            System.out.println("En el IF - Actual: " + actualCurrentToken.getType() + " Siguiente: " + nextTokenValue.getType());
+            if((actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextToken == null) 
+            || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.LLAVE_DE_CERRADURA)) 
+            || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.ELSE))
+            || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.MENU))){
+                System.out.println("Entro al return BG");
+                return;
+            }else{
+                if(match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
+                    match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF) || match(TokenType.IDENTIFICADOR) ||
+                    match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)
+                    ){
+                    B(); // Para todas estas opciones
+                    BG(); // Para la recursividad
+                }else if(match(TokenType.MENU)){
+                    MEN(); //Para el menu
+                    BG(); // Para la recursividad
+                }else{
+                    if(index < arbolSintac.size()){
+                        arbolSintac currentToken = arbolSintac.get(index);
+                        Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                        if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                        }else{
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                            consume();
+
+                        }
+                    }else{
+                        arbolSintac currentToken = arbolSintac.get(index-1);
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn() + getLength(currentToken.getId());
+                        errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea " + line + ", columna " + column);
+                    }
+                    System.out.println("error del if");
+                }
+            }
+        }else{
+            return;
         }
         //¿Aquí podría haber un error? no se s ti 
     }
@@ -866,45 +1425,117 @@ public class Syntax {
 
     // Para determinar si es un identificador
     private UUID T() throws Exception {
-        if (match(TokenType.IDENTIFICADOR)) {
+        System.out.println("Entro a T");
+        if (!match(TokenType.IDENTIFICADOR)) {
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un identificador en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un identificador en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba un identificador en la línea " + line + ", columna " + column);
+            }
+            // System.out.println("Llegue hasta aquí");
+        }else{
             consume();
             return arbolSintac.get(index-1).getId();
-        } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un identificador en la línea " + line + ", columna " + column);
-            consume();
         }
         return null;
     }
 
     // Para los números
     private UUID NUM() throws Exception {
-        if (match(TokenType.NUMERO)) {
+        if (!match(TokenType.NUMERO)) {
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un número en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un número en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba un número en la línea " + line + ", columna " + column);
+            }
+        }else{
             consume();
             return arbolSintac.get(index-1).getId();
-        } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un número en la línea " + line + ", columna " + column);
-            consume();
         }
         return null;
     }
 
     // Para las cadenas
     private UUID CAD() throws Exception {
-        if (match(TokenType.CADENA)) {
+        if (!match(TokenType.CADENA)) {
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba una cadena en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba una cadena en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba una cadena en la línea " + line + ", columna " + column);
+            }
+        }else{
             consume();
             return arbolSintac.get(index-1).getId();
+        }
+        return null;
+    }
+
+    private UUID TF() throws Exception {
+        if (!match(TokenType.TRUE) || !match(TokenType.FALSE)) {
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'True' o 'False' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'True' o 'False' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'True' o 'False' en la línea " + line + ", columna " + column);
+            }
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba una cadena en la línea " + line + ", columna " + column);
             consume();
+            return arbolSintac.get(index-1).getId();
         }
         return null;
     }
@@ -914,9 +1545,32 @@ public class Syntax {
     // -------------------------------------------------------------------------------------------------------------------------------
     // Para palabras reservadas
     private void X() throws Exception {
-        if (match(TokenType.DEFINE)) {
+        //Si recibo define
+        if (!match(TokenType.DEFINE)) {
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'define' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'define' en la línea " + line + ", columna " + column);
+                    consume();
+                }    
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba 'define' en la línea " + line + ", columna " + column);
+            }
+        }else{
             consume();
-        } 
+        }
+        System.out.println(index);
+        //Para el resto
         N();
     }
 
@@ -933,39 +1587,53 @@ public class Syntax {
         }else if(match(TokenType.BOOLEANO)){
             consume();
             return "BOOLEANO";
+        }else{
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'un tipo de dato' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'un tipo de dato' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'un tipo de dato' en la línea " + line + ", columna " + column);
+            }
         }
         return null;
     }
-
-    private UUID TF() throws Exception {
-        if (match(TokenType.TRUE) || match(TokenType.FALSE)) {
-            consume();
-            return arbolSintac.get(index-1).getId();
-        } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'True' o 'False' en la línea " + line + ", columna " + column);
-        }
-        return null;
-    }
-
-    // private void CHA() throws Exception {
-    //     if (match("Character")) {
-    //         consume();
-    //     } else {
-    //         throw new Exception("Se esperaba 'Character' ");
-    //     }
-    // }
 
     private String U() throws Exception {
         if (match(TokenType.COLOR)) {
             consume();
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un 'Color' en la línea " + line + ", columna " + column);
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Color' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Color' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'Color' en la línea " + line + ", columna " + column);
+            }
         }
         String color = DE(); // Para el color
         return color;
@@ -994,11 +1662,25 @@ public class Syntax {
             type = tokens.get(getIndex(arbolSintac.get(index).getId())).getType();
             consume();
         }else{
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' en la línea " + line + ", columna " + column);
-            consume();
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' en la línea " + line + ", columna " + column);
+            }
         }
         AN(type); // Para lo que va despues, (id)
     }
@@ -1007,11 +1689,25 @@ public class Syntax {
         if (match(TokenType.MENU)) {
             consume();
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'Menu' en la línea " + line + ", columna " + column);
-            consume();
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Menu' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Menu' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'Menu' en la línea " + line + ", columna " + column);
+            }
         }
         DP(); // Para el " : "
         AO(); // Para las opciones del menu
@@ -1022,11 +1718,25 @@ public class Syntax {
             consume();
             codigo += "goto||";
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'Breaker' en la línea " + line + ", columna " + column);
-            consume();
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Breaker' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Breaker' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'Breaker' en la línea " + line + ", columna " + column);
+            }
         }
         PYC(); // Para el " ; "
     }
@@ -1035,11 +1745,25 @@ public class Syntax {
         if (match(TokenType.GO)) {
             consume();
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba 'Go' en la línea " + line + ", columna " + column);
-            consume();
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Go' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba 'Go' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba 'Go' en la línea " + line + ", columna " + column);
+            }
         }
         UUID idT = T(); // Para el identificador
         if(idT != null){
@@ -1048,27 +1772,29 @@ public class Syntax {
         PYC(); // Para el " ; "
     }
 
-    // private void FOR() throws Exception {
-    //     if (match("for")) {
-    //         consume();
-    //     } else {
-    //         throw new Exception("Se esperaba un 'for' ");
-    //     }
-    //     PA(); // Para el parentesis de apertura
-    //     BK(); // Para el tema del condicional del for
-    //     PC(); // Para el parentesis de cerradura
-    //     BN(); // Para lo que va dentro del for
-    // }
-
     private void IF() throws Exception {
         if (match(TokenType.IF)) {
             consume();
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un 'if' en la línea " + line + ", columna " + column);
-            consume();
+            if(index < arbolSintac.size()){
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un 'if' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un 'if' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba un 'if' en la línea " + line + ", columna " + column);
+            }
         }
         PA(); // Para el parentesis de apertura
         BM(); // Para el condicional
@@ -1079,19 +1805,50 @@ public class Syntax {
     }
 
     private void ELS() throws Exception {
-        if (match(TokenType.ELSE)) {
-            consume();
-            if (match(TokenType.IF)) {
-                IF(); // Si recibo un else if
-            } else {
-                BF(); // Si recibo else
+        if(index < arbolSintac.size()){
+            Token actualCurrentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+            arbolSintac nextToken = null;
+            Token nextTokenValue = null;
+            if(index + 1 < arbolSintac.size()){
+                nextToken = arbolSintac.get(index + 1);
+                nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
+            }
+
+            if((actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextToken == null) || (actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextTokenValue.getType().equals(TokenType.LLAVE_DE_CERRADURA))){
+                return;
+            }else{
+                if (match(TokenType.ELSE)) {
+                    consume();
+                    System.out.println("Concuso else");
+                    if (match(TokenType.IF)) {
+                        IF(); // Si recibo un else if
+                    } else {
+                        BF(); // Si recibo else
+                    }
+                }else{
+                    if(index < arbolSintac.size()){
+                        arbolSintac currentToken = arbolSintac.get(index);
+                        Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                        if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba un 'else' o 'else if' en la línea " + line + ", columna " + column);
+                        }else{
+                            int line = currentToken.getLine();
+                            int column = currentToken.getColumn();
+                            errors.add("Se esperaba un 'else' o 'else if' en la línea " + line + ", columna " + column);
+                            consume();
+                        }
+                    }else{
+                        arbolSintac currentToken = arbolSintac.get(index-1);
+                        int line = currentToken.getLine();
+                        int column = currentToken.getColumn();
+                        errors.add("Se esperaba un 'else' o 'else if' en la línea " + line + ", columna " + column);
+                    }
+                }
             }
         }else{
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un 'else' en la línea " + line + ", columna " + column);
-            consume();
+            return;
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -1100,13 +1857,28 @@ public class Syntax {
     // Metodos para signos de operadores
 
     private void IGU() throws Exception {
-        if (match(TokenType.ASIGNACION)) {
-            consume();
-        } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un '=' en la línea " + line + ", columna " + column);
+        // System.out.println("Entro a IGU");
+        if (!match(TokenType.ASIGNACION)) {
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un '=' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un '=' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                Token currentToken = tokens.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn() + currentToken.getValue().length();
+                errors.add("Se esperaba un '=' en la línea " + line + ", columna " + column);
+            }
+        } else{
             consume();
         }
     }
@@ -1128,74 +1900,92 @@ public class Syntax {
         } else if(match(TokenType.IGUALACION)){
             consume();
             comp = 5;
-        }else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba '<' o '>' o '<=' o '>=' en la línea " + line + ", columna " + column);
-            consume();
+        } else {
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.PARENTESIS_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba '<' o '>' o '<=' o '>=' o '==' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba '<' o '>' o '<=' o '>=' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba '<' o '>' o '<=' o '>=' en la línea " + line + ", columna " + column);
+            }
         }
         return comp;
     }
 
-    /*
-     * private void AX() throws Exception{
-     * if(match("\\+=") || match("\\-=") || match("\\*=") || match("/=") ||
-     * match("==")){
-     * consume();
-     * }else{
-     * throw new Exception("Se esperaba '+=' o '-=' o '*=' o '/=' o '==' ");
-     * }
-     * }
-     */
-
-    // private void PLU() throws Exception {
-    //     if (match("\\+\\+")) {
-    //         consume();
-    //     } else {
-    //         throw new Exception("Se esperaba un '++' ");
-    //     }
-    // }
-
     // -------------------------------------------------------------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------------------------------------------------------------
-
-    // Metodos para signos
-    private void COM() throws Exception {
-        if (match(TokenType.COMA)) {
-            consume();
-        } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba una ',' en la línea " + line + ", columna " + column);
-        }
-    }
 
     private String BQ() throws Exception {
-        if (match(TokenType.ASIGNACION_DE_COLOR)) {
-            consume();
+        if (!match(TokenType.ASIGNACION_DE_COLOR)) {
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un '#' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un '#' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            } else {
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba un '#' en la línea " + line + ", columna " + column);
+            }
         } else {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba un '#' en la línea " + line + ", columna " + column);
+            consume();
         }
-        UUID idCad = CAD();
-        if(idCad != null){
+        
+        if(match(TokenType.COLOR_HEX)){
             try {
-                // System.out.println("idCad: " + idCad);
-                String color = tokens.get(getIndex(idCad)).getValorToken() + "";
-                // System.out.println("Color: " + color);
+                Token currentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                String color = currentToken.getValorToken() + "";
                 boolean isColor = isColor(color);
                 System.out.println("isColor: " + isColor);
+                isColor = true;
                 if(isColor){
-                    // System.out.println("Color: #" + color);
+                    consume();
                     return "#"+color;
                 }
             } catch (Exception e) {
                 // System.out.println("Error en el color");
+            }
+        } else {
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un color hexadecimal en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un color hexadecimal en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            } else {
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba un color hexadecimal en la línea " + line + ", columna " + column);
             }
         }
         return null;
@@ -1208,43 +1998,57 @@ public class Syntax {
 
     // Para llaves de Apertura " { "
     private void LLA() throws Exception {
-        if (match(TokenType.LLAVE_DE_APERTURA)) {
-            consume(); // Consumir el token de cierre de llave '}'
-        } else {
+        if (!match(TokenType.LLAVE_DE_APERTURA)) {
             if (index < arbolSintac.size()) {
-                arbolSintac currentToken = arbolSintac.get(index - 1); // Obtener el último token analizado
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba '{' para cerrar el bloque en la línea " + line + ", columna " + column);
-                consume();
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un '{' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un '{' en la línea " + line + ", columna " + column);
+                    consume();
+                }
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
                 errors.add("Se esperaba ' { ' en la línea " + line + ", columna " + column);
             }
+        } else {
             consume();
         }
     }
 
     // /Para llaves de Cerradura " } "
     private void LLC() throws Exception {
-            
+        System.out.println("Entro a LLC");
+
         if (!match(TokenType.LLAVE_DE_CERRADURA)) {
             if (index < arbolSintac.size()) {
-                arbolSintac currentToken = arbolSintac.get(index); 
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba '}' para cerrar el bloque en la línea " + line + ", columna " + column);
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un '}' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba un '}' en la línea " + line + ", columna " + column);
+                    consume();
+                }
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
-                errors.add("Se esperaba ' } ' en la línea " + line + ", columna " + column);
+                errors.add("Se esperaba un '}' en la línea " + line + ", columna " + column);
             }
-            consume();
         } else {
-            consume(); // Consumir el token de cierre de llave '}'
+            consume();
         }
     }
 
@@ -1253,16 +2057,23 @@ public class Syntax {
         if(!match(TokenType.PUNTO_Y_COMA)){
             if (index < arbolSintac.size()) {
                 arbolSintac currentToken = arbolSintac.get(index);
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba ' ; ' en la línea " + line + ", columna " + column);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba ' ; ' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba ' ; ' en la línea " + line + ", columna " + column);
+                    consume();
+                }
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
                 errors.add("Se esperaba ' ; ' en la línea " + line + ", columna " + column);
             }
-            consume();
         }else{
             consume();
         }
@@ -1273,16 +2084,23 @@ public class Syntax {
         if (!match(TokenType.PARENTESIS_DE_APERTURA)) {
             if (index < arbolSintac.size()) {
                 arbolSintac currentToken = arbolSintac.get(index);
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
+                    consume();
+                }
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
                 errors.add("Se esperaba ' ( ' en la línea " + line + ", columna " + column);
             }
-            consume();
         } else {
             consume();
         }
@@ -1293,16 +2111,23 @@ public class Syntax {
         if (!match(TokenType.PARENTESIS_DE_CERRADURA)) {
             if (index < arbolSintac.size()) {
                 arbolSintac currentToken = arbolSintac.get(index);
-                int line = currentToken.getLine();
-                int column = currentToken.getColumn();
-                errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
+                    consume();
+                }
             }else{
                 arbolSintac currentToken = arbolSintac.get(index-1);
                 int line = currentToken.getLine();
                 int column = currentToken.getColumn() + getLength(currentToken.getId());
                 errors.add("Se esperaba ' ) ' en la línea " + line + ", columna " + column);
             }
-            consume();
         } else {
             consume();
         }
@@ -1311,11 +2136,25 @@ public class Syntax {
     // Para los dos puntos " : "
     private void DP() throws Exception {
         if (!match(TokenType.DOS_PUNTOS)) {
-            arbolSintac currentToken = arbolSintac.get(index);
-            int line = currentToken.getLine();
-            int column = currentToken.getColumn();
-            errors.add("Se esperaba ' : ' en la línea " + line + ", columna " + column);
-            consume();
+            if (index < arbolSintac.size()) {
+                arbolSintac currentToken = arbolSintac.get(index);
+                Token otherToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
+                if(otherToken.getType().equals(TokenType.LLAVE_DE_CERRADURA)){
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba ' : ' en la línea " + line + ", columna " + column);
+                }else{
+                    int line = currentToken.getLine();
+                    int column = currentToken.getColumn();
+                    errors.add("Se esperaba ':' en la línea " + line + ", columna " + column);
+                    consume();
+                }
+            }else{
+                arbolSintac currentToken = arbolSintac.get(index-1);
+                int line = currentToken.getLine();
+                int column = currentToken.getColumn();
+                errors.add("Se esperaba ':' en la línea " + line + ", columna " + column);
+            }
         } else {
             consume();
         }
@@ -1324,6 +2163,7 @@ public class Syntax {
     // -------------------------------------------------------------------------------------------------------------------------------
     // Métodos auxiliares
 
+    //Metodo para hacer concidencias con el token en turno con lo esperado de la gramatica
     private boolean match(TokenType expectedType) {
         if (index >= 0 && index < arbolSintac.size()) { // Verifica los límites antes de acceder
             int ind = getIndex(arbolSintac.get(index).getId());
@@ -1337,6 +2177,7 @@ public class Syntax {
         return false;
     }
 
+    //Metodo para pedir un nuevo token de la lista de tokens
     private void consume() {
         if (index < arbolSintac.size()) {
             // System.out.println(tokens.get(index).getValue());
@@ -1577,6 +2418,7 @@ public class Syntax {
         return tipo;
     }
 
+    
     public List<String> getErrors() {
         return errors;
     }
