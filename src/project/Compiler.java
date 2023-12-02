@@ -430,8 +430,10 @@ public class Compiler extends JFrame {
 		/*
 public static void main(){
 	define Character vl = Character("Hol ", Color(#"FFFFFF"));
+	define int v = 34;
 	Screen vl (){
-		int ve
+		if(v < 3){}else{}
+		v = (3=+8);
 	}
 }
 		 */

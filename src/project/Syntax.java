@@ -1,36 +1,38 @@
 package project;
 
-import java.io.EOFException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.tree.ExpandVetoException;
 
 public class Syntax {
     private final List<Token> tokens;
     private int index;
     private List<String> errors;
     private List<arbolSintac> arbolSintac;
+    private String codigo;
+    private int count;
 
     public Syntax(List<Token> tokens, List<arbolSintac> arbolSintac) {
         this.tokens = tokens;
         this.index = 0;
         this.errors = new ArrayList<>();
         this.arbolSintac = arbolSintac;
+        this.codigo = "";
+        this.count = 0;
     }
 
     public String parse() throws Exception {
 
         A();
         if (index != arbolSintac.size()) {
-            errors.add("Error: código fuente no válido");
+            errors.add("Error: código fuente no válido `(╯°□°)╯ ︵ ┻━┻");
         }
 
         if (!errors.isEmpty()) {
+            System.out.println(codigo);
             StringBuilder errorMessage = new StringBuilder();
             errorMessage.append("Se encontraron los siguientes errores:\n");
             for (String error : errors) {
@@ -38,6 +40,7 @@ public class Syntax {
             }
             return errorMessage.toString();
         } else {
+            System.out.println(codigo);
             return "Análisis sintáctico exitoso.";
         }
     }
@@ -127,10 +130,6 @@ public class Syntax {
         LLC();// Para el parentesis de " } "
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------------------------------------------------------------
-
     // Para lo que se puede escribir dentro del metodo principal y tanto dentro como
     // fuera de la
     // funciones Screen () y define
@@ -175,7 +174,7 @@ public class Syntax {
     }
 
     private void N() throws Exception {
-
+        
         // Si despues del define recibo un tipo de dato hago esto
         if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING) || match(TokenType.BOOLEANO)) {
             // consumo y reviso el resto
@@ -196,6 +195,7 @@ public class Syntax {
             O();// Para el resto
         } else if (match(TokenType.IMAGE) || match(TokenType.SOUND)) {
             // Consumo y sigo con el resto
+            TokenType type = tokens.get(getIndex(arbolSintac.get(index).getId())).getType();
             if (match(TokenType.IMAGE) || match(TokenType.SOUND)) {
                 consume();
             } else {
@@ -204,7 +204,7 @@ public class Syntax {
                 int column = currentToken.getColumn();
                 errors.add("Se esperaba 'Image' o 'Sound' en la línea " + line + ", columna " + column);
             }
-            AC(); // Para el resto
+            AC(type); // Para el resto
         } else {
             arbolSintac currentToken = arbolSintac.get(index);
             int line = currentToken.getLine();
@@ -215,9 +215,12 @@ public class Syntax {
     }
 
     private void Q(String tip) throws Exception {
+        String TQ = "";
         UUID idT = T(); // Para determinar que sea un Identificador y no una palabra clave
         if(idT != null && tip != null)
-            tokens.get(getIndex(idT)).setTipoToken(tip);
+            asignarTipo(idT, tip);
+            
+            //tokens.get(getIndex(idT)).setTipoToken(tip);
             IGU(); // Para el signo de '='
             UUID idR = R(); // Para el Numero o Identificador
             if(idR != null){
@@ -232,17 +235,28 @@ public class Syntax {
                     isEquals = tip.equals(tokens.get(getIndex(idR)).getTipoToken());
                 }
                 if(isEquals){
-                    tokens.get(getIndex(idT)).setTipoToken(tip);
-                    tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idR)).getValorToken());
+                    // tokens.get(getIndex(idT)).setTipoToken(tip);
+                    // tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idR)).getValorToken());
+                    asignarValor(idT, idR);
+                    codigo += "def " + tokens.get(getIndex(idT)).getValue() + ", " + tokens.get(getIndex(idR)).getTipoToken() + "||";
+                    if(tokens.get(getIndex(idR)).getType() == TokenType.CADENA){
+                        codigo += tokens.get(getIndex(idT)).getValue() + " = \"" + tokens.get(getIndex(idR)).getValorToken() + "\"||";    
+                    }else{
+                        codigo += tokens.get(getIndex(idT)).getValue() + " = " + tokens.get(getIndex(idR)).getValorToken() + "||";
+                    }
                 }else{
                     errors.add("No se puede asignar un valor de tipo '" + tokens.get(getIndex(idR)).getTipoToken() + "' a una variable de tipo '" + tip + "' (línea " + arbolSintac.get(getIndexArbol(idR)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idR)).getColumn() + ")");
                 }
             }
+            System.out.println(TQ);
+            codigo += TQ;
 
     }
 
     private void O() throws Exception {// T = Character("Cadena", Color(#"HEX"));
+        
         UUID idT = T(); // Para determinar que sea un Identificador y no una palabra clave
+        // TO = tokens.get(getIndex(idT)).getValue() + ": {nombre: string, color: string} = "; //color no se como hacerle
         // if(idT != null){
             IGU(); // Para el igual
             // Para la palabra reservada Character
@@ -255,9 +269,17 @@ public class Syntax {
                 errors.add("Se esperaba 'Character' en la línea " + line + ", columna " + column);
                 consume();
             }
-            UUID idCad = S();// Para lo que va despues
+            UUID idCad = S(); // Para lo que va despues
             if(idCad != null){
-                tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idCad)).getValorToken());
+                codigo += "def " + tokens.get(getIndex(idT)).getValue() + ", Character||";
+                codigo += "param " + tokens.get(getIndex(idCad)).getColor() + "||";
+                codigo += "call color, 1||";
+                codigo += "ret t0||";
+                codigo += "param \"" + tokens.get(getIndex(idCad)).getValorToken() + "\"||";
+                codigo += "param t0||";
+                codigo += "call Character, 2||";
+                // tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idCad)).getValorToken());
+                asignarValor(idT, idCad);
                 if(tokens.get(getIndex(idCad)).getColor() != null){
                     tokens.get(getIndex(idT)).setColor(tokens.get(getIndex(idCad)).getColor());
                 }
@@ -274,6 +296,7 @@ public class Syntax {
         UUID idCad = DD(); // Para lo que va dentro del parentensis
         PC(); // Parentesis de cerradura
         PYC(); // Punto y coma
+        // codigo += TO + "{nombre: " + tokens.get(getIndex(idCad)).getValorToken() + ", color: " + tokens.get(getIndex(idCad)).getColor() + "||";
         return idCad;
     }
 
@@ -332,20 +355,24 @@ public class Syntax {
         return id;
     }
 
-    private void AC() throws Exception {
+    private void AC(TokenType type) throws Exception { // Image/sound T = "";
         UUID idT = T(); // Para el identificador
         IGU(); // Para el igual
         UUID idCad = CAD(); // Para el String
         if(idT != null && idCad != null){
+            codigo += "def " + tokens.get(getIndex(idT)).getValue() + ", " + type + "||";
+            codigo += tokens.get(getIndex(idT)).getValue() + " = \"" + tokens.get(getIndex(idCad)).getValorToken() + "\"||";
             tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idCad)).getValorToken());
         }
         PYC(); // Para el ;
     }
 
     private void AI() throws Exception {
-        T(); // Verifico que sea un identificador
+        UUID idT = T(); // Verifico que sea un identificador
         PA(); // Para el parentesis de apertura
         PC(); // Para el parentesis de cerradura
+        codigo += ":" + (tokens.get(getIndex(idT)).getValue()).toUpperCase() + "||";
+        codigo += "def " + tokens.get(getIndex(idT)).getValue() + "_void_void||"; //nombre_retorna_recibe1_recibe2_reciben
         AJ(); // Para lo que va despues de eso
     }
 
@@ -382,34 +409,57 @@ public class Syntax {
         // }
     }
 
-    private void AN() throws Exception {
+    private void AN(TokenType type) throws Exception { // !Validar si los tokens son del tipo image o sound
         PA(); // Para el parentesis de apertura
-        T(); // Para el identificador
+        UUID idT = T(); // Para el identificador
         PC(); // Para el parentesis de cerradura
         PYC(); // Para el punto y coma
+        if(type != null && idT != null){
+            codigo += "param " + tokens.get(getIndex(idT)).getValue() + "||";
+            codigo += "call " + type + ", 1||";
+        }
     }
 
-    private void DF() throws Exception {
-        CAD(); // ¨Para el String
+    private void DF() throws Exception { // ("") que hace esto?
+        UUID idCad = CAD(); // Para el String
+        if(idCad != null){
+            Token token = tokens.get(getIndex(idCad));
+            if(token != null){
+                codigo += "param " + token.getValorToken() + "||";
+                codigo += "call showText " + "1||";
+            }
+            if(valorPrimitive(token.getTipoToken()) != TokenType.CADENA){
+                errors.add("Error: variable '" + token.getValue() + "' no es de tipo 'String' (línea " + arbolSintac.get(getIndexArbol(idCad)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idCad)).getColumn() + ")");
+            }
+            if(tokens.get(getIndex(idCad)).getValorToken() == null){
+                errors.add("Error: variable no declarada (línea " + arbolSintac.get(getIndexArbol(idCad)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idCad)).getColumn() + ")");
+            }
+        }else{
+            errors.add("Error: variable no declarada (línea " + arbolSintac.get(index-1).getLine() + ", columna " + arbolSintac.get(index-1).getColumn() + ")");
+        }
         PC(); // Para el parentesis de Cerradura
     }
 
-    private void K() throws Exception {
-        L(); // Para los simbolos
-        KP();
+    private Token K() throws Exception {
+        Token idL = L(); // Para los simbolos
+        Token tokenK = KP(idL);
+        return tokenK;
     }
 
-    private void L() throws Exception {
-        if (match(TokenType.PARENTESIS_DE_APERTURA)) {
+    private Token L() throws Exception {
+        if (match(TokenType.PARENTESIS_DE_APERTURA)) {// EN ESPERA
             PA(); // Parentesis de apertura
             if (match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO) || match(TokenType.IDENTIFICADOR)) {
-                K(); // para llamar a la funcion de K
+                Token tokenK = K(); // para llamar a la funcion de K
                 PC(); // Para el )
+                return tokenK;
             }
         } else if (match(TokenType.IDENTIFICADOR)) {
-            T(); // Para el identificador
+            UUID id = T(); // Para el identificador
+            return tokens.get(getIndex(id));
         } else if (match(TokenType.NUMERO)) {
-            NUM(); // Para el numero
+            UUID id = NUM(); // Para el numero
+            return tokens.get(getIndex(id));
         } else {
             arbolSintac currentToken = arbolSintac.get(index);
             int line = currentToken.getLine();
@@ -417,17 +467,79 @@ public class Syntax {
             errors.add("Se esperaba '(', identificador o numero en la línea" + line + ", columna " + column);
             consume();
         }
+        return null;
     }
 
-    private void KP() throws Exception {
+    private Token KP(Token tokL) throws Exception { //operandor operando
+        Token token = tokL;
         if (match(TokenType.SUMA) || match(TokenType.RESTA) || match(TokenType.MULTIPLICACION) || 
             match(TokenType.DIVISION)) {
+            TokenType opeAri = tokens.get(getIndex(arbolSintac.get(index).getId())).getType();
+            UUID idZ;
             consume();
             if (match(TokenType.ASIGNACION)) {
-                Z(); // en caso de que tenga una operacion iterativa
+                idZ = Z(); // en caso de que tenga una operacion iterativa
+                Token tokenZ = tokens.get(getIndex(idZ));
+                Token tokenL = tokL;
+                double valLDouble, valZDouble;
+                if(parseNumber(tokenL.getValorToken()) && parseNumber(tokenZ.getValorToken())){
+                    valLDouble = ((Number) tokenL.getValorToken()).doubleValue();
+                    valZDouble = ((Number) tokenZ.getValorToken()).doubleValue();
+                    Object valL, valZ;
+                    if(tokenL.getType() == TokenType.IDENTIFICADOR){
+                        valL = tokenL.getValue();
+                    }else{
+                        valL = tokenL.getValorToken();
+                    }
+                    if(tokenL.getType() == TokenType.IDENTIFICADOR){
+                        valZ = tokenZ.getValue();
+                    }else{
+                        valZ = tokenZ.getValorToken();
+                    }
+                    switch (opeAri) {
+                        case SUMA:
+                            codigo += "t = " + valL + " + " + valZ + "||";
+                            valLDouble += valZDouble;
+                            break;
+                        case RESTA:
+                            codigo += "t = " + valL + " - " + valZ + "||";
+                            valLDouble -= valZDouble;
+                            break;
+                        case MULTIPLICACION:
+                            codigo += "t = " + valL + " * " + valZ + "||";
+                            valLDouble *= valZDouble;
+                            break;
+                        case DIVISION:
+                            codigo += "t = " + valL + " / " + valZ + "||";
+                            valLDouble /= valZDouble;
+                            break;
+                        default:
+                            valLDouble = Double.MIN_VALUE;
+                            break;
+                    }
+    
+                    if(valLDouble != Double.MIN_VALUE){
+                        Object idObject;
+                        String tipotoken;
+                        int val = (int) valLDouble;
+                        double isEntero = valLDouble - val;
+                        if(isEntero == 0.0){
+                            idObject =  (Object)val;
+                            tipotoken = "INT";
+                        }else{
+                            idObject = (Object)valLDouble;
+                            tipotoken = "DOUBLE";
+                        }
+                        codigo += tokenL.getValue() + " = t||";
+                        token = new Token(TokenType.NUMERO, 0, 0, null, tipotoken, idObject);
+                    }else{
+                        errors.add("Error: no se puede realizar la operación aritmética (línea " + arbolSintac.get(index-1).getLine() + ", columna " + arbolSintac.get(index-1).getColumn() + ")");
+                    }
+                }
+                
             } else {
-                L();
-                KP();
+                Token tokenL2 = L();
+                token = KP(tokenL2);
             }
 
         }else{
@@ -436,8 +548,10 @@ public class Syntax {
             int column = currentToken.getColumn();  
             errors.add("Se esperaba un operador en la línea" + line + ", columna " + column);
             consume();
+        
         }
         PYC();
+        return token;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -458,12 +572,10 @@ public class Syntax {
         if(idT != null && ope != null)
             System.out.println(ope);
             tokens.get(getIndex(idT)).setTipoToken(ope);
-        
-        if (match(TokenType.COMA)) {
-            System.out.println("Coma");
+            codigo += "def " + tokens.get(getIndex(idT)).getValue() + ", " + ope + "||";
+        if (match(TokenType.PUNTO_Y_COMA)) {
             PYC(); // Si llega el punto y coma termina
         } else if (match(TokenType.ASIGNACION)) {
-            System.out.println("Asignacion");
             IGU(); // Si llega el igual es necesario recibir el valor
             UUID idR = R(); // Para validar el valor y, punto y coma
             if(idR != null){
@@ -480,6 +592,7 @@ public class Syntax {
                 if(isEquals){
                     tokens.get(getIndex(idT)).setTipoToken(ope);
                     tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idR)).getValorToken());
+                    codigo += tokens.get(getIndex(idT)).getValue() + " = " + tokens.get(getIndex(idR)).getValorToken() + "||";
                 }else{
                     errors.add("No se puede asignar un valor de tipo '" + tokens.get(getIndex(idR)).getTipoToken() + "' a una variable de tipo '" + ope + "' (línea " + arbolSintac.get(getIndexArbol(idR)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idR)).getColumn() + ")");
                 }
@@ -507,15 +620,30 @@ public class Syntax {
         } else if (match(TokenType.IF)) {
             IF(); // Para el if
         } else if (match(TokenType.IDENTIFICADOR)) {
-            T(); // Si llega un identificador
+            UUID idT = T(); // Si llega un identificador
             // Y luego un = quiere decir que es una inicializacion de variable
-            if (match(TokenType.ASIGNACION)) {
+            if (match(TokenType.ASIGNACION) && idT != null) {
                 IGU(); // Para el igual
                 if (match(TokenType.PARENTESIS_DE_APERTURA)) {
-                    K();
+                    Token tokenK = K();
+                    if(tokenK != null){
+                        if(isNumber(tokens.get(getIndex(idT)).getTipoToken()) && 
+                        isNumber(tokenK.getTipoToken())){
+                            codigo += tokens.get(getIndex(idT)).getValue() + " = " + tokenK.getValorToken() + "||";
+                            tokens.get(getIndex(idT)).setValorToken(tokenK.getValorToken());
+                        }
+                    }
                 } else if (match(TokenType.NUMERO) || match(TokenType.CADENA) || match(TokenType.TRUE)
                         || match(TokenType.FALSE) || match(TokenType.IDENTIFICADOR)) {
-                    R(); // Para determinar el tipo de dato
+                    UUID idR = R(); // Para determinar el tipo de dato
+                    if(idR != null){
+                        if(isNumber(tokens.get(getIndex(idT)).getTipoToken()) &&
+                        isNumber(tokens.get(getIndex(idR)).getTipoToken())){
+                            codigo += tokens.get(getIndex(idT)).getValue() + " = " + tokens.get(getIndex(idR)).getValorToken() + "||";
+                            tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idR)).getValorToken());
+                        }
+                    }
+
                 }
             } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
                 PA(); // Para el parentesis de apertura
@@ -523,7 +651,13 @@ public class Syntax {
                 PYC(); // Para el punto y coma
             } else if (match(TokenType.SUMA) || match(TokenType.RESTA) || match(TokenType.MULTIPLICACION) 
                     || match(TokenType.DIVISION)) {
-                KP(); // Llamo a K prima, porque lo siquiente que debe esperar es un signo
+                Token tokenKP = KP(tokens.get(getIndex(idT))); // Llamo a K prima, porque lo siquiente que debe esperar es un signo
+                if(tokenKP != null){
+                    if(isNumber(tokens.get(getIndex(idT)).getTipoToken()) && 
+                    parseNumber(tokenKP.getValorToken())){
+                        tokens.get(getIndex(idT)).setValorToken(tokenKP.getValorToken());
+                    }
+                }
                 PYC(); // Para el " ; "
             }
         } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
@@ -532,12 +666,12 @@ public class Syntax {
             DF();
             PYC(); // Para el " ; "
 
-        } else if (match(TokenType.NUMERO)) {
-            NUM(); // Para verificar que sea un número
-            KP(); // Para verificar que lo siguiente del número sea un operador
+        } else if (match(TokenType.NUMERO)) {// num ope= num??
+            UUID idNum = NUM(); // Para verificar que sea un número
+            KP(tokens.get(getIndex(idNum))); // Para verificar que lo siguiente del número sea un operador
             PYC(); // Para el " ; "
         }
-        //¿Aquí podría haber un error?
+        //¿Aquí podría haber un error? si.. tu
     }
     // -------------------------------------------------------------------------------------------------------------------------------
 
@@ -595,18 +729,31 @@ public class Syntax {
         NUM(); // Para el número
     }
 
-    private void BM() throws Exception {
-        T(); // Para el identificador
-        BU(); // Para lo comparadores
-        RR(); // Para la igual
+    private boolean BM() throws Exception {
+        UUID idT = T(); // Para el identificador
+        int comp = BU(); // Para lo comparadores
+        UUID idRR = RR(); // Para la igual
+        if(idT != null && comp > 0 && idRR != null){
+            Token tokenT = tokens.get(getIndex(idT));
+            Token tokenRR = tokens.get(getIndex(idRR));
+            if(parseNumber(tokenRR.getValorToken()) && parseNumber(tokenT.getValorToken())){
+                boolean isEquals = areEquals(comp, tokenT.getValorToken(), tokenRR.getValorToken());
+                return isEquals;
+            }else{
+                System.out.println("Error");
+                errors.add("Error: no se puede comparar un valor de tipo '" + tokenRR.getTipoToken() + "' con un valor de tipo '" + tokenT.getTipoToken() + "' (línea " + arbolSintac.get(getIndexArbol(idRR)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idRR)).getColumn() + ")");
+            }
+        }
+        return false;
     }
 
-    private void RR() throws Exception {
+    private UUID RR() throws Exception {
+        UUID id = null;
         if (match(TokenType.NUMERO)) {
-            NUM(); // validar si es un número
+            id = NUM(); // validar si es un número
             // PYC(); // Para el ;
         } else if (match(TokenType.CADENA)) {
-            T(); // Para validar que es un identificador
+            id = T(); // Para validar que es un identificador
             // PYC(); // Para el ;
         }else{
             arbolSintac currentToken = arbolSintac.get(index);
@@ -615,6 +762,7 @@ public class Syntax {
             errors.add("Se esperaba un número o cadena en la línea " + line + ", columna " + column);
             consume();
         }
+        return id;
     }
 
     // private void BP() throws Exception {
@@ -678,11 +826,12 @@ public class Syntax {
     //     }
     // }
 
-    private void Z() throws Exception {
+    private UUID Z() throws Exception {
         IGU(); // Para los operadores
-        RR(); // Para determinar que sea un número o identificador
+        UUID idRR = RR(); // Para determinar que sea un número o identificador
         // PYC(); // Para el " ; "
         // BO(); // Para llamar al metodo de nuevo
+        return idRR;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -707,7 +856,7 @@ public class Syntax {
             MEN(); //Para el menu
             BG(); // Para la recursividad
         }
-        //¿Aquí podría haber un error?
+        //¿Aquí podría haber un error? no se s ti 
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -839,8 +988,10 @@ public class Syntax {
     // }
 
     private void AL() throws Exception {
+        TokenType type = null;
         if (match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
                 match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND)) {
+            type = tokens.get(getIndex(arbolSintac.get(index).getId())).getType();
             consume();
         }else{
             arbolSintac currentToken = arbolSintac.get(index);
@@ -849,10 +1000,10 @@ public class Syntax {
             errors.add("Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' en la línea " + line + ", columna " + column);
             consume();
         }
-        AN(); // Para lo que va despues, (id)
+        AN(type); // Para lo que va despues, (id)
     }
 
-    private void MEN() throws Exception {
+    private void MEN() throws Exception {/// Menu voy a deber
         if (match(TokenType.MENU)) {
             consume();
         } else {
@@ -869,6 +1020,7 @@ public class Syntax {
     private void BRE() throws Exception {
         if (match(TokenType.BREAKER)) {
             consume();
+            codigo += "goto||";
         } else {
             arbolSintac currentToken = arbolSintac.get(index);
             int line = currentToken.getLine();
@@ -889,7 +1041,10 @@ public class Syntax {
             errors.add("Se esperaba 'Go' en la línea " + line + ", columna " + column);
             consume();
         }
-        T(); // Para el identificador
+        UUID idT = T(); // Para el identificador
+        if(idT != null){
+            codigo += "goto " + tokens.get(getIndex(idT)).getValue() + "||";
+        }
         PYC(); // Para el " ; "
     }
 
@@ -918,6 +1073,7 @@ public class Syntax {
         PA(); // Para el parentesis de apertura
         BM(); // Para el condicional
         PC(); // Para el parentesis de cerradura
+        codigo += "if tbm||";
         BF(); // Para lo que va dentro del if
         ELS(); // Para poner o no, un else if o else
     }
@@ -955,17 +1111,31 @@ public class Syntax {
         }
     }
 
-    private void BU() throws Exception {
-        if (match(TokenType.MENOR_QUE) || match(TokenType.MAYOR_QUE) || match(TokenType.MENOR_O_IGUAL_QUE) || 
-            match(TokenType.MAYOR_O_IGUAL_QUE) || match(TokenType.IGUALACION)) {
+    private int BU() throws Exception {
+        int comp = 0;
+        if (match(TokenType.MENOR_QUE)) {
             consume();
-        } else {
+            comp = 1;
+        } else if(match(TokenType.MAYOR_QUE)){
+            consume();
+            comp = 2;
+        } else if(match(TokenType.MENOR_O_IGUAL_QUE)){
+            consume();
+            comp = 3;
+        } else if(match(TokenType.MAYOR_O_IGUAL_QUE)){
+            consume();
+            comp = 4;
+        } else if(match(TokenType.IGUALACION)){
+            consume();
+            comp = 5;
+        }else {
             arbolSintac currentToken = arbolSintac.get(index);
             int line = currentToken.getLine();
             int column = currentToken.getColumn();
             errors.add("Se esperaba '<' o '>' o '<=' o '>=' en la línea " + line + ", columna " + column);
             consume();
         }
+        return comp;
     }
 
     /*
@@ -1213,6 +1383,198 @@ public class Syntax {
         Matcher matcherH = patternH.matcher(cad);
         boolean match = matcherH.matches();
         return match;
+    }
+
+    private TokenType valorPrimitive(Object variable){
+        if(variable instanceof Integer){
+            return TokenType.INT;
+        }
+        if(variable instanceof Double){
+            return TokenType.DOUBLE;
+        }
+        if(variable instanceof String){
+            return TokenType.CADENA;
+        }
+        if(variable instanceof Boolean){
+            return TokenType.BOOLEANO;
+        }
+        return null;
+    }
+
+    private int parseInt(Object valor){
+        try {
+            return (Integer) valor;
+        } catch (Exception e) {
+            return Integer.MIN_VALUE;
+        }
+    }
+
+    private double parseDouble(Object valor){
+        try {
+            return (Double) valor;
+        } catch (Exception e) {
+            return Double.MIN_VALUE;
+        }
+    }
+
+    private String parseString(Object valor){
+        try {
+            return (String) valor;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private boolean parseBoolean(Object valor){
+        try {
+            return (Boolean) valor;
+        } catch (Exception e) {
+            return Boolean.FALSE;
+        }
+    }
+
+    private boolean parseNumber(Object valor){
+        if(valor instanceof Integer || valor instanceof Double){
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isNumber(String valorToken){
+        if(valorToken.equals("DOUBLE") || valorToken.equals("INT") || valorToken.equals("NUMERO")){
+            return true;
+        }
+        return false;
+    }
+
+    private boolean areEquals(int comp, Object valor1, Object valor2){
+        int val1Int = parseInt(valor1);
+        int val2Int = parseInt(valor2);
+        double val1Double = parseDouble(valor1);
+        double val2Double = parseDouble(valor2);
+        if(val1Int != Integer.MIN_VALUE){
+            if(val2Int != Integer.MIN_VALUE){
+                switch (comp) {
+                    case 1:
+                        codigo += "tbm = " + val1Int + "<" + val2Int + "||";
+                        return val1Int < val2Int;
+                    case 2:
+                        codigo += "tbm = " + val1Int + ">" + val2Int + "||";
+                        return val1Int > val2Int;
+                    case 3:
+                        codigo += "tbm = " + val1Int + "<=" + val2Int + "||";
+                        return val1Int <= val2Int;
+                    case 4:
+                        codigo += "tbm = " + val1Int + ">=" + val2Int + "||";
+                        return val1Int >= val2Int;
+                    case 5:
+                        codigo += "tbm = " + val1Int + "==" + val2Int + "||";
+                        return val1Int == val2Int;
+                    default:
+                        return false;
+                }
+            }else if(val2Double != Double.MIN_VALUE){
+                switch (comp) {
+                    case 1:
+                        codigo += "tbm = " + val1Int + "<" + val2Double + "||";
+                        return val1Int < val2Double;
+                    case 2:
+                        codigo += "tbm = " + val1Int + ">" + val2Double + "||";
+                        return val1Int > val2Double;
+                    case 3:
+                        codigo += "tbm = " + val1Int + "<=" + val2Double + "||";
+                        return val1Int <= val2Double;
+                    case 4:
+                        codigo += "tbm = " + val1Int + ">=" + val2Double + "||";
+                        return val1Int >= val2Double;
+                    case 5:
+                        codigo += "tbm = " + val1Int + "==" + val2Double + "||";
+                        return val1Int == val2Double;
+                    default:
+                        return false;
+                }
+            }
+        }else if(val1Double != Double.MIN_VALUE){
+            if(val2Int != Integer.MIN_VALUE){
+                switch (comp) {
+                    case 1:
+                        codigo += "tbm = " + val1Double + "<" + val2Int + "||";
+                        return val1Double < val2Int;
+                    case 2:
+                        codigo += "tbm = " + val1Double + ">" + val2Int + "||";
+                        return val1Double > val2Int;
+                    case 3:
+                        codigo += "tbm = " + val1Double + "<=" + val2Int + "||";
+                        return val1Double <= val2Int;
+                    case 4:
+                        codigo += "tbm = " + val1Double + ">=" + val2Int + "||";
+                        return val1Double >= val2Int;
+                    case 5:
+                        codigo += "tbm = " + val1Double + "==" + val2Int + "||";
+                        return val1Double == val2Int;
+                    default:
+                        return false;
+                }
+            }else if(val2Double != Double.MIN_VALUE){
+                switch (comp) {
+                    case 1:
+                        codigo += "tbm = " + val1Double + "<" + val2Double + "||";
+                        return val1Double < val2Double;
+                    case 2:
+                        codigo += "tbm = " + val1Double + ">" + val2Double + "||";
+                        return val1Double > val2Double;
+                    case 3:
+                        codigo += "tbm = " + val1Double + "<=" + val2Double + "||";
+                        return val1Double <= val2Double;
+                    case 4:
+                        codigo += "tbm = " + val1Double + ">=" + val2Double + "||";
+                        return val1Double >= val2Double;
+                    case 5:
+                        codigo += "tbm = " + val1Double + "==" + val2Double + "||";
+                        return val1Double == val2Double;
+                    default:
+                        return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void asignarValor(UUID idT, Object valor){
+        try {
+            tokens.get(getIndex(idT)).setValorToken(valor);
+        } catch (Exception e) {
+            errors.add("Error: no se pudo asignar valor a " + tokens.get(getIndex(idT)).getValorToken() + " (línea " + arbolSintac.get(getIndexArbol(idT)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idT)).getColumn() + ")");
+        }
+    }
+
+    private void asignarValor(UUID idAsignado, UUID idAsignador){
+        try {
+            tokens.get(getIndex(idAsignado)).setValorToken(tokens.get(getIndex(idAsignador)).getValorToken());
+        } catch (Exception e) {
+            errors.add("Error: no se pudo asignar valor a " + tokens.get(getIndex(idAsignado)).getValorToken() + " (línea " + arbolSintac.get(getIndexArbol(idAsignado)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idAsignado)).getColumn() + ")");
+        }
+    }
+
+    private void asignarTipo(UUID idT, String tipo){
+        try {
+            tokens.get(getIndex(idT)).setTipoToken(tipo);
+        } catch (Exception e) {
+            errors.add("Error: no se pudo asignar tipo a " + tokens.get(getIndex(idT)).getValorToken() + " (línea " + arbolSintac.get(getIndexArbol(idT)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idT)).getColumn() + ")");
+        }
+    }
+
+    private String selectType (String tip){
+        String tipo = null;
+        if(tip.equals("INT") || tip.equals("DOUBLE")){
+            tipo = "number";
+        }else if(tip.equals("CADENA")){
+            tipo = "string";
+        }else if(tip.equals("BOOLEANO")){
+            tipo = "boolean";
+        }
+
+        return tipo;
     }
 
     public List<String> getErrors() {
