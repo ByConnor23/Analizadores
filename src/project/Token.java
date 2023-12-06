@@ -11,7 +11,7 @@ public class Token {
     private Object valorToken;
     private String color;
     /**
-   * {@code 'INT', 'CADENA', 'BOOLEANO', 'DOUBLE', 'NUMERO'}
+   * {@code 'INT', 'CADENA', 'BOOLEANO', 'DOUBLE', 'NUMERO', 'CHARACTER', 'SOUND', 'IMAGE'}
    */
     private String tipoToken;
     private String codigo;

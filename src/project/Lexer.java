@@ -959,7 +959,7 @@ class Lexer {
           { 
             String valorToken = null;
             try {
-              valorToken = yytext().replaceAll("\"", "");
+              valorToken = yytext();
             } catch (Exception e) {
               // TODO: handle exception
             }

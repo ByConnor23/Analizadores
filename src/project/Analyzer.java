@@ -37,6 +37,17 @@ public class Analyzer {
                                     tokenExists = true;
                                     currentToken.setId(tok.getId());
                                     break;
+                                }else{
+                                    String tipo = "";
+                                    Token tipoToken = tokens.get(tokens.size()-1);
+                                    if(tipoToken.getType() == TokenType.CHARACTER){
+                                        tipo = "CHARACTER";
+                                    }else if(tipoToken.getType() == TokenType.IMAGE){
+                                        tipo = "IMAGE";
+                                    }else if(tipoToken.getType() == TokenType.SOUND){
+                                        tipo = "SOUND";
+                                    }
+                                    currentToken.setTipoToken(tipo);
                                 }
                             }
                         }
