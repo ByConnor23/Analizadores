@@ -1956,14 +1956,22 @@ public class Syntax {
         if(match(TokenType.COLOR_HEX)){
             try {
                 Token currentToken = tokens.get(getIndex(arbolSintac.get(index).getId()));
-                String color = currentToken.getValorToken() + "";
-                boolean isColor = isColor(color);
-                System.out.println("isColor: " + isColor);
-                isColor = true;
-                if(isColor){
+                String color = currentToken.getValue() + "";
+                color = "#" + color;
+                System.out.println("Color: " + color);
+                if(isColorInEnum(color)){
                     consume();
-                    return "#"+color;
+                    return color;
+                } else {
+                    consume();
+                    return null;
                 }
+                // boolean isColor = isColor(color);
+                // System.out.println("isColor: " + isColor);
+                // if(isColor){
+                //     consume();
+                //     return "#"+color;
+                // }
             } catch (Exception e) {
                 // System.out.println("Error en el color");
             }
@@ -2387,6 +2395,15 @@ public class Syntax {
         } catch (Exception e) {
             errors.add("Error: no se pudo asignar valor a " + tokens.get(getIndex(idT)).getValorToken() + " (línea " + arbolSintac.get(getIndexArbol(idT)).getLine() + ", columna " + arbolSintac.get(getIndexArbol(idT)).getColumn() + ")");
         }
+    }
+
+    private boolean isColorInEnum(String color) {
+        for (CodColor codColor : CodColor.values()) {
+            if (codColor.getHexCode().equalsIgnoreCase(color)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void asignarValor(UUID idAsignado, UUID idAsignador){
