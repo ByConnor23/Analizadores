@@ -97,10 +97,19 @@ public class Compiler extends JFrame {
 		codeEditor = new JTextPane();
 		symbolTable = new JTable();
 		outputConsole = new JTextArea();
+		JSplitPane topSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(codeEditor), new JScrollPane(symbolTable));
+		topSplitPane.setResizeWeight(0.5); // Esto divide el espacio superior por igual entre codeEditor y symbolTable
+
+		JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topSplitPane, new JScrollPane(outputConsole));
+		mainSplitPane.setResizeWeight(0.7);
 
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
 
+		contentPane.setLayout(new BorderLayout());
+		contentPane.add(mainSplitPane, BorderLayout.CENTER);
+		contentPane.revalidate();
+		contentPane.repaint();
 		// ==================== Menu Bar ====================
 		{
 			fileMenu.setText("File");
@@ -507,5 +516,4 @@ public static void main(){
 	private JTextPane codeEditor;
 	private JTextArea outputConsole;
 	private JTable symbolTable;
-
 }
