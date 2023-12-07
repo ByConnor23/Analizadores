@@ -25,13 +25,14 @@ public class Syntax {
 
     public String parse() throws Exception {
 
-        A();
+        codigo = A();
         if (index != arbolSintac.size()) {
             errors.add("Error: código fuente no válido `(╯°□°)╯ ︵ ┻━┻");
         }
 
         if (!errors.isEmpty()) {
             System.out.println(codigo);
+            
             StringBuilder errorMessage = new StringBuilder();
             errorMessage.append("Se encontraron los siguientes errores:\n");
             for (String error : errors) {
@@ -39,14 +40,19 @@ public class Syntax {
             }
             return errorMessage.toString();
         } else {
-            System.out.println(codigo);
+            String[] cod_tres_dir;
+            cod_tres_dir = codigo.split("\\|\\|");
+            for(int i = 0; i < cod_tres_dir.length; i++){
+                System.out.println(cod_tres_dir[i]);
+            }
+            // System.out.println(codigo);
             return "Análisis sintáctico exitoso.";
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------
 
     // Para el metodo principal
-    private void A() throws Exception {
+    private String A() throws Exception {
         if (!match(TokenType.PUBLIC)) {
             if (index < arbolSintac.size()) {
                 arbolSintac currentToken = arbolSintac.get(index);
@@ -114,21 +120,21 @@ public class Syntax {
         } else {
             consume();
         }
-        System.out.println(index);
         // Continúa con el análisis
-        codigo += F();
+        return F();
     }
 
     private String F() throws Exception {
         String codigoF = "";
         PA();
         PC();
-        codigoF += "funt main||";
+        codigoF += "funt main||BGNMAIN||";
         LLA();
         if (index != arbolSintac.size()) {
             codigoF += CA(); // Para determinar si se declara algo dentro del metodo principal
         }
         LLC();
+        codigoF += "ENDMAIN||";
         return codigoF;
     }
 
@@ -239,8 +245,9 @@ public class Syntax {
             codigoN += O();// Para el resto
         } else if (match(TokenType.IMAGE) || match(TokenType.SOUND)) {
             // Consumo y sigo con el resto
-            TokenType type = tokens.get(getIndex(arbolSintac.get(index).getId())).getType();
+            TokenType type = TokenType.TOKEN_UNKNOWN;
             if (match(TokenType.IMAGE) || match(TokenType.SOUND)) {
+                type = tokens.get(getIndex(arbolSintac.get(index).getId())).getType();
                 consume();
             } else {
                 if (index < arbolSintac.size()) {
@@ -532,6 +539,7 @@ public class Syntax {
             codigoAC += tokens.get(getIndex(idT)).getValue() + " = " + tokens.get(getIndex(idCad)).getValorToken()
                     + "||";
             tokens.get(getIndex(idT)).setValorToken(tokens.get(getIndex(idCad)).getValorToken());
+            tokens.get(getIndex(idT)).setTipoToken(type.toString());
         }
         PYC(); // Para el ;
         return codigoAC;
@@ -600,6 +608,7 @@ public class Syntax {
                         match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF)
                         || match(TokenType.IDENTIFICADOR) ||
                         match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)) {
+                            System.out.println("para el parentesis de apertura");
                     codigoCB += B(); // Para todas estas opciones
                     codigoCB += CB(); // Para la recursividad
                 } else if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING)
@@ -607,7 +616,7 @@ public class Syntax {
                     codigoCB += H(); // Para en caso de un tipo de dato
                     codigoCB += CB(); // Para la recursividad
                 } else if (match(TokenType.MENU)) {
-                    MEN(); // Para el Menu
+                    codigoCB += MEN(); // Para el Menu
                     codigoCB += CB(); // Para la recursividad
                 } else {
                     if (index < arbolSintac.size()) {
@@ -660,7 +669,7 @@ public class Syntax {
                             + ", columna " + arbolSintac.get(getIndexArbol(idT)).getColumn() + ")");
                 }
             } else {
-                if (tokens.get(getIndex(idT)).getTipoToken() == "SONIDO") {
+                if (tokens.get(getIndex(idT)).getTipoToken() == "SOUND") {
                     return "param " + tokens.get(getIndex(idT)).getValue() + "||call " + type + ", 1||";
                 } else {
                     errors.add("Error: variable '" + tokens.get(getIndex(idT)).getValue()
@@ -673,7 +682,7 @@ public class Syntax {
     }
 
     private String DF() throws Exception { // ("") que hace esto? 1235
-        String codigoDF = null;
+        String codigoDF = "";
         UUID idCad = CAD(); // Para el String
         if (idCad != null) {
             Token token = tokens.get(getIndex(idCad));
@@ -1158,13 +1167,15 @@ public class Syntax {
         return null;
     }
 
-    private String E() throws Exception { // 1143
-        String codigoE = J();
-        codigoE += EP();
-        return codigoE;
+    private ReturnDomain E() throws Exception { // 1143
+        ReturnDomain returnDomainJ = J();
+        ReturnDomain returnDomainEP = EP(returnDomainJ.getToken());
+        
+        returnDomainEP.setCodigo(returnDomainJ.getCodigo() + returnDomainEP.getCodigo());
+        return returnDomainEP;
     }
 
-    private String EP() throws Exception {
+    private ReturnDomain EP(Token val) throws Exception {
         if (match(TokenType.SUMA) || match(TokenType.RESTA)) {
             String ope = "";
             if (match(TokenType.SUMA)) {
@@ -1173,23 +1184,29 @@ public class Syntax {
                 ope = "-";
             }
             consume();
-            String codigoEP = J();
-            codigoEP += EP();
-            return ope + codigoEP;
+            ReturnDomain returnDomainJ = J();
+            String codigoEP = ope + returnDomainJ.getCodigo();
+            ReturnDomain returnDomainEP = EP(returnDomainJ.getToken());
+            Token tok = doOperation(val.getValorToken(), returnDomainEP.getToken().getValorToken(), ope);
+            returnDomainJ.setCodigo(codigoEP + returnDomainEP.getCodigo());
+            returnDomainJ.setToken(tok);
+            return returnDomainJ;
         }
-        return "";
+        ReturnDomain returnDomain = new ReturnDomain("", null, val);
+        return returnDomain;
     }
 
-    private String J() throws Exception {
-        String codigoJ = null;
-        Object val = M();
-        codigoJ = val + JP();
-        return codigoJ;
+    private ReturnDomain J() throws Exception {
+        ReturnDomain returnDomainM = M();
+        ReturnDomain returnDomainJP = JP(returnDomainM.getToken());
+
+        returnDomainJP.setCodigo( returnDomainM.getCodigo() + returnDomainJP.getCodigo());
+        return returnDomainJP;
         // String codigoJ = val + JP();
 
     }
 
-    private String JP() throws Exception {
+    private ReturnDomain JP(Token valJP) throws Exception {
         if (match(TokenType.MULTIPLICACION) || match(TokenType.DIVISION)) {
             String ope = "";
             if (match(TokenType.MULTIPLICACION)) {
@@ -1198,21 +1215,25 @@ public class Syntax {
                 ope = "/";
             }
             consume();
-            Object val = M();
-            String codigoJP = ope + val;
+            ReturnDomain returnDomainM = M();
+            Token tok = doOperation(valJP.getValorToken(), returnDomainM.getToken().getValorToken(), ope);
 
-            codigoJP += JP();
-            return codigoJP;
+            ReturnDomain rd = JP(tok);
+            String codigoJP = ope + returnDomainM.getCodigo() + rd.getCodigo();
+            rd.setCodigo(codigoJP);
+            return rd;
         }
-        return "";
+        ReturnDomain returnDomain = new ReturnDomain("", null, valJP);
+        return returnDomain;
     }
 
-    private Object M() throws Exception {
+    private ReturnDomain M() throws Exception {
         if (match(TokenType.IDENTIFICADOR)) {
             UUID id = T();
             Token tok = tokens.get(getIndex(id));
-            if (isType(tok.getTipoToken()) == TokenType.NUMERO) {
-                return tok.getValorToken();
+            if (isType(tok.getTipoToken()) == TokenType.NUMERO && tok.getValorToken() != null) {
+                ReturnDomain returnDomain = new ReturnDomain((tok.getValorToken()).toString(), null, tok);
+                return returnDomain;
             } else {
                 errors.add("Error: no se puede realizar la operación aritmética (línea "
                         + arbolSintac.get(getIndexArbol(id)).getLine() + ", columna "
@@ -1221,12 +1242,13 @@ public class Syntax {
             }
         } else if (match(TokenType.NUMERO)) {
             UUID id = NUM();
-            return tokens.get(getIndex(id)).getValorToken();
+            ReturnDomain returnDomain = new ReturnDomain((tokens.get(getIndex(id)).getValorToken()).toString(), null, tokens.get(getIndex(id)));
+            return returnDomain;
         } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
             PA();
-            E();
+            ReturnDomain returnDomain = E(); //pendiente
             PC();
-            return null;
+            return returnDomain;
         } else {
             if (index < arbolSintac.size()) {
                 arbolSintac currentToken = arbolSintac.get(index);
@@ -1271,13 +1293,17 @@ public class Syntax {
                     codigoB += G(idT); // En caso de recibir esos datos
                     PYC(); // Para el punto y coma
                 } else if (match(TokenType.NUMERO) || match(TokenType.IDENTIFICADOR)) {
-                    codigoB += (String) (tokens.get(getIndex(idT)).getValue() + " = " + E()); // Para la declaracion de
+                    ReturnDomain returnDomain = E();
+                    codigoB += (String) (tokens.get(getIndex(idT)).getValue() + " = " + returnDomain.getCodigo()); // Para la declaracion de
                                                                                              // una variable o
                                                                                              // identificador
+                    tokens.get(getIndex(idT)).setValorToken(returnDomain.getToken().getValorToken());
                     PYC(); // Para el punto y coma
                 } else if (match(TokenType.PARENTESIS_DE_APERTURA)) {
                     PA(); // Para el parentesis de apertura
-                    codigoB += (String) (tokens.get(getIndex(idT)) + " = " + E()); // Para la declaracion de una variable o identificador
+                    ReturnDomain returnDomain = E();
+                    codigoB += (String) (tokens.get(getIndex(idT)) + " = " + returnDomain.getCodigo()); // Para la declaracion de una variable o identificador
+                    tokens.get(getIndex(idT)).setValorToken(returnDomain.getToken().getValorToken());
                     PC(); // Para el parentesis de cerradura
                     PYC(); // Para el " ; ""
                 } else {
@@ -1406,7 +1432,7 @@ public class Syntax {
                 codigoAO += AO();
             }
         }
-        codigoAO += AO(); // Para llamar esto de manera recursiva y crear tantas opciones como se desee
+        // codigoAO += AO();  // Para llamar esto de manera recursiva y crear tantas opciones como se desee
         return codigoAO;
     }
 
@@ -1421,15 +1447,15 @@ public class Syntax {
                 nextTokenValue = tokens.get(getIndex(arbolSintac.get(index + 1).getId()));
             }
             if (actualCurrentToken != null && nextTokenValue != null) {
-                System.out.println(
-                        "Menu - Actual: " + actualCurrentToken.getType() + " Siguiente: " + nextTokenValue.getType());
+                // System.out.println(
+                //         "Menu - Actual: " + actualCurrentToken.getType() + " Siguiente: " + nextTokenValue.getType());
             } else {
                 if (actualCurrentToken == null) {
-                    System.out.println("Menu - El token actual es null" + " Siguiente: " + nextTokenValue.getType());
+                    // System.out.println("Menu - El token actual es null" + " Siguiente: " + nextTokenValue.getType());
                 }
                 if (nextTokenValue == null) {
-                    System.out.println(
-                            "Menu - Anterior: " + actualCurrentToken.getType() + " El siguiente token es null");
+                    // System.out.println(
+                    //         "Menu - Anterior: " + actualCurrentToken.getType() + " El siguiente token es null");
                 }
             }
             if ((actualCurrentToken.getType().equals(TokenType.LLAVE_DE_CERRADURA) && nextToken == null)
@@ -1441,19 +1467,19 @@ public class Syntax {
                             && nextTokenValue.getType().equals(TokenType.PUNTO_Y_COMA))
                     || (actualCurrentToken.getType().equals(TokenType.GO)
                             && nextTokenValue.getType().equals(TokenType.PUNTO_Y_COMA))) {
-                System.out.println("Entro al return AT");
+                // System.out.println("Entro al return AT");
                 return "";
             } else {
                 if (match(TokenType.INT) || match(TokenType.DOUBLE) || match(TokenType.STRING)
                         || match(TokenType.BOOLEANO)) {
                     codigoAT += H(); // Para la declaracion de una variable
-                    AT();
+                    codigo += AT();
                 } else if (match(TokenType.BACKGROUND) || match(TokenType.SHOW) || match(TokenType.HIDE) ||
                         match(TokenType.PLAY_SOUND) || match(TokenType.STOP_SOUND) || match(TokenType.IF)
                         || match(TokenType.IDENTIFICADOR) ||
                         match(TokenType.PARENTESIS_DE_APERTURA) || match(TokenType.NUMERO)) {
                     codigoAT += B(); // Para todas estas opciones) {
-                    AT();
+                    codigo += AT();
                 } else {
                     if (index < arbolSintac.size()) {
                         arbolSintac currentToken = arbolSintac.get(index);
@@ -1480,7 +1506,7 @@ public class Syntax {
                                 "Se esperaba 'Background' o 'Show' o 'Hide' o 'PlaySound' o 'StopSound' o 'if' o 'identificador' o 'tipo de dato' o 'Menu' en la línea "
                                         + line + ", columna " + column);
                     }
-                    System.out.println("Error en el Menu");
+                    // System.out.println("Error en el Menu");
                 }
             }
         } else {
@@ -1605,7 +1631,7 @@ public class Syntax {
                     codigoBG += B(); // Para todas estas opciones
                     codigoBG += BG(); // Para la recursividad
                 } else if (match(TokenType.MENU)) {
-                    MEN(); // Para el menu
+                    codigoBG += MEN(); // Para el menu
                     codigoBG += BG(); // Para la recursividad
                 } else {
                     if (index < arbolSintac.size()) {
@@ -1912,7 +1938,7 @@ public class Syntax {
         return AN(type);// Para lo que va despues, (id)
     }
 
-    private void MEN() throws Exception {/// hoy si hijo de tu madre te toca a ti (/~_~)/
+    private String MEN() throws Exception {/// hoy si hijo de tu madre te toca a ti (/~_~)/
         if (match(TokenType.MENU)) {
             consume();
         } else {
@@ -1937,7 +1963,7 @@ public class Syntax {
             }
         }
         DP(); // Para el " : "
-        AO(); // Para las opciones del menu
+        return AO(); // Para las opciones del menu
     }
 
     private String BRE() throws Exception {
@@ -2704,8 +2730,49 @@ public class Syntax {
     }
 
     ///////// 1068
-    private Token doOperation(Object valor1, Object valor2, TokenType type) {
+    private Token doOperation(Object valor, Object valor2, String type) {
+        if(valor instanceof Number && valor2 instanceof Number){
+            double valor1Double = Double.parseDouble(valor.toString());
+            double valor2Double = Double.parseDouble(valor2.toString());
+            // System.out.println(valor1Double + " " + valor2Double);
+            double result = 0;
+            switch (type) {
+                case "+":
+                    result = valor1Double + valor2Double;
+                    break;
+                case "-":
+                    System.out.println("resta");
+                    result = valor1Double - valor2Double;
+                    break;
+                case "*":
+                    result = valor1Double * valor2Double;
+                    break;
+                case "/":
+                    if(valor2Double != 0){
+                        result = valor1Double / valor2Double;
+                    }else{
+                        result = Double.MIN_VALUE;
+                    }
+                    break;
+                default:
+                    result = Double.MIN_VALUE;
+                    break;
+            }
+            // System.out.println(result);
+            if(result != Double.MIN_VALUE){
+                int resultInt = (int) result;
+                System.out.println(resultInt);
 
+                if(resultInt == result){
+                    valor = resultInt;
+                    Token token = new Token(TokenType.NUMERO, 0, 0, null, "INT", resultInt);
+                    return token;
+                } else {
+                    Token token = new Token(TokenType.NUMERO, 0, 0, null, "DOUBLE", result);
+                    return token;
+                }
+            }
+        }
         return null;
     }
 
